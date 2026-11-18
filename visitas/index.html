@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14213D">
+<title>Visitas a Clientes — Distribuidora Pantanal</title>
+<style>
+  :root {
+    --navy: #14213D;
+    --navy-2: #1f3360;
+    --yellow: #F5C518;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --text: #1b2333;
+    --muted: #5d6984;
+    --line: #e2e6ee;
+    --red: #b3232a;
+    --red-bg: #fde8e8;
+    --green: #157347;
+    --green-bg: #e3f4ea;
+    --amber-bg: #fff6d6;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+  header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--yellow);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  header a { display: block; }
+  header img { height: 44px; display: block; background: #fff; padding: 5px 8px; border-radius: 8px; }
+  header h1 { margin: 0; font-size: 20px; color: #fff; font-weight: 600; }
+  nav.abas {
+    background: var(--navy-2);
+    display: flex; gap: 4px; padding: 0 16px;
+    position: sticky; top: 0; z-index: 10;
+  }
+  nav.abas button {
+    background: none; border: 0; color: #c9d3ea; font: inherit; font-weight: 600;
+    padding: 13px 16px; cursor: pointer; border-bottom: 3px solid transparent;
+  }
+  nav.abas button:hover { color: #fff; }
+  nav.abas button[aria-selected="true"] { color: #fff; border-bottom-color: var(--yellow); }
+  main { max-width: 900px; margin: 0 auto; padding: 20px 16px 48px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  h2 { margin: 0 0 4px; font-size: 21px; color: var(--navy); }
+  h3 { margin: 0 0 6px; font-size: 18px; color: var(--navy); }
+  .ajuda { margin: 0 0 14px; color: var(--muted); }
+  label { display: block; font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .campo { margin-bottom: 14px; }
+  input, select, textarea {
+    font: inherit; font-size: 16px; color: var(--text); width: 100%;
+    padding: 11px 12px; border: 1px solid #b9c2d3; border-radius: 8px; background: #fff;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--yellow); outline-offset: 1px; border-color: var(--navy); }
+  .btn {
+    font: inherit; font-weight: 600; cursor: pointer;
+    background: var(--navy); color: #fff; border: 1px solid var(--navy);
+    padding: 11px 18px; border-radius: 8px;
+  }
+  .btn:hover { background: var(--navy-2); }
+  .btn.amarelo { background: var(--yellow); color: var(--navy); border-color: var(--yellow); }
+  .btn.amarelo:hover { background: #e6b800; }
+  .btn.sec { background: #fff; color: var(--navy); border-color: #b9c2d3; }
+  .btn.sec:hover { background: #eef1f7; }
+  .btn.perigo { background: #fff; color: var(--red); border-color: #efb7ba; }
+  .btn.perigo:hover { background: var(--red-bg); }
+  .btn.peq { padding: 8px 14px; font-size: 15px; }
+  .btn.grande { width: 100%; padding: 14px; font-size: 17px; }
+  .botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .msg { padding: 12px 14px; border-radius: 8px; margin: 0 0 14px; }
+  .msg.ok { background: var(--green-bg); color: var(--green); }
+  .msg.alerta { background: var(--red-bg); color: var(--red); }
+  .msg.info { background: #e8eefb; color: var(--navy); }
+  #aviso-armazenamento { margin: 0; border-radius: 0; text-align: center; }
+
+  .resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .resumo div { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: center; }
+  .resumo b { display: block; font-size: 26px; color: var(--navy); }
+  .resumo div.destaque { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .resumo div.destaque b { color: var(--yellow); }
+  .resumo span { font-size: 14px; }
+
+  .filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .filtros input[type="search"] { flex: 1 1 240px; }
+  .check { display: flex; align-items: center; gap: 8px; font-weight: 400; margin: 0; cursor: pointer; }
+  .check input { width: 20px; height: 20px; }
+  .contagem { color: var(--muted); font-size: 15px; margin: 0 0 10px; }
+
+  ul.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.lista li {
+    background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--line);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  }
+  ul.lista li.atrasado { border-left-color: var(--red); }
+  ul.lista li.nunca { border-left-color: var(--yellow); }
+  ul.lista li.emdia { border-left-color: var(--green); }
+  .info-cliente { flex: 1 1 260px; min-width: 0; }
+  .info-cliente strong { display: block; font-size: 17px; color: var(--navy); }
+  .info-cliente small { display: block; color: var(--muted); font-size: 15px; }
+  .obs { margin-top: 4px; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+  .selo { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 14px; font-weight: 700; margin-top: 4px; }
+  .selo.atrasado { background: var(--red-bg); color: var(--red); }
+  .selo.nunca { background: var(--amber-bg); color: #6b5000; }
+  .selo.emdia { background: var(--green-bg); color: var(--green); }
+  .vazio { text-align: center; color: var(--muted); padding: 24px 10px; background: var(--card); border: 1px dashed var(--line); border-radius: 10px; }
+
+  .cliente-escolhido { background: var(--amber-bg); border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 15px; }
+
+  @media (max-width: 640px) {
+    header { padding: 8px 12px; }
+    header img { height: 38px; }
+    header h1 { font-size: 18px; }
+    nav.abas { padding: 0; gap: 0; }
+    nav.abas button { flex: 1; padding: 12px 4px; font-size: 15px; line-height: 1.2; }
+    main { padding: 14px 12px 40px; }
+    .card { padding: 14px; }
+    .resumo b { font-size: 22px; }
+    .resumo span { font-size: 13px; }
+    ul.lista li .btn { width: 100%; }
+    .botoes .btn { flex: 1 1 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" title="Voltar para a página inicial"><img src="../dados/logo_pantanal.png" alt="Distribuidora Pantanal"></a>
+  <h1>Visitas a Clientes</h1>
+</header>
+<div id="aviso-armazenamento" class="msg alerta" hidden>
+  Este navegador não está deixando guardar as visitas (talvez seja uma janela anônima). O que você registrar agora será perdido ao fechar a página. Faça uma cópia de segurança antes de sair.
+</div>
+<nav class="abas" role="tablist">
+  <button role="tab" data-aba="pendentes" aria-selected="true">Sem visita</button>
+  <button role="tab" data-aba="registrar" aria-selected="false">Registrar visita</button>
+  <button role="tab" data-aba="feitas" aria-selected="false">Visitas feitas</button>
+</nav>
+
+<main>
+  <div id="msg-geral" class="msg" hidden></div>
+
+  <!-- ===== CLIENTES SEM VISITA ===== -->
+  <section id="tela-pendentes">
+    <h2>Clientes sem visita há mais de 30 dias</h2>
+    <p class="ajuda">Estes clientes precisam de visita. Os mais atrasados estão no topo. Toque em <b>Registrar visita</b> quando visitar um deles.</p>
+
+    <div class="resumo">
+      <div class="destaque"><b id="n-atrasados">0</b><span>sem visita há mais de 30 dias</span></div>
+      <div><b id="n-nunca">0</b><span>nunca visitados</span></div>
+      <div><b id="n-emdia">0</b><span>visitados nos últimos 30 dias</span></div>
+    </div>
+
+    <div class="filtros">
+      <input type="search" id="busca-pendentes" placeholder="Procurar cliente ou cidade" aria-label="Procurar cliente ou cidade" autocomplete="off">
+      <label class="check"><input type="checkbox" id="mostrar-emdia"> Mostrar também os clientes em dia</label>
+    </div>
+    <p class="contagem" id="contagem-pendentes"></p>
+    <ul class="lista" id="lista-pendentes"></ul>
+  </section>
+
+  <!-- ===== REGISTRAR VISITA ===== -->
+  <section id="tela-registrar" hidden>
+    <div class="card">
+      <h2>Registrar visita</h2>
+      <p class="ajuda">Preencha os campos e toque em <b>Salvar visita</b>.</p>
+      <div id="msg-registrar" class="msg" hidden></div>
+
+      <div class="campo">
+        <label for="f-data">Data da visita</label>
+        <input type="date" id="f-data">
+      </div>
+      <div class="campo">
+        <label for="f-cliente">Cliente</label>
+        <input type="text" id="f-cliente" list="opcoes-clientes" placeholder="Comece a digitar o nome do cliente" autocomplete="off">
+        <datalist id="opcoes-clientes"></datalist>
+        <div class="cliente-escolhido" id="cliente-escolhido" hidden></div>
+      </div>
+      <div class="campo">
+        <label for="f-vendedor">Vendedor</label>
+        <select id="f-vendedor"></select>
+      </div>
+      <div class="campo">
+        <label for="f-obs">Observação (opcional)</label>
+        <textarea id="f-obs" maxlength="1000" placeholder="Ex.: Fez pedido de bebidas. Pediu retorno na próxima semana."></textarea>
+      </div>
+      <div class="botoes">
+        <button class="btn amarelo grande" id="btn-salvar">Salvar visita</button>
+        <button class="btn sec" id="btn-limpar">Limpar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VISITAS FEITAS ===== -->
+  <section id="tela-feitas" hidden>
+    <div class="card">
+      <h2>Visitas feitas</h2>
+      <p class="ajuda">Todas as visitas registradas neste aparelho, da mais nova para a mais antiga.</p>
+      <div class="filtros">
+        <select id="filtro-vendedor" aria-label="Filtrar por vendedor"></select>
+        <input type="search" id="busca-feitas" placeholder="Procurar cliente ou observação" aria-label="Procurar cliente ou observação" autocomplete="off">
+      </div>
+      <p class="contagem" id="contagem-feitas"></p>
+      <ul class="lista" id="lista-feitas"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Planilha e cópia de segurança</h3>
+      <p class="ajuda">As visitas ficam guardadas só neste aparelho. Faça uma cópia de segurança com frequência e envie para o seu gerente.</p>
+      <div id="msg-copia" class="msg" hidden></div>
+      <div class="botoes">
+        <button class="btn amarelo" id="btn-planilha">Baixar planilha das visitas</button>
+        <button class="btn" id="btn-fazer-copia">Fazer cópia de segurança</button>
+        <button class="btn sec" id="btn-juntar">Juntar visitas de outra cópia</button>
+        <button class="btn perigo" id="btn-restaurar">Restaurar cópia</button>
+      </div>
+      <p class="ajuda" style="margin:12px 0 0">
+        <b>Juntar visitas de outra cópia:</b> acrescenta as visitas de outro celular sem apagar as daqui (dá para escolher vários arquivos de uma vez).<br>
+        <b>Restaurar cópia:</b> troca todas as visitas deste aparelho pelas do arquivo.
+      </p>
+      <input type="file" id="arq-juntar" accept=".json,application/json" multiple hidden>
+      <input type="file" id="arq-restaurar" accept=".json,application/json" hidden>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ===== Dados da empresa (cópia de dados/clientes.csv e dos vendedores de dados/vendas_2026.csv) ===== */
+const CSV_CLIENTES = "codigo;cliente;cidade;uf;segmento;email\n1;Atacarejo Santo Antônio;Tangará da Serra;MT;Supermercado;contato@atacarejosantoantonio.com.br\n2;Posto e Conveniência Recanto;Várzea Grande;MT;Conveniência;contato@postoeconvenienciarecanto.com.br\n3;Cantina Vale Verde;Rondonópolis;MT;Restaurante;contato@cantinavaleverde.com.br\n4;Supermercado Real;Cuiabá;MT;Supermercado;contato@supermercadoreal.com.br\n5;Super Vitória;Porto Velho;RO;Supermercado;contato@supervitoria.com.br\n6;Confeitaria Rio Cuiabá;Cáceres;MT;Padaria;contato@confeitariariocuiaba.com.br\n7;Super Nova Era;Primavera do Leste;MT;Supermercado;contato@supernovaera.com.br\n8;Mini Mercado Esperança;Rondonópolis;MT;Conveniência;contato@minimercadoesperanca.com.br\n9;Empório São José;Várzea Grande;MT;Mercearia;contato@emporiosaojose.com.br\n10;Armazém Primavera;Lucas do Rio Verde;MT;Mercearia;contato@armazemprimavera.com.br\n11;Armazém Pantanal;Sinop;MT;Mercearia;contato@armazempantanal.com.br\n12;Confeitaria Boa Vista;Cáceres;MT;Padaria;contato@confeitariaboavista.com.br\n13;Mercearia São José;Sinop;MT;Mercearia;contato@merceariasaojose.com.br\n14;Churrascaria Primavera;Sinop;MT;Restaurante;contato@churrascariaprimavera.com.br\n15;Armazém Santo Antônio;Cáceres;MT;Mercearia;contato@armazemsantoantonio.com.br\n16;Super Bom Preço;Cuiabá;MT;Supermercado;contato@superbompreco.com.br\n17;Confeitaria Dois Irmãos;Várzea Grande;MT;Padaria;contato@confeitariadoisirmaos.com.br\n18;Armazém Dois Irmãos;Lucas do Rio Verde;MT;Mercearia;contato@armazemdoisirmaos.com.br\n19;Super Progresso;Rondonópolis;MT;Supermercado;contato@superprogresso.com.br\n20;Cantina Popular;Campo Grande;MS;Restaurante;contato@cantinapopular.com.br\n21;Cantina Esperança;Cuiabá;MT;Restaurante;\n22;Padaria Bom Preço;Rondonópolis;MT;Padaria;contato@padariabompreco.com.br\n23;Supermercado Sol Nascente;Cuiabá;MT;Supermercado;contato@supermercadosolnascente.com.br\n24;Confeitaria Vitória;Cuiabá;MT;Padaria;contato@confeitariavitoria.com.br\n25;Empório Santa Rita;Sinop;MT;Mercearia;contato@emporiosantarita.com.br\n26;Confeitaria Santo Antônio;Cuiabá;MT;Padaria;contato@confeitariasantoantonio.com.br\n27;Confeitaria Jardim;Rondonópolis;MT;Padaria;contato@confeitariajardim.com.br\n28;Mercearia Bandeirantes;Cuiabá;MT;Mercearia;contato@merceariabandeirantes.com.br\n29;Supermercado Pantanal;Rondonópolis;MT;Supermercado;contato@supermercadopantanal.com.br\n30;Mercearia Dois Irmãos;Campo Grande;MS;Mercearia;contato@merceariadoisirmaos.com.br\n31;Atacarejo Coxipó;Cuiabá;MT;Supermercado;contato@atacarejocoxipo.com.br\n32;Armazém Rio Cuiabá;Sinop;MT;Mercearia;contato@armazemriocuiaba.com.br\n33;Padaria Boa Esperança;Barra do Garças;MT;Padaria;contato@padariaboaesperanca.com.br\n34;Conveniência Três Irmãos;Cáceres;MT;Conveniência;\n35;Armazém Santa Rita;Cuiabá;MT;Mercearia;contato@armazemsantarita.com.br\n36;Empório Ipê Amarelo;Várzea Grande;MT;Mercearia;contato@emporioipeamarelo.com.br\n37;Super Alvorada;Cuiabá;MT;Supermercado;contato@superalvorada.com.br\n38;Mercearia Coxipó;Sorriso;MT;Mercearia;contato@merceariacoxipo.com.br\n39;Conveniência Bom Preço;Campo Grande;MS;Conveniência;contato@convenienciabompreco.com.br\n40;Armazém Popular;Campo Grande;MS;Mercearia;contato@armazempopular.com.br\n41;Armazém Morada;Sorriso;MT;Mercearia;\n42;Churrascaria Morada;Cáceres;MT;Restaurante;contato@churrascariamorada.com.br\n43;Atacarejo Santa Rita;Cuiabá;MT;Supermercado;\n44;Mercearia Cerrado;Sorriso;MT;Mercearia;contato@merceariacerrado.com.br\n45;Super Tuiuiú;Sinop;MT;Supermercado;contato@supertuiuiu.com.br\n46;Empório Primavera;Cuiabá;MT;Mercearia;contato@emporioprimavera.com.br\n47;Panificadora Alvorada;Campo Grande;MS;Padaria;\n48;Supermercado Boa Vista;Tangará da Serra;MT;Supermercado;contato@supermercadoboavista.com.br\n49;Mini Mercado Oásis;Sinop;MT;Conveniência;contato@minimercadooasis.com.br\n50;Atacarejo Central;Sinop;MT;Supermercado;contato@atacarejocentral.com.br\n51;Posto e Conveniência Esperança;Primavera do Leste;MT;Conveniência;contato@postoeconvenienciaesperanca.com.br\n52;Supermercado Paraíso;Primavera do Leste;MT;Supermercado;contato@supermercadoparaiso.com.br\n53;Supermercado Jardim;Sorriso;MT;Supermercado;contato@supermercadojardim.com.br\n54;Super Estrela;Sinop;MT;Supermercado;contato@superestrela.com.br\n55;Supermercado Santa Rita;Rondonópolis;MT;Supermercado;contato@supermercadosantarita.com.br\n56;Restaurante Paraíso;Sinop;MT;Restaurante;contato@restauranteparaiso.com.br\n57;Empório do Bairro;Sorriso;MT;Mercearia;contato@emporiodobairro.com.br\n58;Churrascaria Recanto;Várzea Grande;MT;Restaurante;contato@churrascariarecanto.com.br\n59;Supermercado Tuiuiú;Sinop;MT;Supermercado;contato@supermercadotuiuiu.com.br\n60;Armazém Vale Verde;Cuiabá;MT;Mercearia;contato@armazemvaleverde.com.br\n61;Cantina Coxipó;Sorriso;MT;Restaurante;\n62;Posto e Conveniência Sol Nascente;Rondonópolis;MT;Conveniência;contato@postoeconvenienciasolnascente.com.br\n63;Posto e Conveniência Porto;Cáceres;MT;Conveniência;contato@postoeconvenienciaporto.com.br\n64;Super União;Primavera do Leste;MT;Supermercado;contato@superuniao.com.br\n65;Churrascaria Três Irmãos;Primavera do Leste;MT;Restaurante;contato@churrascariatresirmaos.com.br\n66;Atacarejo Alvorada;Cuiabá;MT;Supermercado;contato@atacarejoalvorada.com.br\n67;Posto e Conveniência Alvorada;Sorriso;MT;Conveniência;contato@postoeconvenienciaalvorada.com.br\n68;Atacarejo Primavera;Cuiabá;MT;Supermercado;contato@atacarejoprimavera.com.br\n69;Supermercado Vale Verde;Várzea Grande;MT;Supermercado;contato@supermercadovaleverde.com.br\n70;Armazém Família;Campo Grande;MS;Mercearia;\n71;Cantina Recanto;Cuiabá;MT;Restaurante;contato@cantinarecanto.com.br\n72;Restaurante Família;Primavera do Leste;MT;Restaurante;contato@restaurantefamilia.com.br\n73;Empório Estrela;Porto Velho;RO;Mercearia;\n74;Cantina Paraíso;Várzea Grande;MT;Restaurante;contato@cantinaparaiso.com.br\n75;Mercearia Progresso;Rondonópolis;MT;Mercearia;\n76;Atacarejo Bom Preço;Lucas do Rio Verde;MT;Supermercado;contato@atacarejobompreco.com.br\n77;Supermercado Pequi;Sinop;MT;Supermercado;\n78;Mercearia Rio Cuiabá;Várzea Grande;MT;Mercearia;contato@merceariariocuiaba.com.br\n79;Super Dois Irmãos;Cuiabá;MT;Supermercado;contato@superdoisirmaos.com.br\n80;Empório Vale Verde;Várzea Grande;MT;Mercearia;contato@emporiovaleverde.com.br\n81;Super Jardim;Cuiabá;MT;Supermercado;contato@superjardim.com.br\n82;Armazém Recanto;Várzea Grande;MT;Mercearia;contato@armazemrecanto.com.br\n83;Mercearia Estrela;Lucas do Rio Verde;MT;Mercearia;contato@merceariaestrela.com.br\n84;Confeitaria Bandeirantes;Cuiabá;MT;Padaria;contato@confeitariabandeirantes.com.br\n85;Cantina União;Lucas do Rio Verde;MT;Restaurante;contato@cantinauniao.com.br\n86;Mini Mercado Nova Era;Sinop;MT;Conveniência;contato@minimercadonovaera.com.br\n87;Confeitaria São José;Cuiabá;MT;Padaria;contato@confeitariasaojose.com.br\n88;Mercearia Recanto;Cáceres;MT;Mercearia;contato@merceariarecanto.com.br\n89;Super Boa Esperança;Rondonópolis;MT;Supermercado;contato@superboaesperanca.com.br\n90;Empório Popular;Cuiabá;MT;Mercearia;contato@emporiopopular.com.br\n91;Atacarejo Guaraná;Várzea Grande;MT;Supermercado;contato@atacarejoguarana.com.br\n92;Mercearia Chapada;Sorriso;MT;Mercearia;\n93;Mini Mercado Progresso;Cuiabá;MT;Conveniência;contato@minimercadoprogresso.com.br\n94;Armazém Esperança;Cuiabá;MT;Mercearia;contato@armazemesperanca.com.br\n95;Supermercado Nova Era;Várzea Grande;MT;Supermercado;contato@supermercadonovaera.com.br\n96;Atacarejo Família;Cáceres;MT;Supermercado;contato@atacarejofamilia.com.br\n97;Churrascaria Vale Verde;Sinop;MT;Restaurante;\n98;Padaria Popular;Sinop;MT;Padaria;contato@padariapopular.com.br\n99;Panificadora União;Várzea Grande;MT;Padaria;contato@panificadorauniao.com.br\n100;Super Primavera;Cuiabá;MT;Supermercado;\n101;Empório Tuiuiú;Rondonópolis;MT;Mercearia;contato@emporiotuiuiu.com.br\n102;Empório Rio Cuiabá;Cáceres;MT;Mercearia;contato@emporioriocuiaba.com.br\n103;Cantina Três Irmãos;Sinop;MT;Restaurante;contato@cantinatresirmaos.com.br\n104;Empório Progresso;Tangará da Serra;MT;Mercearia;contato@emporioprogresso.com.br\n105;Padaria Primavera;Campo Grande;MS;Padaria;contato@padariaprimavera.com.br\n106;Mercearia Pequi;Porto Velho;RO;Mercearia;contato@merceariapequi.com.br\n107;Supermercado Santo Antônio;Cuiabá;MT;Supermercado;contato@supermercadosantoantonio.com.br\n108;Restaurante Recanto;Tangará da Serra;MT;Restaurante;contato@restauranterecanto.com.br\n109;Churrascaria Guaraná;Cáceres;MT;Restaurante;contato@churrascariaguarana.com.br\n110;Mercearia Nova Era;Cuiabá;MT;Mercearia;contato@mercearianovaera.com.br\n111;Conveniência Tuiuiú;Sorriso;MT;Conveniência;\n112;Padaria Oásis;Cuiabá;MT;Padaria;contato@padariaoasis.com.br\n113;Cantina Guaraná;Rondonópolis;MT;Restaurante;contato@cantinaguarana.com.br\n114;Armazém Ipê Amarelo;Rondonópolis;MT;Mercearia;contato@armazemipeamarelo.com.br\n115;Mercearia Três Irmãos;Cuiabá;MT;Mercearia;contato@merceariatresirmaos.com.br\n116;Posto e Conveniência Primavera;Várzea Grande;MT;Conveniência;contato@postoeconvenienciaprimavera.com.br\n117;Atacarejo Paraíso;Cuiabá;MT;Supermercado;contato@atacarejoparaiso.com.br\n118;Cantina Central;Várzea Grande;MT;Restaurante;contato@cantinacentral.com.br\n119;Empório Oásis;Primavera do Leste;MT;Mercearia;contato@emporiooasis.com.br\n120;Restaurante Central;Cáceres;MT;Restaurante;contato@restaurantecentral.com.br\n121;Armazém Guaraná;Tangará da Serra;MT;Mercearia;contato@armazemguarana.com.br\n122;Restaurante Tuiuiú;Cuiabá;MT;Restaurante;contato@restaurantetuiuiu.com.br\n123;Empório Dois Irmãos;Porto Velho;RO;Mercearia;contato@emporiodoisirmaos.com.br\n124;Empório Pequi;Tangará da Serra;MT;Mercearia;contato@emporiopequi.com.br\n125;Cantina Primavera;Campo Grande;MS;Restaurante;contato@cantinaprimavera.com.br\n126;Armazém Coxipó;Campo Grande;MS;Mercearia;contato@armazemcoxipo.com.br\n127;Supermercado Rio Cuiabá;Rondonópolis;MT;Supermercado;contato@supermercadoriocuiaba.com.br\n128;Empório Guaraná;Rondonópolis;MT;Mercearia;contato@emporioguarana.com.br\n129;Mercearia Boa Vista;Várzea Grande;MT;Mercearia;contato@merceariaboavista.com.br\n130;Supermercado União;Cáceres;MT;Supermercado;contato@supermercadouniao.com.br\n131;Atacarejo Oásis;Cáceres;MT;Supermercado;contato@atacarejooasis.com.br\n132;Mini Mercado Alvorada;Cuiabá;MT;Conveniência;contato@minimercadoalvorada.com.br\n133;Mercearia Vale Verde;Rondonópolis;MT;Mercearia;contato@merceariavaleverde.com.br\n134;Supermercado Bandeirantes;Cáceres;MT;Supermercado;contato@supermercadobandeirantes.com.br\n135;Supermercado Coxipó;Várzea Grande;MT;Supermercado;contato@supermercadocoxipo.com.br\n136;Armazém São José;Sinop;MT;Mercearia;contato@armazemsaojose.com.br\n137;Empório Porto;Lucas do Rio Verde;MT;Mercearia;contato@emporioporto.com.br\n138;Mercearia Sol Nascente;Cuiabá;MT;Mercearia;contato@merceariasolnascente.com.br\n139;Super Esperança;Cuiabá;MT;Supermercado;contato@superesperanca.com.br\n140;Atacarejo Recanto;Cuiabá;MT;Supermercado;contato@atacarejorecanto.com.br\n141;Atacarejo Chapada;Campo Grande;MS;Supermercado;contato@atacarejochapada.com.br\n142;Padaria Araras;Cuiabá;MT;Padaria;\n143;Super Guaraná;Tangará da Serra;MT;Supermercado;contato@superguarana.com.br\n144;Atacarejo Boa Esperança;Cuiabá;MT;Supermercado;contato@atacarejoboaesperanca.com.br\n145;Empório Cerrado;Sinop;MT;Mercearia;contato@emporiocerrado.com.br\n146;Mercearia Alvorada;Várzea Grande;MT;Mercearia;contato@merceariaalvorada.com.br\n147;Restaurante Sol Nascente;Cuiabá;MT;Restaurante;contato@restaurantesolnascente.com.br\n148;Empório Família;Rondonópolis;MT;Mercearia;contato@emporiofamilia.com.br\n149;Restaurante Morada;Primavera do Leste;MT;Restaurante;contato@restaurantemorada.com.br\n150;Armazém Nova Era;Tangará da Serra;MT;Mercearia;contato@armazemnovaera.com.br\n151;Mercearia Bom Preço;Lucas do Rio Verde;MT;Mercearia;contato@merceariabompreco.com.br\n152;Empório Morada;Várzea Grande;MT;Mercearia;\n153;Restaurante Primavera;Cuiabá;MT;Restaurante;contato@restauranteprimavera.com.br\n154;Confeitaria Morada;Tangará da Serra;MT;Padaria;contato@confeitariamorada.com.br\n155;Restaurante Pantanal;Várzea Grande;MT;Restaurante;contato@restaurantepantanal.com.br\n156;Armazém Três Irmãos;Cuiabá;MT;Mercearia;\n157;Empório Pantanal;Rondonópolis;MT;Mercearia;contato@emporiopantanal.com.br\n158;Armazém Bom Preço;Rondonópolis;MT;Mercearia;\n159;Mini Mercado Rio Cuiabá;Lucas do Rio Verde;MT;Conveniência;contato@minimercadoriocuiaba.com.br\n160;Empório Três Irmãos;Cuiabá;MT;Mercearia;contato@emporiotresirmaos.com.br\n161;Atacarejo Pantanal;Cuiabá;MT;Supermercado;contato@atacarejopantanal.com.br\n162;Mini Mercado do Bairro;Primavera do Leste;MT;Conveniência;contato@minimercadodobairro.com.br\n163;Conveniência Bandeirantes;Cuiabá;MT;Conveniência;contato@convenienciabandeirantes.com.br\n164;Empório Boa Esperança;Rondonópolis;MT;Mercearia;contato@emporioboaesperanca.com.br\n165;Empório Sol Nascente;Cuiabá;MT;Mercearia;\n166;Restaurante Jardim;Cuiabá;MT;Restaurante;contato@restaurantejardim.com.br\n167;Atacarejo Cerrado;Sinop;MT;Supermercado;contato@atacarejocerrado.com.br\n168;Armazém Jardim;Lucas do Rio Verde;MT;Mercearia;contato@armazemjardim.com.br\n169;Churrascaria Santo Antônio;Cuiabá;MT;Restaurante;contato@churrascariasantoantonio.com.br\n170;Cantina Vitória;Sorriso;MT;Restaurante;contato@cantinavitoria.com.br\n171;Empório Bandeirantes;Sinop;MT;Mercearia;contato@emporiobandeirantes.com.br\n172;Posto e Conveniência Vale Verde;Várzea Grande;MT;Conveniência;\n173;Super Três Irmãos;Goiânia;GO;Supermercado;contato@supertresirmaos.com.br\n174;Supermercado Boa Esperança;Cuiabá;MT;Supermercado;\n175;Empório Coxipó;Goiânia;GO;Mercearia;\n176;Supermercado Recanto;Primavera do Leste;MT;Supermercado;contato@supermercadorecanto.com.br\n177;Super Sol Nascente;Cuiabá;MT;Supermercado;contato@supersolnascente.com.br\n178;Confeitaria Paraíso;Sorriso;MT;Padaria;\n179;Cantina Rio Cuiabá;Rondonópolis;MT;Restaurante;contato@cantinariocuiaba.com.br\n180;Armazém Sol Nascente;Várzea Grande;MT;Mercearia;contato@armazemsolnascente.com.br\n181;Atacarejo Jardim;Cuiabá;MT;Supermercado;contato@atacarejojardim.com.br\n182;Cantina Ipê Amarelo;Sinop;MT;Restaurante;contato@cantinaipeamarelo.com.br\n183;Armazém Pequi;Rondonópolis;MT;Mercearia;contato@armazempequi.com.br\n184;Super Família;Várzea Grande;MT;Supermercado;contato@superfamilia.com.br\n185;Supermercado Bom Preço;Barra do Garças;MT;Supermercado;contato@supermercadobompreco.com.br\n186;Churrascaria São José;Tangará da Serra;MT;Restaurante;contato@churrascariasaojose.com.br\n187;Churrascaria Bandeirantes;Tangará da Serra;MT;Restaurante;contato@churrascariabandeirantes.com.br\n188;Confeitaria Real;Sinop;MT;Padaria;contato@confeitariareal.com.br\n189;Super Bandeirantes;Cáceres;MT;Supermercado;contato@superbandeirantes.com.br\n190;Super Oásis;Cuiabá;MT;Supermercado;contato@superoasis.com.br\n191;Supermercado Central;Cuiabá;MT;Supermercado;contato@supermercadocentral.com.br\n192;Supermercado Guaraná;Rondonópolis;MT;Supermercado;contato@supermercadoguarana.com.br\n193;Supermercado Alvorada;Cuiabá;MT;Supermercado;contato@supermercadoalvorada.com.br\n194;Conveniência Vale Verde;Primavera do Leste;MT;Conveniência;\n195;Empório Alvorada;Barra do Garças;MT;Mercearia;contato@emporioalvorada.com.br\n196;Conveniência Cerrado;Várzea Grande;MT;Conveniência;contato@convenienciacerrado.com.br\n197;Confeitaria Família;Sinop;MT;Padaria;\n198;Panificadora Três Irmãos;Rondonópolis;MT;Padaria;\n199;Atacarejo Araras;Cuiabá;MT;Supermercado;contato@atacarejoararas.com.br\n200;Empório Recanto;Cuiabá;MT;Mercearia;contato@emporiorecanto.com.br\n";
+const VENDEDORES = ["Ana Paula Ribeiro", "Bruno Henrique Lima", "Carla Mendes Souza", "Diego Arruda Campos", "Eduarda Moraes Silva", "Fábio Nunes Ferreira", "Gabriela Costa Pinto", "Henrique Dias Rocha", "Isabela Martins Cruz", "João Victor Almeida"];
+
+const CHAVE = 'pantanal_visitas_v1';
+const CHAVE_VENDEDOR = 'pantanal_visitas_ultimo_vendedor';
+const SISTEMA = 'pantanal_visitas';
+const PRAZO_DIAS = 30;
+
+/* ===== Utilitários ===== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const hojeISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const dataBR = iso => { if (!iso) return ''; const [a, m, d] = iso.slice(0, 10).split('-'); return `${d}/${m}/${a}`; };
+const dataArquivo = () => dataBR(hojeISO()).replace(/\//g, '-');
+const semAcento = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const diaUTC = iso => { const [a, m, d] = iso.split('-').map(Number); return Date.UTC(a, m - 1, d) / 86400000; };
+const diasEntre = (isoAntes, isoDepois) => Math.round(diaUTC(isoDepois) - diaUTC(isoAntes));
+const dataValida = iso => /^\d{4}-\d{2}-\d{2}$/.test(iso) && dataBR(new Date(diaUTC(iso) * 86400000).toISOString()) === dataBR(iso);
+const novoId = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+function mostrarMsg(el, tipo, texto) { el.className = 'msg ' + tipo; el.textContent = texto; el.hidden = false; }
+function esconderMsg(el) { el.hidden = true; }
+let timerGeral;
+function avisar(tipo, texto) {
+  const el = $('msg-geral'); mostrarMsg(el, tipo, texto);
+  clearTimeout(timerGeral); timerGeral = setTimeout(() => esconderMsg(el), 7000);
+  window.scrollTo(0, 0);
+}
+function baixarArquivo(nome, conteudo, tipo) {
+  const blob = conteudo instanceof Blob ? conteudo : new Blob([conteudo], { type: tipo });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ===== Clientes ===== */
+function lerCSV(texto) {
+  const linhas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
+  const sep = linhas[0].includes(';') ? ';' : ',';
+  const cab = linhas[0].split(sep).map(c => semAcento(c.trim()));
+  return linhas.slice(1).map(l => {
+    const cols = l.split(sep);
+    const o = {}; cab.forEach((c, i) => o[c] = (cols[i] ?? '').trim());
+    return o;
+  });
+}
+function clientesDoCSV(texto) {
+  try {
+    return lerCSV(texto).map(r => ({
+      codigo: parseInt(r.codigo, 10), nome: r.cliente || r.nome || '', cidade: r.cidade || '', uf: (r.uf || '').toUpperCase()
+    })).filter(c => Number.isFinite(c.codigo) && c.nome);
+  } catch (e) { return []; }
+}
+async function carregarClientes() {
+  // Aberta por um endereço da internet, a página lê a planilha atual; aberta com dois cliques, usa a cópia guardada aqui.
+  if (location.protocol !== 'file:') {
+    try {
+      const r = await fetch('../dados/clientes.csv', { cache: 'no-store' });
+      if (r.ok) { const lista = clientesDoCSV(await r.text()); if (lista.length) return lista; }
+    } catch (e) {}
+  }
+  return clientesDoCSV(CSV_CLIENTES);
+}
+let clientes = [];
+const clientePorCodigo = cod => clientes.find(c => c.codigo === cod);
+const rotuloCliente = c => `${c.nome} — ${c.cidade}/${c.uf} (cód. ${c.codigo})`;
+
+/* ===== Visitas guardadas no navegador ===== */
+let visitas = [];
+let armazenamentoOk = true;
+function salvar() {
+  try { localStorage.setItem(CHAVE, JSON.stringify({ sistema: SISTEMA, versao: 1, visitas })); armazenamentoOk = true; }
+  catch (e) { armazenamentoOk = false; }
+  $('aviso-armazenamento').hidden = armazenamentoOk;
+}
+function visitaValida(v) {
+  return v && typeof v.id === 'string' && v.id && dataValida(v.data) && Number.isFinite(v.clienteCodigo)
+    && typeof v.clienteNome === 'string' && typeof v.vendedor === 'string' && v.vendedor;
+}
+function limparVisita(v) {
+  return { id: v.id, data: v.data, clienteCodigo: v.clienteCodigo, clienteNome: v.clienteNome, vendedor: v.vendedor,
+    obs: typeof v.obs === 'string' ? v.obs : '', criadaEm: v.criadaEm || '' };
+}
+function carregarVisitas() {
+  try {
+    const bruto = localStorage.getItem(CHAVE);
+    if (bruto) {
+      const d = JSON.parse(bruto);
+      if (d && Array.isArray(d.visitas)) visitas = d.visitas.filter(visitaValida).map(limparVisita);
+    }
+    localStorage.setItem(CHAVE + '_teste', '1'); localStorage.removeItem(CHAVE + '_teste');
+  } catch (e) { armazenamentoOk = false; }
+  $('aviso-armazenamento').hidden = armazenamentoOk;
+}
+const ordenarVisitas = lista => lista.sort((a, b) => b.data.localeCompare(a.data) || String(b.criadaEm).localeCompare(String(a.criadaEm)));
+
+/* ===== Situação de cada cliente ===== */
+function situacaoClientes() {
+  const hoje = hojeISO();
+  const ultima = new Map();
+  for (const v of visitas) {
+    const u = ultima.get(v.clienteCodigo);
+    if (!u || v.data > u.data) ultima.set(v.clienteCodigo, v);
+  }
+  return clientes.map(c => {
+    const u = ultima.get(c.codigo);
+    if (!u) return { cliente: c, tipo: 'nunca', dias: Infinity, ultima: null };
+    const dias = diasEntre(u.data, hoje);
+    return { cliente: c, tipo: dias > PRAZO_DIAS ? 'atrasado' : 'emdia', dias, ultima: u };
+  });
+}
+function textoSituacao(s) {
+  if (s.tipo === 'nunca') return 'Nunca visitado';
+  if (s.dias === 0) return 'Visitado hoje';
+  return `Há ${plural(s.dias, 'dia', 'dias')} sem visita`;
+}
+const PESO = { nunca: 0, atrasado: 1, emdia: 2 };
+
+/* ===== Tela: clientes sem visita ===== */
+function desenharPendentes() {
+  const todos = situacaoClientes();
+  const conta = t => todos.filter(s => s.tipo === t).length;
+  $('n-atrasados').textContent = conta('atrasado') + conta('nunca');
+  $('n-nunca').textContent = conta('nunca');
+  $('n-emdia').textContent = conta('emdia');
+
+  const termo = semAcento($('busca-pendentes').value.trim());
+  const comEmDia = $('mostrar-emdia').checked;
+  const lista = todos
+    .filter(s => comEmDia || s.tipo !== 'emdia')
+    .filter(s => !termo || semAcento(`${s.cliente.nome} ${s.cliente.cidade} ${s.cliente.uf} ${s.cliente.codigo}`).includes(termo))
+    .sort((a, b) => PESO[a.tipo] - PESO[b.tipo] || b.dias - a.dias || a.cliente.nome.localeCompare(b.cliente.nome, 'pt-BR'));
+
+  $('contagem-pendentes').textContent = lista.length
+    ? `Mostrando ${plural(lista.length, 'cliente', 'clientes')}.` : '';
+  $('lista-pendentes').innerHTML = lista.length ? lista.map(s => `
+    <li class="${s.tipo}">
+      <div class="info-cliente">
+        <strong>${esc(s.cliente.nome)}</strong>
+        <small>${esc(s.cliente.cidade)}/${esc(s.cliente.uf)}${s.ultima ? ` · Última visita: ${dataBR(s.ultima.data)} (${esc(s.ultima.vendedor)})` : ''}</small>
+        <span class="selo ${s.tipo}">${textoSituacao(s)}</span>
+      </div>
+      <button class="btn peq" data-visitar="${s.cliente.codigo}">Registrar visita</button>
+    </li>`).join('')
+    : `<li class="vazio">${termo ? 'Nenhum cliente encontrado com esse nome ou cidade.' : 'Muito bem! Todos os clientes foram visitados nos últimos 30 dias.'}</li>`;
+}
+$('busca-pendentes').addEventListener('input', desenharPendentes);
+$('mostrar-emdia').addEventListener('change', desenharPendentes);
+$('lista-pendentes').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-visitar]');
+  if (!b) return;
+  const c = clientePorCodigo(Number(b.dataset.visitar));
+  limparFormulario();
+  $('f-cliente').value = rotuloCliente(c);
+  mostrarClienteEscolhido();
+  abrirAba('registrar');
+});
+
+/* ===== Tela: registrar visita ===== */
+function clienteDoCampo() {
+  const t = $('f-cliente').value.trim();
+  if (!t) return null;
+  const cod = t.match(/\(cód\. (\d+)\)\s*$/);
+  if (cod) { const c = clientePorCodigo(Number(cod[1])); if (c && rotuloCliente(c) === t) return c; }
+  // Aceita também o nome digitado completo, se só existir um cliente com esse nome
+  const iguais = clientes.filter(c => semAcento(c.nome) === semAcento(t));
+  return iguais.length === 1 ? iguais[0] : null;
+}
+function mostrarClienteEscolhido() {
+  const c = clienteDoCampo(), el = $('cliente-escolhido');
+  if (!c) { el.hidden = true; return; }
+  const s = situacaoClientes().find(x => x.cliente.codigo === c.codigo);
+  el.textContent = `${c.nome} — ${c.cidade}/${c.uf}. ${s.ultima ? `Última visita: ${dataBR(s.ultima.data)}.` : 'Ainda não tem visita registrada.'}`;
+  el.hidden = false;
+}
+$('f-cliente').addEventListener('input', mostrarClienteEscolhido);
+$('f-cliente').addEventListener('change', mostrarClienteEscolhido);
+
+function ultimoVendedor() { try { return localStorage.getItem(CHAVE_VENDEDOR) || ''; } catch (e) { return ''; } }
+function limparFormulario() {
+  $('f-data').value = hojeISO();
+  $('f-data').max = hojeISO();
+  $('f-cliente').value = '';
+  $('f-obs').value = '';
+  const v = ultimoVendedor();
+  $('f-vendedor').value = VENDEDORES.includes(v) ? v : '';
+  $('cliente-escolhido').hidden = true;
+  esconderMsg($('msg-registrar'));
+}
+$('btn-limpar').addEventListener('click', () => {
+  if (($('f-cliente').value.trim() || $('f-obs').value.trim()) && !confirm('Apagar o que foi preenchido e começar de novo?')) return;
+  limparFormulario();
+});
+$('btn-salvar').addEventListener('click', () => {
+  const erro = t => { mostrarMsg($('msg-registrar'), 'alerta', t); $('msg-registrar').scrollIntoView({ block: 'center' }); };
+  const data = $('f-data').value;
+  const hoje = hojeISO();
+  if (!data) return erro('Escolha a data da visita.');
+  if (!dataValida(data)) return erro('A data da visita não está certa. Escolha a data no calendário.');
+  if (data > hoje) return erro(`A data da visita não pode ser depois de hoje (${dataBR(hoje)}). Corrija a data e salve de novo.`);
+  if (!$('f-cliente').value.trim()) return erro('Escolha um cliente antes de salvar.');
+  const c = clienteDoCampo();
+  if (!c) return erro('Cliente não encontrado. Comece a digitar o nome e escolha o cliente na lista que aparece.');
+  const vendedor = $('f-vendedor').value;
+  if (!vendedor) return erro('Escolha o vendedor que fez a visita.');
+
+  const obs = $('f-obs').value.trim();
+  const repetida = visitas.find(v => v.data === data && v.clienteCodigo === c.codigo && v.vendedor === vendedor);
+  if (repetida && !confirm(`Já existe uma visita de ${vendedor} a ${c.nome} em ${dataBR(data)}.\n\nSalvar outra visita mesmo assim?`)) return;
+
+  visitas.push({ id: novoId(), data, clienteCodigo: c.codigo, clienteNome: c.nome, vendedor, obs, criadaEm: new Date().toISOString() });
+  salvar();
+  try { localStorage.setItem(CHAVE_VENDEDOR, vendedor); } catch (e) {}
+  limparFormulario();
+  desenharTudo();
+  mostrarMsg($('msg-registrar'), 'ok', `Visita salva: ${c.nome}, em ${dataBR(data)}, por ${vendedor}.`);
+});
+
+/* ===== Tela: visitas feitas ===== */
+function visitasFiltradas() {
+  const vend = $('filtro-vendedor').value;
+  const termo = semAcento($('busca-feitas').value.trim());
+  return ordenarVisitas(visitas.filter(v => (!vend || v.vendedor === vend)
+    && (!termo || semAcento(`${v.clienteNome} ${v.obs} ${clientePorCodigo(v.clienteCodigo)?.cidade || ''}`).includes(termo))));
+}
+function desenharFeitas() {
+  const lista = visitasFiltradas();
+  $('contagem-feitas').textContent = visitas.length
+    ? `Mostrando ${plural(lista.length, 'visita', 'visitas')} de ${visitas.length}.` : '';
+  $('lista-feitas').innerHTML = lista.length ? lista.map(v => {
+    const c = clientePorCodigo(v.clienteCodigo);
+    return `
+    <li>
+      <div class="info-cliente">
+        <strong>${esc(v.clienteNome)}</strong>
+        <small>${dataBR(v.data)} · ${esc(v.vendedor)}${c ? ` · ${esc(c.cidade)}/${esc(c.uf)}` : ''}</small>
+        ${v.obs ? `<div class="obs">${esc(v.obs)}</div>` : ''}
+      </div>
+      <button class="btn perigo peq" data-apagar="${esc(v.id)}">Apagar</button>
+    </li>`;
+  }).join('')
+    : `<li class="vazio">${visitas.length ? 'Nenhuma visita encontrada. Mude o vendedor ou a busca.' : 'Nenhuma visita registrada ainda. Use a aba Registrar visita.'}</li>`;
+}
+$('filtro-vendedor').addEventListener('change', desenharFeitas);
+$('busca-feitas').addEventListener('input', desenharFeitas);
+$('lista-feitas').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-apagar]');
+  if (!b) return;
+  const v = visitas.find(x => x.id === b.dataset.apagar);
+  if (!v) return;
+  if (!confirm(`Apagar a visita de ${v.vendedor} a ${v.clienteNome} em ${dataBR(v.data)}?\n\nIsso não pode ser desfeito.`)) return;
+  visitas = visitas.filter(x => x.id !== v.id);
+  salvar(); desenharTudo();
+  avisar('ok', 'Visita apagada.');
+});
+
+/* ===== Planilha do Excel ===== */
+const xmlEsc = s => String(s ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+  .replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const letraColuna = n => { let s = ''; for (n++; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + (n - 1) % 26) + s; return s; };
+const serialData = iso => { const [a, m, d] = iso.split('-').map(Number); return (Date.UTC(a, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000; };
+// Estilos: 0 normal, 1 cabeçalho, 2 dinheiro, 3 data, 4 título
+const EST = { cab: 1, rs: 2, data: 3, titulo: 4 };
+function planilhaXML(linhas, larguras, comFiltro) {
+  const cols = larguras.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('');
+  const rows = linhas.map((linha, r) => `<row r="${r + 1}">` + linha.map((c, i) => {
+    if (c === null || c === undefined || c === '') return '';
+    const ref = letraColuna(i) + (r + 1);
+    const cel = typeof c === 'object' ? c : { v: c };
+    const s = cel.s ? ` s="${cel.s}"` : '';
+    if (typeof cel.v === 'number') return `<c r="${ref}"${s}><v>${cel.v}</v></c>`;
+    return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlEsc(cel.v)}</t></is></c>`;
+  }).join('') + '</row>').join('');
+  const ultima = letraColuna(larguras.length - 1) + linhas.length;
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    + (comFiltro ? '<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>' : '')
+    + `<cols>${cols}</cols><sheetData>${rows}</sheetData>`
+    + (comFiltro && linhas.length > 1 ? `<autoFilter ref="A1:${ultima}"/>` : '')
+    + '</worksheet>';
+}
+const ESTILOS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+  + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+  + '<numFmts count="2"><numFmt numFmtId="164" formatCode="&quot;R$&quot;\ #,##0.00"/><numFmt numFmtId="165" formatCode="dd/mm/yyyy"/></numFmts>'
+  + '<fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="14"/><color rgb="FF14213D"/><name val="Calibri"/></font></fonts>'
+  + '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF14213D"/></patternFill></fill></fills>'
+  + '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+  + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+  + '<cellXfs count="5"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+  + '<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
+  + '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+  + '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+  + '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
+  + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
+  + '</styleSheet>';
+function montarXlsx(abas) {
+  const ct = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>'
+    + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+    + abas.map((a, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')
+    + '</Types>';
+  const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+  const wb = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'
+    + abas.map((a, i) => `<sheet name="${xmlEsc(a.nome)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets>'
+    + (abas.some(a => a.filtro && a.linhas.length > 1) ? '<definedNames>' + abas.map((a, i) => a.filtro && a.linhas.length > 1
+      ? `<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${xmlEsc(a.nome)}'!$A$1:$${letraColuna(a.larguras.length - 1)}$${a.linhas.length}</definedName>` : '').join('') + '</definedNames>' : '')
+    + '</workbook>';
+  const wbRels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    + abas.map((a, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')
+    + `<Relationship Id="rId${abas.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`;
+  const arquivos = [
+    ['[Content_Types].xml', ct], ['_rels/.rels', rels], ['xl/workbook.xml', wb], ['xl/_rels/workbook.xml.rels', wbRels], ['xl/styles.xml', ESTILOS_XML],
+    ...abas.map((a, i) => [`xl/worksheets/sheet${i + 1}.xml`, planilhaXML(a.linhas, a.larguras, a.filtro)])
+  ];
+  return zipSemCompressao(arquivos);
+}
+// Zip simples (sem compressão), suficiente para o Excel abrir
+const TABELA_CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = b => { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = TABELA_CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipSemCompressao(arquivos) {
+  const enc = new TextEncoder(), partes = [], central = [];
+  const agora = new Date();
+  const hora = (agora.getHours() << 11) | (agora.getMinutes() << 5) | (agora.getSeconds() >> 1);
+  const dia = ((agora.getFullYear() - 1980) << 9) | ((agora.getMonth() + 1) << 5) | agora.getDate();
+  let pos = 0;
+  for (const [nome, texto] of arquivos) {
+    const n = enc.encode(nome), d = enc.encode(texto), crc = crc32(d);
+    const loc = new DataView(new ArrayBuffer(30));
+    [[0, 0x04034b50, 4], [4, 20, 2], [6, 0x0800, 2], [8, 0, 2], [10, hora, 2], [12, dia, 2], [14, crc, 4], [18, d.length, 4], [22, d.length, 4], [26, n.length, 2], [28, 0, 2]]
+      .forEach(([o, v, t]) => t === 4 ? loc.setUint32(o, v, true) : loc.setUint16(o, v, true));
+    const cen = new DataView(new ArrayBuffer(46));
+    [[0, 0x02014b50, 4], [4, 20, 2], [6, 20, 2], [8, 0x0800, 2], [10, 0, 2], [12, hora, 2], [14, dia, 2], [16, crc, 4], [20, d.length, 4], [24, d.length, 4], [28, n.length, 2], [30, 0, 2], [32, 0, 2], [34, 0, 2], [36, 0, 2], [38, 0, 4], [42, pos, 4]]
+      .forEach(([o, v, t]) => t === 4 ? cen.setUint32(o, v, true) : cen.setUint16(o, v, true));
+    partes.push(new Uint8Array(loc.buffer), n, d);
+    central.push(new Uint8Array(cen.buffer), n);
+    pos += 30 + n.length + d.length;
+  }
+  const tamCentral = central.reduce((s, p) => s + p.length, 0);
+  const fim = new DataView(new ArrayBuffer(22));
+  [[0, 0x06054b50, 4], [4, 0, 2], [6, 0, 2], [8, arquivos.length, 2], [10, arquivos.length, 2], [12, tamCentral, 4], [16, pos, 4], [20, 0, 2]]
+    .forEach(([o, v, t]) => t === 4 ? fim.setUint32(o, v, true) : fim.setUint16(o, v, true));
+  return new Blob([...partes, ...central, new Uint8Array(fim.buffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+$('btn-planilha').addEventListener('click', () => {
+  if (!visitas.length) return mostrarMsg($('msg-copia'), 'alerta', 'Ainda não há visitas para colocar na planilha. Registre uma visita primeiro.');
+  const H = t => ({ v: t, s: EST.cab });
+  const D = iso => ({ v: serialData(iso), s: EST.data });
+  const abaVisitas = [[H('Data'), H('Cód. cliente'), H('Cliente'), H('Cidade'), H('UF'), H('Vendedor'), H('Observação')]];
+  for (const v of ordenarVisitas([...visitas])) {
+    const c = clientePorCodigo(v.clienteCodigo);
+    abaVisitas.push([D(v.data), v.clienteCodigo, v.clienteNome, c?.cidade || '', c?.uf || '', v.vendedor, v.obs]);
+  }
+  const pend = situacaoClientes().filter(s => s.tipo !== 'emdia')
+    .sort((a, b) => PESO[a.tipo] - PESO[b.tipo] || b.dias - a.dias || a.cliente.nome.localeCompare(b.cliente.nome, 'pt-BR'));
+  const abaPend = [[H('Cód. cliente'), H('Cliente'), H('Cidade'), H('UF'), H('Última visita'), H('Dias sem visita'), H('Último vendedor')]];
+  for (const s of pend) {
+    abaPend.push([s.cliente.codigo, s.cliente.nome, s.cliente.cidade, s.cliente.uf,
+      s.ultima ? D(s.ultima.data) : 'Nunca visitado', s.ultima ? s.dias : '', s.ultima ? s.ultima.vendedor : '']);
+  }
+  const arquivo = montarXlsx([
+    { nome: 'Visitas', linhas: abaVisitas, larguras: [12, 12, 38, 22, 6, 24, 50], filtro: true },
+    { nome: 'Sem visita há mais de 30 dias', linhas: abaPend, larguras: [12, 38, 22, 6, 14, 15, 24], filtro: true }
+  ]);
+  baixarArquivo(`visitas_${dataArquivo()}.xlsx`, arquivo);
+  mostrarMsg($('msg-copia'), 'ok', `Planilha baixada com ${plural(visitas.length, 'visita', 'visitas')} e ${plural(pend.length, 'cliente', 'clientes')} sem visita há mais de 30 dias.`);
+});
+
+/* ===== Cópia de segurança ===== */
+$('btn-fazer-copia').addEventListener('click', () => {
+  if (!visitas.length) return mostrarMsg($('msg-copia'), 'alerta', 'Ainda não há visitas para guardar na cópia.');
+  const vend = ultimoVendedor();
+  const pacote = { sistema: SISTEMA, versao: 1, copiaFeitaEm: new Date().toISOString(), vendedor: vend, visitas };
+  const nomeVend = vend ? '_' + semAcento(vend.split(' ')[0]).replace(/[^a-z0-9]/g, '') : '';
+  baixarArquivo(`visitas_copia${nomeVend}_${dataArquivo()}.json`, JSON.stringify(pacote, null, 1), 'application/json');
+  mostrarMsg($('msg-copia'), 'ok', `Cópia baixada com ${plural(visitas.length, 'visita', 'visitas')}. Guarde o arquivo em local seguro ou envie para o seu gerente.`);
+});
+
+function lerCopia(arq) {
+  return new Promise(ok => {
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      let d; try { d = JSON.parse(leitor.result); } catch (e) { d = null; }
+      if (!d || d.sistema !== SISTEMA || !Array.isArray(d.visitas)) return ok({ arq, erro: true });
+      ok({ arq, visitas: d.visitas.filter(visitaValida).map(limparVisita) });
+    };
+    leitor.onerror = () => ok({ arq, erro: true });
+    leitor.readAsText(arq);
+  });
+}
+
+$('btn-juntar').addEventListener('click', () => { $('arq-juntar').value = ''; $('arq-juntar').click(); });
+$('arq-juntar').addEventListener('change', async () => {
+  const arqs = [...$('arq-juntar').files];
+  if (!arqs.length) return;
+  const lidos = await Promise.all(arqs.map(lerCopia));
+  const ruins = lidos.filter(l => l.erro).map(l => l.arq.name);
+  const bons = lidos.filter(l => !l.erro);
+  if (!bons.length) return mostrarMsg($('msg-copia'), 'alerta', `Nenhum dos arquivos escolhidos é uma cópia de segurança das visitas (${ruins.join(', ')}). Nada foi alterado.`);
+  const ids = new Set(visitas.map(v => v.id));
+  const novas = [];
+  for (const l of bons) for (const v of l.visitas) if (!ids.has(v.id)) { ids.add(v.id); novas.push(v); }
+  const total = bons.reduce((s, l) => s + l.visitas.length, 0);
+  if (!novas.length) {
+    return mostrarMsg($('msg-copia'), 'info', `Todas as visitas desta cópia já estavam neste aparelho. Nada mudou.`
+      + (ruins.length ? ` Arquivos ignorados por não serem cópias das visitas: ${ruins.join(', ')}.` : ''));
+  }
+  if (!confirm(`Acrescentar ${plural(novas.length, 'visita nova', 'visitas novas')} de ${plural(bons.length, 'arquivo', 'arquivos')}?\n\nAs visitas que já estão neste aparelho continuam aqui.`)) return;
+  visitas.push(...novas);
+  salvar(); desenharTudo();
+  mostrarMsg($('msg-copia'), 'ok', `Pronto: ${plural(novas.length, 'visita foi acrescentada', 'visitas foram acrescentadas')}. Agora há ${plural(visitas.length, 'visita', 'visitas')} neste aparelho.`
+    + (total > novas.length ? ` (${total - novas.length} já estavam aqui e não foram repetidas.)` : '')
+    + (ruins.length ? ` Arquivos ignorados por não serem cópias das visitas: ${ruins.join(', ')}.` : ''));
+});
+
+$('btn-restaurar').addEventListener('click', () => { $('arq-restaurar').value = ''; $('arq-restaurar').click(); });
+$('arq-restaurar').addEventListener('change', async () => {
+  const arq = $('arq-restaurar').files[0];
+  if (!arq) return;
+  const l = await lerCopia(arq);
+  if (l.erro) return mostrarMsg($('msg-copia'), 'alerta', 'Este arquivo não é uma cópia de segurança das visitas. Nada foi alterado.');
+  if (!confirm(`Restaurar a cópia "${arq.name}", com ${plural(l.visitas.length, 'visita', 'visitas')}?\n\nATENÇÃO: as ${plural(visitas.length, 'visita', 'visitas')} que estão neste aparelho agora serão substituídas pelas da cópia.\n\nSe quiser apenas somar as visitas, cancele e use "Juntar visitas de outra cópia".`)) return;
+  visitas = l.visitas;
+  salvar(); desenharTudo();
+  mostrarMsg($('msg-copia'), 'ok', `Cópia restaurada: agora há ${plural(visitas.length, 'visita', 'visitas')} neste aparelho.`);
+});
+
+/* ===== Abas ===== */
+function abrirAba(nome) {
+  document.querySelectorAll('nav.abas button').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === nome));
+  ['pendentes', 'registrar', 'feitas'].forEach(n => $('tela-' + n).hidden = n !== nome);
+  if (nome === 'registrar') { $('f-data').max = hojeISO(); if (!$('f-data').value) $('f-data').value = hojeISO(); }
+  esconderMsg($('msg-geral'));
+  desenharTudo();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav.abas button').forEach(b => b.addEventListener('click', () => abrirAba(b.dataset.aba)));
+
+function desenharTudo() { desenharPendentes(); desenharFeitas(); }
+
+/* ===== Início ===== */
+(async function iniciar() {
+  $('f-vendedor').innerHTML = '<option value="">Escolha o vendedor</option>' + VENDEDORES.map(v => `<option>${esc(v)}</option>`).join('');
+  $('filtro-vendedor').innerHTML = '<option value="">Todos os vendedores</option>' + VENDEDORES.map(v => `<option>${esc(v)}</option>`).join('');
+  clientes = await carregarClientes();
+  $('opcoes-clientes').innerHTML = [...clientes].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    .map(c => `<option value="${esc(rotuloCliente(c))}">`).join('');
+  carregarVisitas();
+  limparFormulario();
+  desenharTudo();
+})();
+</script>
+</body>
+</html>
