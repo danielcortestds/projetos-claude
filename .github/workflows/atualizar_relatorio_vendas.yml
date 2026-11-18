@@ -8,6 +8,8 @@
 #   1. junta e limpa as planilhas  (automacao/consolidar_vendas.py)
 #   2. gera o relatório            (automacao/gerar_relatorio.py)
 #   3. salva na branch main a planilha consolidada e o relatório atualizados.
+#
+# Entram todas as planilhas com nome vendas_AAAA_MM.xlsx (2026, 2027, ...).
 
 name: Atualizar relatório de vendas
 
@@ -30,7 +32,7 @@ jobs:
   atualizar:
     runs-on: ubuntu-latest
     env:
-      # "Hoje" no horário de Mato Grosso, para separar as vendas com data futura.
+      # Datas e horários no fuso de Mato Grosso.
       TZ: America/Cuiaba
     steps:
       - name: Baixar o repositório
@@ -54,7 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add automacao/saida/vendas_2026_consolidado.xlsx automacao/saida/relatorio_vendas_2026.xlsx
+          git add automacao/saida/vendas_consolidado.xlsx automacao/saida/relatorio_vendas.xlsx
           if git diff --cached --quiet; then
             echo "Nada mudou no relatório."
             exit 0
