@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Orçamentos — Distribuidora Pantanal</title>
+<title>Calculadora de Orçamento — Distribuidora Pantanal</title>
 <style>
   :root {
     --navy: #14213D;
@@ -25,113 +25,75 @@
     color: var(--text);
     font-size: 15px;
   }
-
-  /* ---------- Cabeçalho e navegação ---------- */
-  header { background: var(--navy); border-bottom: 4px solid var(--yellow); }
-  .topo {
-    max-width: 1280px; margin: 0 auto; padding: 12px 24px 0;
+  header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--yellow);
+    padding: 12px 24px;
     display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
   }
-  .topo img { height: 56px; display: block; background: #fff; padding: 6px 10px; border-radius: 8px; }
-  .topo h1 { margin: 0; font-size: 20px; color: #fff; font-weight: 600; }
-  .topo .data { margin-left: auto; color: #c9d3ea; font-size: 14px; }
-  nav { max-width: 1280px; margin: 0 auto; padding: 12px 24px 0; display: flex; gap: 6px; }
-  nav a {
-    display: flex; align-items: center; gap: 10px; padding: 10px 18px; border-radius: 8px 8px 0 0;
-    color: #c9d3ea; text-decoration: none; font-weight: 600; background: rgba(255,255,255,.06);
-  }
-  nav a:hover { background: rgba(255,255,255,.12); color: #fff; }
-  nav a.ativa { background: var(--bg); color: var(--navy); }
-  nav .passo {
-    width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 13px;
-    background: rgba(255,255,255,.15); color: #fff;
-  }
-  nav a.ativa .passo { background: var(--yellow); color: var(--navy); }
-  nav .info { font-weight: 400; font-size: 13px; opacity: .85; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  header img { height: 56px; display: block; background: #fff; padding: 6px 10px; border-radius: 8px; }
+  header h1 { margin: 0; font-size: 20px; color: #fff; font-weight: 600; }
+  header .data { margin-left: auto; color: #c9d3ea; font-size: 14px; }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px; }
-  .tela { display: grid; gap: 20px; align-items: start; }
-  .tela-orcamento { grid-template-columns: minmax(0, 1fr) 400px; }
-
+  main {
+    max-width: 1280px; margin: 0 auto; padding: 20px 24px 40px;
+    display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 20px; align-items: start;
+  }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
-  .card h2 { margin: 0; font-size: 16px; color: var(--navy); padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px; }
-  .card h2 .contagem { font-weight: 400; color: var(--muted); font-size: 14px; }
+  .card h2 { margin: 0; font-size: 16px; color: var(--navy); padding: 14px 16px; border-bottom: 1px solid var(--line); }
 
-  /* ---------- Formulários ---------- */
-  input, select { font: inherit; padding: 8px 10px; border: 1px solid #c9d0dd; border-radius: 6px; background: #fff; color: var(--text); }
-  .campo { display: grid; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; }
-  .campo input, .campo select { width: 100%; font-size: 15px; font-weight: 400; }
-  .filtros { display: flex; gap: 10px; padding: 12px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); align-items: center; }
-  .filtros input[type=search] { flex: 1 1 220px; }
+  .filtros { display: flex; gap: 10px; padding: 12px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .filtros input, .filtros select, .cliente input {
+    font: inherit; padding: 8px 10px; border: 1px solid #c9d0dd; border-radius: 6px; background: #fff; color: var(--text);
+  }
+  .filtros input { flex: 1 1 220px; }
   .filtros label { white-space: nowrap; display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; }
 
-  /* ---------- Tabelas ---------- */
-  .tabela-wrap { max-height: calc(100vh - 330px); min-height: 200px; overflow: auto; }
+  .tabela-wrap { max-height: calc(100vh - 230px); overflow: auto; }
   table { width: 100%; border-collapse: collapse; }
   th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); }
   th { position: sticky; top: 0; background: #f8f9fc; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); z-index: 1; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   td.cod { color: var(--muted); font-variant-numeric: tabular-nums; width: 50px; }
-  td.fraco { color: var(--muted); font-size: 13px; }
+  td.cat { color: var(--muted); font-size: 13px; }
   tr.selecionado td { background: var(--sel); }
-  tr.cat-titulo td { background: var(--navy); color: #fff; font-weight: 600; font-size: 13px; padding: 6px 12px; }
-  #listaClientes tr { cursor: pointer; }
-  #listaClientes tr:hover td { background: #f4f7ff; }
-  #listaClientes tr.selecionado:hover td { background: var(--sel); }
-  .vazio { padding: 24px 16px; color: var(--muted); text-align: center; }
+  tr.cat-titulo td { background: var(--navy); color: #fff; font-weight: 600; font-size: 13px; padding: 6px 12px; position: static; }
 
   .qtd { display: inline-flex; align-items: center; border: 1px solid #c9d0dd; border-radius: 6px; overflow: hidden; background: #fff; }
   .qtd button { border: 0; background: #eef1f6; width: 30px; height: 32px; font-size: 18px; cursor: pointer; color: var(--navy); }
   .qtd button:hover { background: #dfe4ee; }
-  .qtd input { width: 56px; height: 32px; border: 0; border-radius: 0; padding: 0; text-align: center; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+  .qtd input { width: 56px; height: 32px; border: 0; text-align: center; font: inherit; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
   .qtd input::-webkit-outer-spin-button, .qtd input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-  /* ---------- Botões ---------- */
-  .btn { font: inherit; padding: 9px 14px; border-radius: 6px; cursor: pointer; border: 1px solid var(--navy); background: #fff; color: var(--navy); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
-  .btn.primario { background: var(--yellow); border-color: var(--yellow); color: var(--navy); }
-  .btn.escuro { background: var(--navy); color: #fff; }
-  .btn.pequeno { padding: 5px 10px; font-size: 13px; }
-  .btn:hover { filter: brightness(.95); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
-  .link { border: 0; background: none; padding: 0; color: var(--navy-2); text-decoration: underline; cursor: pointer; font: inherit; font-size: 13px; }
-
-  /* ---------- Tela Clientes ---------- */
-  .escolhido { display: flex; align-items: center; gap: 16px; padding: 14px 16px; flex-wrap: wrap; }
-  .escolhido .nome { font-size: 18px; font-weight: 700; color: var(--navy); }
-  .escolhido .sub { color: var(--muted); font-size: 14px; }
-  .escolhido .acoes-linha { margin-left: auto; display: flex; gap: 8px; }
-  .novo-cliente { display: grid; grid-template-columns: 2fr 1.4fr 90px auto; gap: 10px; align-items: end; padding: 14px 16px; }
-
-  /* ---------- Barra de resumo (tela Produtos) ---------- */
-  .barra {
-    position: sticky; bottom: 0; z-index: 5; background: var(--navy); color: #fff; border-radius: 10px;
-    padding: 12px 16px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; box-shadow: 0 -4px 16px rgba(20,33,61,.18);
-  }
-  .barra .cli { font-weight: 600; }
-  .barra .cli small, .barra .resumo-barra small { display: block; font-weight: 400; color: #c9d3ea; font-size: 12px; }
-  .barra .resumo-barra { margin-left: auto; text-align: right; font-variant-numeric: tabular-nums; }
-  .barra .resumo-barra strong { font-size: 22px; color: var(--yellow); }
-
-  /* ---------- Tela Orçamento ---------- */
   aside.card { position: sticky; top: 16px; }
-  .bloco { padding: 12px 16px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+  .cliente { padding: 12px 16px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+  .cliente label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .cliente input, .cliente select { width: 100%; font: inherit; font-size: 15px; font-weight: 400; padding: 8px 10px; border: 1px solid #c9d0dd; border-radius: 6px; background: #fff; color: var(--text); }
   .cidade-uf { display: grid; grid-template-columns: 1fr 76px; gap: 8px; }
-  .resumo { padding: 12px 16px; display: grid; gap: 6px; }
-  .resumo .linha { display: flex; justify-content: space-between; align-items: center; font-variant-numeric: tabular-nums; }
+  .resumo .frete-campo { display: inline-flex; align-items: center; gap: 6px; }
+  .resumo .frete-campo input { width: 90px; }
   .resumo small { color: var(--muted); font-size: 12px; }
-  .frete-campo { display: inline-flex; align-items: center; gap: 6px; }
-  .frete-campo input { width: 90px; padding: 4px 6px; text-align: right; }
-  input.pendente { border-color: #d97706; background: #fff7e6; }
+  .resumo input.pendente { border-color: #d97706; background: #fff7e6; }
+  .link { border: 0; background: none; padding: 0; color: var(--navy-2); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
   .verde { color: #157347; }
   .dica { font-size: 12px; color: var(--navy-2); background: #eef3ff; border-radius: 6px; padding: 5px 8px; }
   .aviso { font-size: 12px; color: #8a4b00; background: #fff4dc; border-radius: 6px; padding: 5px 8px; }
-  .total { background: var(--navy); color: #fff; padding: 18px 16px; display: flex; justify-content: space-between; align-items: baseline; }
+  .total small { display: block; font-size: 12px; color: #c9d3ea; text-transform: none; letter-spacing: 0; }
+  .itens { max-height: calc(100vh - 470px); min-height: 80px; overflow: auto; }
+  .itens table td { font-size: 14px; padding: 7px 12px; }
+  .itens .remover { border: 0; background: none; color: #b33; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .vazio { padding: 24px 16px; color: var(--muted); text-align: center; }
+
+  .resumo { padding: 12px 16px; display: grid; gap: 6px; }
+  .resumo .linha { display: flex; justify-content: space-between; align-items: center; font-variant-numeric: tabular-nums; }
+  .resumo .linha input { width: 80px; font: inherit; padding: 4px 6px; border: 1px solid #c9d0dd; border-radius: 6px; text-align: right; }
+  .total { background: var(--navy); color: #fff; padding: 18px 16px; display: flex; justify-content: space-between; align-items: baseline; border-radius: 0 0 10px 10px; }
   .total span:first-child { font-size: 14px; text-transform: uppercase; letter-spacing: .05em; }
   .total strong { font-size: 40px; font-weight: 800; line-height: 1.1; color: var(--yellow); font-variant-numeric: tabular-nums; }
-  .total small { display: block; font-size: 12px; color: #c9d3ea; text-transform: none; letter-spacing: 0; text-align: right; font-weight: 400; }
-  .acoes { display: flex; gap: 8px; padding: 12px 16px; }
-  .acoes .btn { flex: 1; }
-  .remover { border: 0; background: none; color: #b33; cursor: pointer; font-size: 16px; padding: 0 4px; }
+  .acoes { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  .btn { flex: 1; font: inherit; padding: 9px 12px; border-radius: 6px; cursor: pointer; border: 1px solid var(--navy); background: #fff; color: var(--navy); font-weight: 600; }
+  .btn.primario { background: var(--yellow); border-color: var(--yellow); color: var(--navy); }
+  .btn:hover { filter: brightness(.95); }
 
   .rodape { color: var(--muted); font-size: 12px; padding: 10px 16px; }
   .rodape label { color: var(--navy-2); text-decoration: underline; cursor: pointer; }
@@ -140,29 +102,17 @@
   #impressao { display: none; }
 
   @media screen and (max-width: 900px) {
-    .topo { padding: 10px 16px 0; }
-    .topo .data { margin-left: 0; width: 100%; }
-    nav { padding: 10px 8px 0; gap: 4px; }
-    nav a { flex: 1; flex-direction: column; gap: 2px; padding: 8px 4px; font-size: 13px; text-align: center; }
-    nav .info { display: none; }
-    main { padding: 16px; }
-    .tela-orcamento { grid-template-columns: minmax(0, 1fr); }
-    aside.card { position: static; }
-    .tabela-wrap { max-height: none; }
-    th, td { padding: 8px 6px; }
-    .esconder-cel { display: none; }
-    .filtros select { flex: 1 1 140px; }
-    .qtd input { width: 44px; }
+    main { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+    header { padding: 10px 16px; }
+    header .data { margin-left: 0; width: 100%; }
     .total strong { font-size: 34px; }
-    .novo-cliente { grid-template-columns: 1fr 76px; }
-    .novo-cliente .campo:first-child, .novo-cliente .btn { grid-column: 1 / -1; }
-    .escolhido .acoes-linha { margin-left: 0; width: 100%; }
-    .escolhido .acoes-linha .btn { flex: 1; }
-    .barra { gap: 10px; flex-wrap: nowrap; padding: 10px 12px; }
-    .barra .cli, .barra .resumo-barra small:last-child { display: none; }
-    .barra .resumo-barra { margin-left: 0; text-align: left; }
-    .barra .resumo-barra strong { font-size: 20px; }
-    .barra .btn { margin-left: auto; }
+    .filtros select { flex: 1 1 100%; }
+    th, td { padding: 8px 6px; }
+    .tabela-wrap td.cod, .tabela-wrap th:first-child, .tabela-wrap td.sub, .tabela-wrap th:last-child { display: none; }
+    .qtd input { width: 44px; }
+    aside.card { position: static; }
+    .tabela-wrap, .itens { max-height: none; }
+    td.cat, th.cat { display: none; }
   }
 
   @media print {
@@ -187,125 +137,75 @@
 <body>
 
 <header>
-  <div class="topo">
-    <img id="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAADwCAYAAAD4pgDaAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjE0MzM5ZGMwLTRkNmYtNDk4MS04ZTUwLWQzMTE2ZTY1NjZkZQAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoTZ1ZTzj9cbDIgUwwtC43kgAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6ZjY5NjY0MjItZmQyMy00YzBkLWE3ZGMtMDFmM2JmMDhhYjRmbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBPrQvrqXbvxaVWNMcGdiF0AAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYICcx3L8QNhRi/Lxif/BZQKO1z5mr4F6e39XazoP+mPaYpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2hRniuBkMuTFxolS9zSA9siAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggQXJFBGon5nnNzGQeX0xElu3i6U1iK29dgdNYB0LBl7lkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYToxNDMzOWRjMC00ZDZmLTQ5ODEtOGU1MC1kMzExNmU2NTY2ZGUvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDo2MWFmMTRhZC04NTJmLTQwNDktYjFhOC03OGU2ZTUyMzM4NDNyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggJzHcvxA2FGL8vGJ/8FlAo7XPmavgXp7f1drOg/6Y9piiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIIs5zq3vONQcnSzuxy/Yi8YdzCZ3iaWTDdpWdWBMDmqgomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIP/umEma4Uv156g3oBjmjvPBAR6z3STts9eFCb20PulWdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="Distribuidora Pantanal">
-    <h1>Orçamentos</h1>
-    <div class="data" id="dataHoje"></div>
-  </div>
-  <nav>
-    <a href="#clientes" data-tela="clientes"><span class="passo">1</span><span>Clientes</span><span class="info" id="navCliente"></span></a>
-    <a href="#produtos" data-tela="produtos"><span class="passo">2</span><span>Produtos</span><span class="info" id="navProdutos"></span></a>
-    <a href="#orcamento" data-tela="orcamento"><span class="passo">3</span><span>Orçamento</span><span class="info" id="navTotal"></span></a>
-  </nav>
+  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAADwCAYAAAD4pgDaAAAWfmNhQlgAABZ+anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFlhqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOjE0MzM5ZGMwLTRkNmYtNDk4MS04ZTUwLWQzMTE2ZTY1NjZkZQAAAAOTanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuGp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNoTZ1ZTzj9cbDIgUwwtC43kgAAAGxjYm9yo2lkYzpmb3JtYXRpaW1hZ2UvcG5namluc3RhbmNlSUR4LHhtcDppaWQ6ZjY5NjY0MjItZmQyMy00YzBkLWE3ZGMtMDFmM2JmMDhhYjRmbHJlbGF0aW9uc2hpcGhwYXJlbnRPZgAAAeJqdW1iAAAAQWp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuYWN0aW9ucy52MgAAAAAYYzJzaBPrQvrqXbvxaVWNMcGdiF0AAAGZY2JvcqJnYWN0aW9uc4KiZmFjdGlvbmtjMnBhLm9wZW5lZGpwYXJhbWV0ZXJzoWtpbmdyZWRpZW50c4GiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYICcx3L8QNhRi/Lxif/BZQKO1z5mr4F6e39XazoP+mPaYpGZhY3Rpb254HWNvbS5hbnRocm9waWMuY2xhdWRlLnByb3ZpZGVkanBhcmFtZXRlcnOheB9jb20uYW50aHJvcGljLm9yaWdpbi1jb25maWRlbmNlZ3Vua25vd25rZGVzY3JpcHRpb254ZkNsYXVkZSBwcm92aWRlZCB0aGlzIGZpbGUgYXQgdGhlIHJlcXVlc3Qgb2YgYSB1c2VyIGFuZCBtYXkgaGF2ZSBjcmVhdGVkIG9yIG1vZGlmaWVkIHRoZSBmaWxlIGNvbnRlbnRzLm1zb2Z0d2FyZUFnZW50oWRuYW1lZkNsYXVkZXJhbGxBY3Rpb25zSW5jbHVkZWT1AAAAyGp1bWIAAABAanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5oYXNoLmRhdGEAAAAAGGMyc2hRniuBkMuTFxolS9zSA9siAAAAgGNib3KlY2FsZ2ZzaGEyNTZjcGFkTQAAAAAAAAAAAAAAAABkaGFzaFggQXJFBGon5nnNzGQeX0xElu3i6U1iK29dgdNYB0LBl7lkbmFtZW5qdW1iZiBtYW5pZmVzdGpleGNsdXNpb25zgaJlc3RhcnQYIWZsZW5ndGgZFooAAAI+anVtYgAAACdqdW1kYzJjbAARABCAAACqADibcQNjMnBhLmNsYWltLnYyAAAAAg9jYm9ypWNhbGdmc2hhMjU2aXNpZ25hdHVyZXhNc2VsZiNqdW1iZj0vYzJwYS91cm46YzJwYToxNDMzOWRjMC00ZDZmLTQ5ODEtOGU1MC1kMzExNmU2NTY2ZGUvYzJwYS5zaWduYXR1cmVqaW5zdGFuY2VJRHgseG1wOmlpZDo2MWFmMTRhZC04NTJmLTQwNDktYjFhOC03OGU2ZTUyMzM4NDNyY3JlYXRlZF9hc3NlcnRpb25zg6JjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggJzHcvxA2FGL8vGJ/8FlAo7XPmavgXp7f1drOg/6Y9piiY3VybHgqc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5hY3Rpb25zLnYyZGhhc2hYIIs5zq3vONQcnSzuxy/Yi8YdzCZ3iaWTDdpWdWBMDmqgomN1cmx4KXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaGFzaC5kYXRhZGhhc2hYIP/umEma4Uv156g3oBjmjvPBAR6z3STts9eFCb20PulWdGNsYWltX2dlbmVyYXRvcl9pbmZvo2RuYW1lb0FudGhyb3BpYyBGaWxlc2d2ZXJzaW9uZTEuMC4wa3NwZWNWZXJzaW9uZTIuNC4wAAAQOGp1bWIAAAAoanVtZGMyY3MAEQAQgAAAqgA4m3EDYzJwYS5zaWduYXR1cmUAAAAQCGNib3LShFkCEqIBJhghWQIKMIICBjCCAY2gAwIBAgIUQOWgCu7COdC+uIP6BkIFPWdVEwAwCgYIKoZIzj0EAwMwSTEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxLjAsBgNVBAMTJUFudGhyb3BpYyBDb250ZW50IENyZWRlbnRpYWxzIFJvb3QgQ0EwHhcNMjYwODA3MTg0MzU2WhcNMjgwODA2MTk0MzU2WjBEMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEpMCcGA1UEAxMgQW50aHJvcGljIENsYXVkZSBDb250ZW50IFNpZ25pbmcwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASYegpry1AYBRTVNL1CpTlbROnY3dey+UrsF9C3phYrATN3ZHf93Mo8RQN0KOUuOn19P4oWNFWe5n2/She9N7eTo1gwVjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lBA4wDAYKKwYBBAGD6F4CATAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFM5R4gSBTmRbI/jjxM+aPpzB11zCMAoGCCqGSM49BAMDA2cAMGQCMDFzHRSeAXrSy1WOzkbhPZ6Km2wGTmZ/2gK18k8BQGXyqz88Rdrz6CTX9flAnYNVxgIwcF9c3fVhqmJKpi+UhasNUMko69cyX6STPfta3Q8EjyzDjzoyrol46FP6VFHhvUcJoWNwYWRZDZ4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="Distribuidora Pantanal">
+  <h1>Calculadora de Orçamento</h1>
+  <div class="data" id="dataHoje"></div>
 </header>
 
 <main>
-  <!-- ================= TELA 1: CLIENTES ================= -->
-  <section class="tela" id="tela-clientes" hidden>
-    <div class="card">
-      <h2>Cliente do orçamento</h2>
-      <div class="escolhido" id="clienteEscolhido"></div>
+  <section class="card">
+    <h2>Produtos</h2>
+    <div class="filtros">
+      <input type="search" id="busca" placeholder="Buscar por nome ou código…" autocomplete="off">
+      <select id="categoria"><option value="">Todas as categorias</option></select>
+      <label><input type="checkbox" id="soSelecionados"> Só os escolhidos</label>
     </div>
-
-    <div class="card">
-      <h2>Clientes cadastrados <span class="contagem" id="contagemClientes"></span></h2>
-      <div class="filtros">
-        <input type="search" id="buscaCliente" placeholder="Buscar por nome do cliente…" autocomplete="off">
-        <select id="filtroCidade"><option value="">Todas as cidades</option></select>
-        <select id="filtroSegmento"><option value="">Todos os segmentos</option></select>
-      </div>
-      <div class="tabela-wrap">
-        <table>
-          <thead><tr><th>Cliente</th><th>Cidade</th><th>UF</th><th class="esconder-cel">Segmento</th><th></th></tr></thead>
-          <tbody id="listaClientes"></tbody>
-        </table>
-      </div>
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr><th>Cód.</th><th>Produto</th><th class="cat">Categoria</th><th class="num">Preço</th><th class="num">Quantidade</th><th class="num">Subtotal</th></tr>
+        </thead>
+        <tbody id="listaProdutos"></tbody>
+      </table>
     </div>
-
-    <div class="card">
-      <h2>Cliente não cadastrado</h2>
-      <form class="novo-cliente" id="formNovoCliente">
-        <label class="campo">Nome do cliente <input type="text" id="novoNome" required></label>
-        <label class="campo">Cidade <input type="text" id="novoCidade" list="listaCidades" autocomplete="off" required></label>
-        <label class="campo">UF <select id="novoUf"></select></label>
-        <button class="btn escuro" type="submit">Usar este cliente</button>
-      </form>
+    <div class="rodape">
+      <span id="infoLista"></span>
+      · <label for="arquivoCsv">Carregar outro produtos.csv</label>
+      <input type="file" id="arquivoCsv" accept=".csv,text/csv" hidden>
     </div>
   </section>
 
-  <!-- ================= TELA 2: PRODUTOS ================= -->
-  <section class="tela" id="tela-produtos" hidden>
-    <div class="card">
-      <h2>Produtos <span class="contagem" id="infoLista"></span></h2>
-      <div class="filtros">
-        <input type="search" id="busca" placeholder="Buscar por nome ou código…" autocomplete="off">
-        <select id="categoria"><option value="">Todas as categorias</option></select>
-        <label><input type="checkbox" id="soSelecionados"> Só os escolhidos</label>
-      </div>
-      <div class="tabela-wrap">
-        <table>
-          <thead>
-            <tr><th class="esconder-cel">Cód.</th><th>Produto</th><th class="esconder-cel">Categoria</th><th class="num">Preço</th><th class="num">Quantidade</th><th class="num esconder-cel">Subtotal</th></tr>
-          </thead>
-          <tbody id="listaProdutos"></tbody>
-        </table>
-      </div>
-      <div class="rodape">
-        <label for="arquivoCsv">Carregar outro produtos.csv</label>
-        <input type="file" id="arquivoCsv" accept=".csv,text/csv" hidden>
-      </div>
-    </div>
-
-    <div class="barra">
-      <div class="cli" id="barraCliente"></div>
-      <div class="resumo-barra" id="barraResumo"></div>
-      <a class="btn primario" href="#orcamento">Ver orçamento →</a>
-    </div>
-  </section>
-
-  <!-- ================= TELA 3: ORÇAMENTO ================= -->
-  <section class="tela tela-orcamento" id="tela-orcamento" hidden>
-    <div class="card">
-      <h2>Itens do orçamento <span class="contagem" id="qtdItens"></span></h2>
-      <div id="itens"></div>
-    </div>
-
-    <aside class="card">
-      <h2>Resumo</h2>
-      <div class="bloco">
-        <label class="campo">Cliente
-          <input type="text" id="cliente" list="sugestoesClientes" placeholder="Escolha na tela Clientes ou digite" autocomplete="off">
+  <aside class="card">
+    <h2>Orçamento</h2>
+    <div class="cliente">
+      <label>Cliente
+        <input type="text" id="cliente" list="listaClientes" placeholder="Digite para buscar no cadastro…" autocomplete="off">
+      </label>
+      <datalist id="listaClientes"></datalist>
+      <div class="cidade-uf">
+        <label>Cidade
+          <input type="text" id="cidade" list="listaCidades" placeholder="Cidade de entrega" autocomplete="off">
         </label>
-        <datalist id="sugestoesClientes"></datalist>
-        <div class="cidade-uf">
-          <label class="campo">Cidade
-            <input type="text" id="cidade" list="listaCidades" placeholder="Cidade de entrega" autocomplete="off">
-          </label>
-          <label class="campo">UF <select id="uf"></select></label>
-        </div>
-        <datalist id="listaCidades"></datalist>
-        <label class="campo">Vendedor <input type="text" id="vendedor" placeholder="Opcional"></label>
+        <label>UF
+          <select id="uf"></select>
+        </label>
       </div>
-      <div class="resumo">
-        <div class="linha"><span>Subtotal dos produtos</span><span id="subtotal">R$ 0,00</span></div>
-        <div class="linha" id="linhaDesconto" hidden><span id="rotuloDesconto">Desconto</span><span id="valorDesconto" class="verde"></span></div>
-        <div class="dica" id="dicaDesconto" hidden></div>
-        <div class="linha">
-          <span>Frete <small id="origemFrete"></small></span>
-          <span class="frete-campo">
-            <button type="button" class="link" id="fretePadrao" hidden>usar padrão</button>
-            R$ <input type="text" id="frete" inputmode="decimal" placeholder="—" aria-label="Valor do frete">
-          </span>
-        </div>
-        <div class="aviso" id="avisoFrete" hidden></div>
+      <datalist id="listaCidades"></datalist>
+      <label>Vendedor
+        <input type="text" id="vendedor" placeholder="Opcional">
+      </label>
+    </div>
+    <div class="itens" id="itens"></div>
+    <div class="resumo">
+      <div class="linha"><span>Itens</span><span id="qtdItens">0</span></div>
+      <div class="linha"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
+      <div class="linha" id="linhaDesconto" hidden><span id="rotuloDesconto">Desconto</span><span id="valorDesconto" class="verde">− R$ 0,00</span></div>
+      <div class="dica" id="dicaDesconto" hidden></div>
+      <div class="linha frete">
+        <span>Frete <small id="origemFrete"></small></span>
+        <span class="frete-campo">
+          <button type="button" class="link" id="fretePadrao" hidden>usar padrão</button>
+          R$ <input type="text" id="frete" inputmode="decimal" placeholder="—" aria-label="Valor do frete">
+        </span>
       </div>
-      <div class="total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
-      <div class="acoes">
-        <button class="btn" id="novoOrcamento">Novo orçamento</button>
-        <button class="btn primario" id="imprimir">Imprimir / Salvar PDF</button>
-      </div>
-    </aside>
-  </section>
+      <div class="aviso" id="avisoFrete" hidden></div>
+    </div>
+    <div class="total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
+    <div class="acoes">
+      <button class="btn" id="limpar">Limpar</button>
+      <button class="btn primario" id="imprimir">Imprimir / Salvar PDF</button>
+    </div>
+  </aside>
 </main>
 
 <div id="impressao"></div>
@@ -375,208 +275,208 @@ const CSV_PRODUTOS = `codigo;produto;categoria;preco
 59;Fósforo (pack 10cx);Utilidades Domésticas;4,49
 60;Cafeteira Elétrica 110V;Utilidades Domésticas;129,90`;
 
-// Clientes copiados de dados/clientes.csv (sem os e-mails).
-const CSV_CLIENTES = `codigo;cliente;cidade;uf;segmento
-1;Atacarejo Santo Antônio;Tangará da Serra;MT;Supermercado
-2;Posto e Conveniência Recanto;Várzea Grande;MT;Conveniência
-3;Cantina Vale Verde;Rondonópolis;MT;Restaurante
-4;Supermercado Real;Cuiabá;MT;Supermercado
-5;Super Vitória;Porto Velho;RO;Supermercado
-6;Confeitaria Rio Cuiabá;Cáceres;MT;Padaria
-7;Super Nova Era;Primavera do Leste;MT;Supermercado
-8;Mini Mercado Esperança;Rondonópolis;MT;Conveniência
-9;Empório São José;Várzea Grande;MT;Mercearia
-10;Armazém Primavera;Lucas do Rio Verde;MT;Mercearia
-11;Armazém Pantanal;Sinop;MT;Mercearia
-12;Confeitaria Boa Vista;Cáceres;MT;Padaria
-13;Mercearia São José;Sinop;MT;Mercearia
-14;Churrascaria Primavera;Sinop;MT;Restaurante
-15;Armazém Santo Antônio;Cáceres;MT;Mercearia
-16;Super Bom Preço;Cuiabá;MT;Supermercado
-17;Confeitaria Dois Irmãos;Várzea Grande;MT;Padaria
-18;Armazém Dois Irmãos;Lucas do Rio Verde;MT;Mercearia
-19;Super Progresso;Rondonópolis;MT;Supermercado
-20;Cantina Popular;Campo Grande;MS;Restaurante
-21;Cantina Esperança;Cuiabá;MT;Restaurante
-22;Padaria Bom Preço;Rondonópolis;MT;Padaria
-23;Supermercado Sol Nascente;Cuiabá;MT;Supermercado
-24;Confeitaria Vitória;Cuiabá;MT;Padaria
-25;Empório Santa Rita;Sinop;MT;Mercearia
-26;Confeitaria Santo Antônio;Cuiabá;MT;Padaria
-27;Confeitaria Jardim;Rondonópolis;MT;Padaria
-28;Mercearia Bandeirantes;Cuiabá;MT;Mercearia
-29;Supermercado Pantanal;Rondonópolis;MT;Supermercado
-30;Mercearia Dois Irmãos;Campo Grande;MS;Mercearia
-31;Atacarejo Coxipó;Cuiabá;MT;Supermercado
-32;Armazém Rio Cuiabá;Sinop;MT;Mercearia
-33;Padaria Boa Esperança;Barra do Garças;MT;Padaria
-34;Conveniência Três Irmãos;Cáceres;MT;Conveniência
-35;Armazém Santa Rita;Cuiabá;MT;Mercearia
-36;Empório Ipê Amarelo;Várzea Grande;MT;Mercearia
-37;Super Alvorada;Cuiabá;MT;Supermercado
-38;Mercearia Coxipó;Sorriso;MT;Mercearia
-39;Conveniência Bom Preço;Campo Grande;MS;Conveniência
-40;Armazém Popular;Campo Grande;MS;Mercearia
-41;Armazém Morada;Sorriso;MT;Mercearia
-42;Churrascaria Morada;Cáceres;MT;Restaurante
-43;Atacarejo Santa Rita;Cuiabá;MT;Supermercado
-44;Mercearia Cerrado;Sorriso;MT;Mercearia
-45;Super Tuiuiú;Sinop;MT;Supermercado
-46;Empório Primavera;Cuiabá;MT;Mercearia
-47;Panificadora Alvorada;Campo Grande;MS;Padaria
-48;Supermercado Boa Vista;Tangará da Serra;MT;Supermercado
-49;Mini Mercado Oásis;Sinop;MT;Conveniência
-50;Atacarejo Central;Sinop;MT;Supermercado
-51;Posto e Conveniência Esperança;Primavera do Leste;MT;Conveniência
-52;Supermercado Paraíso;Primavera do Leste;MT;Supermercado
-53;Supermercado Jardim;Sorriso;MT;Supermercado
-54;Super Estrela;Sinop;MT;Supermercado
-55;Supermercado Santa Rita;Rondonópolis;MT;Supermercado
-56;Restaurante Paraíso;Sinop;MT;Restaurante
-57;Empório do Bairro;Sorriso;MT;Mercearia
-58;Churrascaria Recanto;Várzea Grande;MT;Restaurante
-59;Supermercado Tuiuiú;Sinop;MT;Supermercado
-60;Armazém Vale Verde;Cuiabá;MT;Mercearia
-61;Cantina Coxipó;Sorriso;MT;Restaurante
-62;Posto e Conveniência Sol Nascente;Rondonópolis;MT;Conveniência
-63;Posto e Conveniência Porto;Cáceres;MT;Conveniência
-64;Super União;Primavera do Leste;MT;Supermercado
-65;Churrascaria Três Irmãos;Primavera do Leste;MT;Restaurante
-66;Atacarejo Alvorada;Cuiabá;MT;Supermercado
-67;Posto e Conveniência Alvorada;Sorriso;MT;Conveniência
-68;Atacarejo Primavera;Cuiabá;MT;Supermercado
-69;Supermercado Vale Verde;Várzea Grande;MT;Supermercado
-70;Armazém Família;Campo Grande;MS;Mercearia
-71;Cantina Recanto;Cuiabá;MT;Restaurante
-72;Restaurante Família;Primavera do Leste;MT;Restaurante
-73;Empório Estrela;Porto Velho;RO;Mercearia
-74;Cantina Paraíso;Várzea Grande;MT;Restaurante
-75;Mercearia Progresso;Rondonópolis;MT;Mercearia
-76;Atacarejo Bom Preço;Lucas do Rio Verde;MT;Supermercado
-77;Supermercado Pequi;Sinop;MT;Supermercado
-78;Mercearia Rio Cuiabá;Várzea Grande;MT;Mercearia
-79;Super Dois Irmãos;Cuiabá;MT;Supermercado
-80;Empório Vale Verde;Várzea Grande;MT;Mercearia
-81;Super Jardim;Cuiabá;MT;Supermercado
-82;Armazém Recanto;Várzea Grande;MT;Mercearia
-83;Mercearia Estrela;Lucas do Rio Verde;MT;Mercearia
-84;Confeitaria Bandeirantes;Cuiabá;MT;Padaria
-85;Cantina União;Lucas do Rio Verde;MT;Restaurante
-86;Mini Mercado Nova Era;Sinop;MT;Conveniência
-87;Confeitaria São José;Cuiabá;MT;Padaria
-88;Mercearia Recanto;Cáceres;MT;Mercearia
-89;Super Boa Esperança;Rondonópolis;MT;Supermercado
-90;Empório Popular;Cuiabá;MT;Mercearia
-91;Atacarejo Guaraná;Várzea Grande;MT;Supermercado
-92;Mercearia Chapada;Sorriso;MT;Mercearia
-93;Mini Mercado Progresso;Cuiabá;MT;Conveniência
-94;Armazém Esperança;Cuiabá;MT;Mercearia
-95;Supermercado Nova Era;Várzea Grande;MT;Supermercado
-96;Atacarejo Família;Cáceres;MT;Supermercado
-97;Churrascaria Vale Verde;Sinop;MT;Restaurante
-98;Padaria Popular;Sinop;MT;Padaria
-99;Panificadora União;Várzea Grande;MT;Padaria
-100;Super Primavera;Cuiabá;MT;Supermercado
-101;Empório Tuiuiú;Rondonópolis;MT;Mercearia
-102;Empório Rio Cuiabá;Cáceres;MT;Mercearia
-103;Cantina Três Irmãos;Sinop;MT;Restaurante
-104;Empório Progresso;Tangará da Serra;MT;Mercearia
-105;Padaria Primavera;Campo Grande;MS;Padaria
-106;Mercearia Pequi;Porto Velho;RO;Mercearia
-107;Supermercado Santo Antônio;Cuiabá;MT;Supermercado
-108;Restaurante Recanto;Tangará da Serra;MT;Restaurante
-109;Churrascaria Guaraná;Cáceres;MT;Restaurante
-110;Mercearia Nova Era;Cuiabá;MT;Mercearia
-111;Conveniência Tuiuiú;Sorriso;MT;Conveniência
-112;Padaria Oásis;Cuiabá;MT;Padaria
-113;Cantina Guaraná;Rondonópolis;MT;Restaurante
-114;Armazém Ipê Amarelo;Rondonópolis;MT;Mercearia
-115;Mercearia Três Irmãos;Cuiabá;MT;Mercearia
-116;Posto e Conveniência Primavera;Várzea Grande;MT;Conveniência
-117;Atacarejo Paraíso;Cuiabá;MT;Supermercado
-118;Cantina Central;Várzea Grande;MT;Restaurante
-119;Empório Oásis;Primavera do Leste;MT;Mercearia
-120;Restaurante Central;Cáceres;MT;Restaurante
-121;Armazém Guaraná;Tangará da Serra;MT;Mercearia
-122;Restaurante Tuiuiú;Cuiabá;MT;Restaurante
-123;Empório Dois Irmãos;Porto Velho;RO;Mercearia
-124;Empório Pequi;Tangará da Serra;MT;Mercearia
-125;Cantina Primavera;Campo Grande;MS;Restaurante
-126;Armazém Coxipó;Campo Grande;MS;Mercearia
-127;Supermercado Rio Cuiabá;Rondonópolis;MT;Supermercado
-128;Empório Guaraná;Rondonópolis;MT;Mercearia
-129;Mercearia Boa Vista;Várzea Grande;MT;Mercearia
-130;Supermercado União;Cáceres;MT;Supermercado
-131;Atacarejo Oásis;Cáceres;MT;Supermercado
-132;Mini Mercado Alvorada;Cuiabá;MT;Conveniência
-133;Mercearia Vale Verde;Rondonópolis;MT;Mercearia
-134;Supermercado Bandeirantes;Cáceres;MT;Supermercado
-135;Supermercado Coxipó;Várzea Grande;MT;Supermercado
-136;Armazém São José;Sinop;MT;Mercearia
-137;Empório Porto;Lucas do Rio Verde;MT;Mercearia
-138;Mercearia Sol Nascente;Cuiabá;MT;Mercearia
-139;Super Esperança;Cuiabá;MT;Supermercado
-140;Atacarejo Recanto;Cuiabá;MT;Supermercado
-141;Atacarejo Chapada;Campo Grande;MS;Supermercado
-142;Padaria Araras;Cuiabá;MT;Padaria
-143;Super Guaraná;Tangará da Serra;MT;Supermercado
-144;Atacarejo Boa Esperança;Cuiabá;MT;Supermercado
-145;Empório Cerrado;Sinop;MT;Mercearia
-146;Mercearia Alvorada;Várzea Grande;MT;Mercearia
-147;Restaurante Sol Nascente;Cuiabá;MT;Restaurante
-148;Empório Família;Rondonópolis;MT;Mercearia
-149;Restaurante Morada;Primavera do Leste;MT;Restaurante
-150;Armazém Nova Era;Tangará da Serra;MT;Mercearia
-151;Mercearia Bom Preço;Lucas do Rio Verde;MT;Mercearia
-152;Empório Morada;Várzea Grande;MT;Mercearia
-153;Restaurante Primavera;Cuiabá;MT;Restaurante
-154;Confeitaria Morada;Tangará da Serra;MT;Padaria
-155;Restaurante Pantanal;Várzea Grande;MT;Restaurante
-156;Armazém Três Irmãos;Cuiabá;MT;Mercearia
-157;Empório Pantanal;Rondonópolis;MT;Mercearia
-158;Armazém Bom Preço;Rondonópolis;MT;Mercearia
-159;Mini Mercado Rio Cuiabá;Lucas do Rio Verde;MT;Conveniência
-160;Empório Três Irmãos;Cuiabá;MT;Mercearia
-161;Atacarejo Pantanal;Cuiabá;MT;Supermercado
-162;Mini Mercado do Bairro;Primavera do Leste;MT;Conveniência
-163;Conveniência Bandeirantes;Cuiabá;MT;Conveniência
-164;Empório Boa Esperança;Rondonópolis;MT;Mercearia
-165;Empório Sol Nascente;Cuiabá;MT;Mercearia
-166;Restaurante Jardim;Cuiabá;MT;Restaurante
-167;Atacarejo Cerrado;Sinop;MT;Supermercado
-168;Armazém Jardim;Lucas do Rio Verde;MT;Mercearia
-169;Churrascaria Santo Antônio;Cuiabá;MT;Restaurante
-170;Cantina Vitória;Sorriso;MT;Restaurante
-171;Empório Bandeirantes;Sinop;MT;Mercearia
-172;Posto e Conveniência Vale Verde;Várzea Grande;MT;Conveniência
-173;Super Três Irmãos;Goiânia;GO;Supermercado
-174;Supermercado Boa Esperança;Cuiabá;MT;Supermercado
-175;Empório Coxipó;Goiânia;GO;Mercearia
-176;Supermercado Recanto;Primavera do Leste;MT;Supermercado
-177;Super Sol Nascente;Cuiabá;MT;Supermercado
-178;Confeitaria Paraíso;Sorriso;MT;Padaria
-179;Cantina Rio Cuiabá;Rondonópolis;MT;Restaurante
-180;Armazém Sol Nascente;Várzea Grande;MT;Mercearia
-181;Atacarejo Jardim;Cuiabá;MT;Supermercado
-182;Cantina Ipê Amarelo;Sinop;MT;Restaurante
-183;Armazém Pequi;Rondonópolis;MT;Mercearia
-184;Super Família;Várzea Grande;MT;Supermercado
-185;Supermercado Bom Preço;Barra do Garças;MT;Supermercado
-186;Churrascaria São José;Tangará da Serra;MT;Restaurante
-187;Churrascaria Bandeirantes;Tangará da Serra;MT;Restaurante
-188;Confeitaria Real;Sinop;MT;Padaria
-189;Super Bandeirantes;Cáceres;MT;Supermercado
-190;Super Oásis;Cuiabá;MT;Supermercado
-191;Supermercado Central;Cuiabá;MT;Supermercado
-192;Supermercado Guaraná;Rondonópolis;MT;Supermercado
-193;Supermercado Alvorada;Cuiabá;MT;Supermercado
-194;Conveniência Vale Verde;Primavera do Leste;MT;Conveniência
-195;Empório Alvorada;Barra do Garças;MT;Mercearia
-196;Conveniência Cerrado;Várzea Grande;MT;Conveniência
-197;Confeitaria Família;Sinop;MT;Padaria
-198;Panificadora Três Irmãos;Rondonópolis;MT;Padaria
-199;Atacarejo Araras;Cuiabá;MT;Supermercado
-200;Empório Recanto;Cuiabá;MT;Mercearia`;
+// Clientes copiados de dados/clientes.csv (só nome, cidade e UF).
+const CSV_CLIENTES = `cliente;cidade;uf
+Atacarejo Santo Antônio;Tangará da Serra;MT
+Posto e Conveniência Recanto;Várzea Grande;MT
+Cantina Vale Verde;Rondonópolis;MT
+Supermercado Real;Cuiabá;MT
+Super Vitória;Porto Velho;RO
+Confeitaria Rio Cuiabá;Cáceres;MT
+Super Nova Era;Primavera do Leste;MT
+Mini Mercado Esperança;Rondonópolis;MT
+Empório São José;Várzea Grande;MT
+Armazém Primavera;Lucas do Rio Verde;MT
+Armazém Pantanal;Sinop;MT
+Confeitaria Boa Vista;Cáceres;MT
+Mercearia São José;Sinop;MT
+Churrascaria Primavera;Sinop;MT
+Armazém Santo Antônio;Cáceres;MT
+Super Bom Preço;Cuiabá;MT
+Confeitaria Dois Irmãos;Várzea Grande;MT
+Armazém Dois Irmãos;Lucas do Rio Verde;MT
+Super Progresso;Rondonópolis;MT
+Cantina Popular;Campo Grande;MS
+Cantina Esperança;Cuiabá;MT
+Padaria Bom Preço;Rondonópolis;MT
+Supermercado Sol Nascente;Cuiabá;MT
+Confeitaria Vitória;Cuiabá;MT
+Empório Santa Rita;Sinop;MT
+Confeitaria Santo Antônio;Cuiabá;MT
+Confeitaria Jardim;Rondonópolis;MT
+Mercearia Bandeirantes;Cuiabá;MT
+Supermercado Pantanal;Rondonópolis;MT
+Mercearia Dois Irmãos;Campo Grande;MS
+Atacarejo Coxipó;Cuiabá;MT
+Armazém Rio Cuiabá;Sinop;MT
+Padaria Boa Esperança;Barra do Garças;MT
+Conveniência Três Irmãos;Cáceres;MT
+Armazém Santa Rita;Cuiabá;MT
+Empório Ipê Amarelo;Várzea Grande;MT
+Super Alvorada;Cuiabá;MT
+Mercearia Coxipó;Sorriso;MT
+Conveniência Bom Preço;Campo Grande;MS
+Armazém Popular;Campo Grande;MS
+Armazém Morada;Sorriso;MT
+Churrascaria Morada;Cáceres;MT
+Atacarejo Santa Rita;Cuiabá;MT
+Mercearia Cerrado;Sorriso;MT
+Super Tuiuiú;Sinop;MT
+Empório Primavera;Cuiabá;MT
+Panificadora Alvorada;Campo Grande;MS
+Supermercado Boa Vista;Tangará da Serra;MT
+Mini Mercado Oásis;Sinop;MT
+Atacarejo Central;Sinop;MT
+Posto e Conveniência Esperança;Primavera do Leste;MT
+Supermercado Paraíso;Primavera do Leste;MT
+Supermercado Jardim;Sorriso;MT
+Super Estrela;Sinop;MT
+Supermercado Santa Rita;Rondonópolis;MT
+Restaurante Paraíso;Sinop;MT
+Empório do Bairro;Sorriso;MT
+Churrascaria Recanto;Várzea Grande;MT
+Supermercado Tuiuiú;Sinop;MT
+Armazém Vale Verde;Cuiabá;MT
+Cantina Coxipó;Sorriso;MT
+Posto e Conveniência Sol Nascente;Rondonópolis;MT
+Posto e Conveniência Porto;Cáceres;MT
+Super União;Primavera do Leste;MT
+Churrascaria Três Irmãos;Primavera do Leste;MT
+Atacarejo Alvorada;Cuiabá;MT
+Posto e Conveniência Alvorada;Sorriso;MT
+Atacarejo Primavera;Cuiabá;MT
+Supermercado Vale Verde;Várzea Grande;MT
+Armazém Família;Campo Grande;MS
+Cantina Recanto;Cuiabá;MT
+Restaurante Família;Primavera do Leste;MT
+Empório Estrela;Porto Velho;RO
+Cantina Paraíso;Várzea Grande;MT
+Mercearia Progresso;Rondonópolis;MT
+Atacarejo Bom Preço;Lucas do Rio Verde;MT
+Supermercado Pequi;Sinop;MT
+Mercearia Rio Cuiabá;Várzea Grande;MT
+Super Dois Irmãos;Cuiabá;MT
+Empório Vale Verde;Várzea Grande;MT
+Super Jardim;Cuiabá;MT
+Armazém Recanto;Várzea Grande;MT
+Mercearia Estrela;Lucas do Rio Verde;MT
+Confeitaria Bandeirantes;Cuiabá;MT
+Cantina União;Lucas do Rio Verde;MT
+Mini Mercado Nova Era;Sinop;MT
+Confeitaria São José;Cuiabá;MT
+Mercearia Recanto;Cáceres;MT
+Super Boa Esperança;Rondonópolis;MT
+Empório Popular;Cuiabá;MT
+Atacarejo Guaraná;Várzea Grande;MT
+Mercearia Chapada;Sorriso;MT
+Mini Mercado Progresso;Cuiabá;MT
+Armazém Esperança;Cuiabá;MT
+Supermercado Nova Era;Várzea Grande;MT
+Atacarejo Família;Cáceres;MT
+Churrascaria Vale Verde;Sinop;MT
+Padaria Popular;Sinop;MT
+Panificadora União;Várzea Grande;MT
+Super Primavera;Cuiabá;MT
+Empório Tuiuiú;Rondonópolis;MT
+Empório Rio Cuiabá;Cáceres;MT
+Cantina Três Irmãos;Sinop;MT
+Empório Progresso;Tangará da Serra;MT
+Padaria Primavera;Campo Grande;MS
+Mercearia Pequi;Porto Velho;RO
+Supermercado Santo Antônio;Cuiabá;MT
+Restaurante Recanto;Tangará da Serra;MT
+Churrascaria Guaraná;Cáceres;MT
+Mercearia Nova Era;Cuiabá;MT
+Conveniência Tuiuiú;Sorriso;MT
+Padaria Oásis;Cuiabá;MT
+Cantina Guaraná;Rondonópolis;MT
+Armazém Ipê Amarelo;Rondonópolis;MT
+Mercearia Três Irmãos;Cuiabá;MT
+Posto e Conveniência Primavera;Várzea Grande;MT
+Atacarejo Paraíso;Cuiabá;MT
+Cantina Central;Várzea Grande;MT
+Empório Oásis;Primavera do Leste;MT
+Restaurante Central;Cáceres;MT
+Armazém Guaraná;Tangará da Serra;MT
+Restaurante Tuiuiú;Cuiabá;MT
+Empório Dois Irmãos;Porto Velho;RO
+Empório Pequi;Tangará da Serra;MT
+Cantina Primavera;Campo Grande;MS
+Armazém Coxipó;Campo Grande;MS
+Supermercado Rio Cuiabá;Rondonópolis;MT
+Empório Guaraná;Rondonópolis;MT
+Mercearia Boa Vista;Várzea Grande;MT
+Supermercado União;Cáceres;MT
+Atacarejo Oásis;Cáceres;MT
+Mini Mercado Alvorada;Cuiabá;MT
+Mercearia Vale Verde;Rondonópolis;MT
+Supermercado Bandeirantes;Cáceres;MT
+Supermercado Coxipó;Várzea Grande;MT
+Armazém São José;Sinop;MT
+Empório Porto;Lucas do Rio Verde;MT
+Mercearia Sol Nascente;Cuiabá;MT
+Super Esperança;Cuiabá;MT
+Atacarejo Recanto;Cuiabá;MT
+Atacarejo Chapada;Campo Grande;MS
+Padaria Araras;Cuiabá;MT
+Super Guaraná;Tangará da Serra;MT
+Atacarejo Boa Esperança;Cuiabá;MT
+Empório Cerrado;Sinop;MT
+Mercearia Alvorada;Várzea Grande;MT
+Restaurante Sol Nascente;Cuiabá;MT
+Empório Família;Rondonópolis;MT
+Restaurante Morada;Primavera do Leste;MT
+Armazém Nova Era;Tangará da Serra;MT
+Mercearia Bom Preço;Lucas do Rio Verde;MT
+Empório Morada;Várzea Grande;MT
+Restaurante Primavera;Cuiabá;MT
+Confeitaria Morada;Tangará da Serra;MT
+Restaurante Pantanal;Várzea Grande;MT
+Armazém Três Irmãos;Cuiabá;MT
+Empório Pantanal;Rondonópolis;MT
+Armazém Bom Preço;Rondonópolis;MT
+Mini Mercado Rio Cuiabá;Lucas do Rio Verde;MT
+Empório Três Irmãos;Cuiabá;MT
+Atacarejo Pantanal;Cuiabá;MT
+Mini Mercado do Bairro;Primavera do Leste;MT
+Conveniência Bandeirantes;Cuiabá;MT
+Empório Boa Esperança;Rondonópolis;MT
+Empório Sol Nascente;Cuiabá;MT
+Restaurante Jardim;Cuiabá;MT
+Atacarejo Cerrado;Sinop;MT
+Armazém Jardim;Lucas do Rio Verde;MT
+Churrascaria Santo Antônio;Cuiabá;MT
+Cantina Vitória;Sorriso;MT
+Empório Bandeirantes;Sinop;MT
+Posto e Conveniência Vale Verde;Várzea Grande;MT
+Super Três Irmãos;Goiânia;GO
+Supermercado Boa Esperança;Cuiabá;MT
+Empório Coxipó;Goiânia;GO
+Supermercado Recanto;Primavera do Leste;MT
+Super Sol Nascente;Cuiabá;MT
+Confeitaria Paraíso;Sorriso;MT
+Cantina Rio Cuiabá;Rondonópolis;MT
+Armazém Sol Nascente;Várzea Grande;MT
+Atacarejo Jardim;Cuiabá;MT
+Cantina Ipê Amarelo;Sinop;MT
+Armazém Pequi;Rondonópolis;MT
+Super Família;Várzea Grande;MT
+Supermercado Bom Preço;Barra do Garças;MT
+Churrascaria São José;Tangará da Serra;MT
+Churrascaria Bandeirantes;Tangará da Serra;MT
+Confeitaria Real;Sinop;MT
+Super Bandeirantes;Cáceres;MT
+Super Oásis;Cuiabá;MT
+Supermercado Central;Cuiabá;MT
+Supermercado Guaraná;Rondonópolis;MT
+Supermercado Alvorada;Cuiabá;MT
+Conveniência Vale Verde;Primavera do Leste;MT
+Empório Alvorada;Barra do Garças;MT
+Conveniência Cerrado;Várzea Grande;MT
+Confeitaria Família;Sinop;MT
+Panificadora Três Irmãos;Rondonópolis;MT
+Atacarejo Araras;Cuiabá;MT
+Empório Recanto;Cuiabá;MT`;
 
 // ---------- Regras comerciais (altere aqui) ----------
 // Desconto automático sobre o valor dos produtos (o frete não tem desconto).
@@ -589,17 +489,10 @@ const FAIXAS_DESCONTO = [
 // Fora de MT não há regra: o vendedor informa o valor.
 const FRETE = { uf: 'MT', gratis: ['Cuiabá', 'Várzea Grande'], valorMT: 150 };
 const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
-const CHAVE_RASCUNHO = 'pantanal-orcamento-rascunho';
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const fmt = v => moeda.format(v);
 const centavos = v => Math.round(v * 100) / 100;
-const $ = id => document.getElementById(id);
-
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-}
-function semAcento(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
 
 // ---------- Leitura do CSV ----------
 // Lê texto no formato "a;b;c" (com cabeçalho) e devolve objetos só com as colunas pedidas.
@@ -616,228 +509,90 @@ function lerTabela(texto, colunas) {
 // "1.234,56" -> 1234.56
 function numeroBR(s) { return parseFloat(String(s).trim().replace(/\./g, '').replace(',', '.')); }
 
-function lerProdutos(texto) {
+function lerCsv(texto) {
   return lerTabela(texto, ['codigo', 'produto', 'categoria', 'preco'])
     .map(p => ({ ...p, preco: numeroBR(p.preco) }))
     .filter(p => p.produto && !isNaN(p.preco));
 }
 
-// ---------- Dados e estado do orçamento ----------
-const clientes = lerTabela(CSV_CLIENTES, ['codigo', 'cliente', 'cidade', 'uf', 'segmento']);
+// ---------- Estado ----------
 let produtos = [];
+const quantidades = new Map(); // codigo -> quantidade
+const clientes = lerTabela(CSV_CLIENTES, ['cliente', 'cidade', 'uf']);
+let freteManual = null;        // número digitado pelo vendedor, ou null para usar a regra
 
-// Tudo o que forma o orçamento em andamento. É salvo no navegador para não se
-// perder ao recarregar a página.
-const estado = {
-  clienteCodigo: null,    // código do cliente cadastrado escolhido (null = avulso/nenhum)
-  cliente: '', cidade: '', uf: FRETE.uf, vendedor: '',
-  freteManual: null,      // número digitado pelo vendedor, ou null para usar a regra
-  quantidades: new Map(), // codigo do produto -> quantidade
+const $ = id => document.getElementById(id);
+const el = {
+  lista: $('listaProdutos'), busca: $('busca'), categoria: $('categoria'), soSel: $('soSelecionados'),
+  itens: $('itens'), qtdItens: $('qtdItens'), subtotal: $('subtotal'),
+  linhaDesconto: $('linhaDesconto'), rotuloDesconto: $('rotuloDesconto'), valorDesconto: $('valorDesconto'),
+  dicaDesconto: $('dicaDesconto'), frete: $('frete'), origemFrete: $('origemFrete'), fretePadrao: $('fretePadrao'),
+  avisoFrete: $('avisoFrete'), total: $('total'), info: $('infoLista'),
+  cliente: $('cliente'), cidade: $('cidade'), uf: $('uf'), vendedor: $('vendedor'),
 };
 
-function salvar() {
-  try {
-    localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify({ ...estado, quantidades: [...estado.quantidades] }));
-  } catch (e) { /* navegador sem armazenamento: segue sem salvar */ }
-}
-function restaurar() {
-  try {
-    const salvo = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO) || 'null');
-    if (!salvo) return;
-    Object.assign(estado, salvo, { quantidades: new Map(salvo.quantidades || []) });
-    // descarta produtos que não existem mais na lista
-    for (const cod of estado.quantidades.keys()) if (!produtos.some(p => p.codigo === cod)) estado.quantidades.delete(cod);
-  } catch (e) { /* rascunho inválido: começa do zero */ }
-}
-
-// Cidades conhecidas (do cadastro + as da regra de frete), com a UF de cada uma
-const cidades = new Map();
-FRETE.gratis.forEach(c => cidades.set(semAcento(c), { cidade: c, uf: FRETE.uf }));
-clientes.forEach(c => cidades.set(semAcento(c.cidade), { cidade: c.cidade, uf: c.uf }));
-const ufDaCidade = nome => (cidades.get(semAcento(nome)) || {}).uf;
-
-// ---------- Cálculo ----------
-function descontoPara(subtotal) {
-  const faixa = FAIXAS_DESCONTO.find(f => subtotal > f.acimaDe);
-  return faixa ? faixa.pct : 0;
-}
-
-// Devolve { valor, origem } — valor null quando não há regra (fora de MT ou sem cidade).
-function fretePelaRegra() {
-  const cidade = estado.cidade.trim(), uf = estado.uf;
-  if (!cidade) return { valor: null, origem: 'informe a cidade' };
-  if (uf !== FRETE.uf) return { valor: null, origem: `fora de ${FRETE.uf}` };
-  if (FRETE.gratis.some(c => semAcento(c) === semAcento(cidade))) return { valor: 0, origem: 'grátis nesta cidade' };
-  return { valor: FRETE.valorMT, origem: `padrão ${FRETE.uf}` };
-}
-
-function calcular() {
-  const itens = produtos
-    .filter(p => estado.quantidades.get(p.codigo) > 0)
-    .map(p => ({ ...p, qtd: estado.quantidades.get(p.codigo), sub: centavos(estado.quantidades.get(p.codigo) * p.preco) }));
-  const subtotal = centavos(itens.reduce((s, i) => s + i.sub, 0));
-  const pct = descontoPara(subtotal);
-  const desconto = centavos(subtotal * pct / 100);
-  const regra = fretePelaRegra();
-  const frete = estado.freteManual !== null ? estado.freteManual : regra.valor;   // null = a definir
-  const total = centavos(subtotal - desconto + (frete || 0));
-  const unidades = itens.reduce((s, i) => s + i.qtd, 0);
-  return { itens, subtotal, pct, desconto, regra, frete, freteEditado: estado.freteManual !== null, total, unidades };
-}
-
-// ---------- Navegação entre as telas ----------
-const TELAS = ['clientes', 'produtos', 'orcamento'];
-function mostrarTela() {
-  const tela = TELAS.includes(location.hash.slice(1)) ? location.hash.slice(1) : 'clientes';
-  TELAS.forEach(t => { $('tela-' + t).hidden = t !== tela; });
-  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('ativa', a.dataset.tela === tela));
-  if (tela === 'clientes') desenharClientes();
-  if (tela === 'produtos') desenharProdutos();
-  if (tela === 'orcamento') desenharOrcamento();
-  window.scrollTo(0, 0);
-}
-window.addEventListener('hashchange', mostrarTela);
-
-// Atualiza o que aparece em todas as telas (abas, barra de resumo)
-function atualizarResumos() {
-  const o = calcular();
-  $('navCliente').textContent = estado.cliente ? '· ' + estado.cliente : '';
-  $('navProdutos').textContent = o.itens.length ? `· ${o.itens.length} escolhido(s)` : '';
-  $('navTotal').textContent = o.itens.length ? '· ' + fmt(o.total) : '';
-
-  $('barraCliente').innerHTML = estado.cliente
-    ? `${esc(estado.cliente)}<small>${esc(estado.cidade || 'cidade não informada')}${estado.cidade ? ' - ' + esc(estado.uf) : ''}</small>`
-    : `Nenhum cliente escolhido<small><a href="#clientes" style="color:#fff">escolher cliente</a></small>`;
-  $('barraResumo').innerHTML = `<small>${o.itens.length} produto(s) · ${o.unidades} unid.${o.pct ? ` · desconto ${o.pct}%` : ''}</small>
-    <strong>${fmt(o.subtotal - o.desconto)}</strong><small>em produtos${o.pct ? ', já com desconto' : ''}</small>`;
-  salvar();
-}
-
-// ---------- TELA 1: CLIENTES ----------
-function preencherSelect(sel, valores, rotuloTodos) {
-  sel.innerHTML = `<option value="">${rotuloTodos}</option>` + valores.map(v => `<option>${esc(v)}</option>`).join('');
-}
-const ordenar = arr => [...new Set(arr)].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-preencherSelect($('filtroCidade'), ordenar(clientes.map(c => c.cidade)), 'Todas as cidades');
-preencherSelect($('filtroSegmento'), ordenar(clientes.map(c => c.segmento)), 'Todos os segmentos');
-['novoUf', 'uf'].forEach(id => { $(id).innerHTML = UFS.map(u => `<option${u === FRETE.uf ? ' selected' : ''}>${u}</option>`).join(''); });
-$('listaCidades').innerHTML = [...cidades.values()]
-  .sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt-BR'))
-  .map(c => `<option value="${esc(c.cidade)}">${esc(c.uf)}</option>`).join('');
-$('sugestoesClientes').innerHTML = clientes
-  .map(c => `<option value="${esc(c.cliente)}">${esc(c.cidade)} - ${esc(c.uf)}</option>`).join('');
-
-function desenharClientes() {
-  // Cliente escolhido
-  const box = $('clienteEscolhido');
-  if (estado.cliente) {
-    const cad = clientes.find(c => c.codigo === estado.clienteCodigo);
-    box.innerHTML = `<div><div class="nome">${esc(estado.cliente)}</div>
-      <div class="sub">${esc(estado.cidade || 'cidade não informada')}${estado.cidade ? ' - ' + esc(estado.uf) : ''}${cad ? ' · ' + esc(cad.segmento) : ' · não cadastrado'}</div></div>
-      <div class="acoes-linha"><button class="btn" id="trocarCliente">Trocar cliente</button><a class="btn primario" href="#produtos">Escolher produtos →</a></div>`;
-    $('trocarCliente').onclick = () => { definirCliente(null); $('buscaCliente').focus(); };
-  } else {
-    box.innerHTML = `<div class="sub">Nenhum cliente escolhido. Clique em um cliente da lista abaixo ou informe um cliente não cadastrado.</div>
-      <div class="acoes-linha"><a class="btn" href="#produtos">Pular e escolher produtos →</a></div>`;
-  }
-
-  // Lista
-  const termo = semAcento($('buscaCliente').value);
-  const cidade = $('filtroCidade').value, seg = $('filtroSegmento').value;
-  const lista = clientes.filter(c =>
-    (!termo || semAcento(c.cliente).includes(termo)) && (!cidade || c.cidade === cidade) && (!seg || c.segmento === seg));
-  $('contagemClientes').textContent = `· ${lista.length} de ${clientes.length}`;
-  $('listaClientes').innerHTML = lista.length ? lista.map(c => {
-    const sel = c.codigo === estado.clienteCodigo;
-    return `<tr data-cod="${esc(c.codigo)}" class="${sel ? 'selecionado' : ''}">
-      <td>${esc(c.cliente)}</td><td>${esc(c.cidade)}</td><td>${esc(c.uf)}</td><td class="fraco esconder-cel">${esc(c.segmento)}</td>
-      <td class="num">${sel ? '<b>✓ Escolhido</b>' : '<button class="btn pequeno" type="button">Escolher</button>'}</td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="vazio">Nenhum cliente encontrado.</td></tr>';
-}
-
-// cad = cliente do cadastro, objeto avulso { cliente, cidade, uf }, ou null para limpar
-function definirCliente(cad) {
-  estado.clienteCodigo = cad && cad.codigo ? cad.codigo : null;
-  estado.cliente = cad ? cad.cliente : '';
-  estado.cidade = cad ? cad.cidade : '';
-  estado.uf = cad ? cad.uf : FRETE.uf;
-  estado.freteManual = null;   // trocar de cliente/cidade volta à regra do frete
-  atualizarResumos();
-  desenharClientes();
-}
-
-$('listaClientes').addEventListener('click', e => {
-  const tr = e.target.closest('tr[data-cod]');
-  if (!tr) return;
-  definirCliente(clientes.find(c => c.codigo === tr.dataset.cod));
-  location.hash = '#produtos';
-});
-['buscaCliente', 'filtroCidade', 'filtroSegmento'].forEach(id => $(id).addEventListener('input', desenharClientes));
-
-$('novoCidade').addEventListener('input', () => { const uf = ufDaCidade($('novoCidade').value); if (uf) $('novoUf').value = uf; });
-$('formNovoCliente').addEventListener('submit', e => {
-  e.preventDefault();
-  definirCliente({ cliente: $('novoNome').value.trim(), cidade: $('novoCidade').value.trim(), uf: $('novoUf').value });
-  e.target.reset(); $('novoUf').value = FRETE.uf;
-  location.hash = '#produtos';
-});
-
-// ---------- TELA 2: PRODUTOS ----------
 function carregarProdutos(lista, origem) {
   produtos = lista;
-  for (const cod of estado.quantidades.keys()) if (!produtos.some(p => p.codigo === cod)) estado.quantidades.delete(cod);
-  preencherSelect($('categoria'), [...new Set(produtos.map(p => p.categoria))], 'Todas as categorias');
-  $('infoLista').textContent = `· ${produtos.length} produtos (${origem})`;
-  desenharProdutos();
-  atualizarResumos();
+  quantidades.clear();
+  const cats = [...new Set(produtos.map(p => p.categoria))];
+  el.categoria.innerHTML = '<option value="">Todas as categorias</option>' +
+    cats.map(c => `<option>${esc(c)}</option>`).join('');
+  el.info.textContent = `${produtos.length} produtos (${origem})`;
+  desenharLista();
+  atualizarOrcamento();
 }
 
-function desenharProdutos() {
-  const termo = semAcento($('busca').value);
-  const cat = $('categoria').value;
-  const soSel = $('soSelecionados').checked;
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+function semAcento(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
+
+// ---------- Lista de produtos ----------
+function desenharLista() {
+  const termo = semAcento(el.busca.value);
+  const cat = el.categoria.value;
+  const soSel = el.soSel.checked;
+
   const visiveis = produtos.filter(p =>
     (!cat || p.categoria === cat) &&
-    (!soSel || estado.quantidades.get(p.codigo) > 0) &&
-    (!termo || semAcento(p.produto).includes(termo) || p.codigo === termo));
+    (!soSel || quantidades.get(p.codigo) > 0) &&
+    (!termo || semAcento(p.produto).includes(termo) || p.codigo === termo)
+  );
 
   if (!visiveis.length) {
-    $('listaProdutos').innerHTML = '<tr><td colspan="6" class="vazio">Nenhum produto encontrado.</td></tr>';
+    el.lista.innerHTML = '<tr><td colspan="6" class="vazio">Nenhum produto encontrado.</td></tr>';
     return;
   }
+
   let html = '', catAtual = null;
   for (const p of visiveis) {
     if (!cat && p.categoria !== catAtual) {
       catAtual = p.categoria;
       html += `<tr class="cat-titulo"><td colspan="6">${esc(catAtual)}</td></tr>`;
     }
-    const q = estado.quantidades.get(p.codigo) || 0;
+    const q = quantidades.get(p.codigo) || 0;
     html += `<tr data-cod="${esc(p.codigo)}" class="${q > 0 ? 'selecionado' : ''}">
-      <td class="cod esconder-cel">${esc(p.codigo)}</td>
+      <td class="cod">${esc(p.codigo)}</td>
       <td>${esc(p.produto)}</td>
-      <td class="fraco esconder-cel">${esc(p.categoria)}</td>
+      <td class="cat">${esc(p.categoria)}</td>
       <td class="num">${fmt(p.preco)}</td>
-      <td class="num">${controleQtd(p, q)}</td>
-      <td class="num sub esconder-cel">${q > 0 ? fmt(q * p.preco) : ''}</td>
+      <td class="num"><span class="qtd">
+        <button type="button" data-passo="-1" aria-label="Diminuir">−</button>
+        <input type="number" min="0" step="1" inputmode="numeric" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.produto)}">
+        <button type="button" data-passo="1" aria-label="Aumentar">+</button>
+      </span></td>
+      <td class="num sub">${q > 0 ? fmt(q * p.preco) : ''}</td>
     </tr>`;
   }
-  $('listaProdutos').innerHTML = html;
-}
-
-function controleQtd(p, q) {
-  return `<span class="qtd">
-    <button type="button" data-passo="-1" aria-label="Diminuir">−</button>
-    <input type="number" min="0" step="1" inputmode="numeric" value="${q || ''}" placeholder="0" aria-label="Quantidade de ${esc(p.produto)}">
-    <button type="button" data-passo="1" aria-label="Aumentar">+</button>
-  </span>`;
+  el.lista.innerHTML = html;
 }
 
 function definirQuantidade(codigo, q) {
   q = Math.max(0, Math.floor(Number(q) || 0));
-  if (q > 0) estado.quantidades.set(codigo, q); else estado.quantidades.delete(codigo);
+  if (q > 0) quantidades.set(codigo, q); else quantidades.delete(codigo);
 
-  // Atualiza só a linha alterada da lista de produtos (mantém o foco no campo)
-  const tr = $('listaProdutos').querySelector(`tr[data-cod="${CSS.escape(codigo)}"]`);
+  // Atualiza só a linha alterada, sem redesenhar (mantém o foco no campo)
+  const tr = el.lista.querySelector(`tr[data-cod="${CSS.escape(codigo)}"]`);
   if (tr) {
     const p = produtos.find(x => x.codigo === codigo);
     tr.classList.toggle('selecionado', q > 0);
@@ -845,159 +600,163 @@ function definirQuantidade(codigo, q) {
     if (document.activeElement !== inp) inp.value = q || '';
     tr.querySelector('.sub').textContent = q > 0 ? fmt(q * p.preco) : '';
   }
-  atualizarResumos();
+  atualizarOrcamento();
 }
 
-// Os mesmos controles de quantidade funcionam na tela Produtos e na tela Orçamento
-function ligarQuantidades(container, aoMudar) {
-  container.addEventListener('click', e => {
-    const b = e.target.closest('button[data-passo]');
-    if (b) {
-      const cod = b.closest('tr').dataset.cod;
-      definirQuantidade(cod, (estado.quantidades.get(cod) || 0) + Number(b.dataset.passo));
-      if (aoMudar) aoMudar();
-    }
-  });
-  container.addEventListener('input', e => {
-    if (e.target.matches('.qtd input')) {
-      definirQuantidade(e.target.closest('tr').dataset.cod, e.target.value);
-      if (aoMudar) aoMudar(true);
-    }
-  });
-  container.addEventListener('focusout', e => {
-    if (e.target.matches('.qtd input')) {
-      e.target.value = estado.quantidades.get(e.target.closest('tr').dataset.cod) || '';
-      if (aoMudar) aoMudar();
-    }
-  });
-  container.addEventListener('keydown', e => {
-    // Enter pula para o campo de quantidade seguinte
-    if (e.key === 'Enter' && e.target.matches('.qtd input')) {
-      const campos = [...container.querySelectorAll('.qtd input')];
-      const prox = campos[campos.indexOf(e.target) + 1];
-      if (prox) { prox.focus(); prox.select(); } else e.target.blur();
-    }
-  });
-}
-ligarQuantidades($('listaProdutos'));
-['busca', 'categoria', 'soSelecionados'].forEach(id => $(id).addEventListener('input', desenharProdutos));
-
-$('arquivoCsv').addEventListener('change', e => {
-  const arq = e.target.files[0];
-  if (!arq) return;
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const lista = lerProdutos(r.result);
-      if (!lista.length) throw new Error('Nenhum produto encontrado no arquivo.');
-      carregarProdutos(lista, arq.name);
-    } catch (err) { alert('Não foi possível ler o arquivo: ' + err.message); }
-  };
-  r.readAsText(arq, 'UTF-8');
-  e.target.value = '';
+el.lista.addEventListener('click', e => {
+  const b = e.target.closest('button[data-passo]');
+  if (!b) return;
+  const cod = b.closest('tr').dataset.cod;
+  definirQuantidade(cod, (quantidades.get(cod) || 0) + Number(b.dataset.passo));
+});
+el.lista.addEventListener('input', e => {
+  if (e.target.matches('input')) definirQuantidade(e.target.closest('tr').dataset.cod, e.target.value);
+});
+el.lista.addEventListener('focusout', e => {
+  if (e.target.matches('input')) e.target.value = quantidades.get(e.target.closest('tr').dataset.cod) || '';
+});
+el.lista.addEventListener('keydown', e => {
+  // Enter pula para o campo de quantidade seguinte
+  if (e.key === 'Enter' && e.target.matches('input')) {
+    const campos = [...el.lista.querySelectorAll('input')];
+    const prox = campos[campos.indexOf(e.target) + 1];
+    if (prox) { prox.focus(); prox.select(); }
+  }
 });
 
-// ---------- TELA 3: ORÇAMENTO ----------
-// digitando: não redesenha a tabela nem reescreve o campo em que o vendedor está digitando
-function desenharOrcamento(digitando = false) {
-  const o = calcular();
+[el.busca, el.categoria, el.soSel].forEach(c => c.addEventListener('input', desenharLista));
 
-  // Itens
-  $('qtdItens').textContent = `· ${o.itens.length} produto(s) · ${o.unidades} unid.`;
-  if (!o.itens.length) {
-    $('itens').innerHTML = '<div class="vazio">Nenhum produto no orçamento.<br><br><a class="btn primario" href="#produtos">Escolher produtos</a></div>';
-  } else if (digitando) {
-    // só atualiza os subtotais das linhas
-    o.itens.forEach(i => {
-      const td = $('itens').querySelector(`tr[data-cod="${CSS.escape(i.codigo)}"] .sub`);
-      if (td) td.textContent = fmt(i.sub);
-    });
-  } else {
-    $('itens').innerHTML = `<table>
-      <thead><tr><th class="esconder-cel">Cód.</th><th>Produto</th><th class="num">Quantidade</th><th class="num esconder-cel">Preço</th><th class="num">Subtotal</th><th></th></tr></thead>
-      <tbody>${o.itens.map(i => `
-        <tr data-cod="${esc(i.codigo)}">
-          <td class="cod esconder-cel">${esc(i.codigo)}</td>
-          <td>${esc(i.produto)}</td>
-          <td class="num">${controleQtd(i, i.qtd)}</td>
-          <td class="num esconder-cel">${fmt(i.preco)}</td>
-          <td class="num sub">${fmt(i.sub)}</td>
-          <td style="width:28px"><button class="remover" title="Remover">✕</button></td>
-        </tr>`).join('')}</tbody></table>
-      <div class="rodape"><a class="link" href="#produtos">+ adicionar produtos</a></div>`;
+// ---------- Cliente e cidade ----------
+el.uf.innerHTML = UFS.map(u => `<option${u === FRETE.uf ? ' selected' : ''}>${u}</option>`).join('');
+el.listaClientes = $('listaClientes');
+el.listaClientes.innerHTML = clientes
+  .map(c => `<option value="${esc(c.cliente)}">${esc(c.cidade)} - ${esc(c.uf)}</option>`).join('');
+
+// Cidades conhecidas (do cadastro + as da regra de frete), com a UF de cada uma
+const cidades = new Map();
+FRETE.gratis.forEach(c => cidades.set(semAcento(c), { cidade: c, uf: FRETE.uf }));
+clientes.forEach(c => cidades.set(semAcento(c.cidade), { cidade: c.cidade, uf: c.uf }));
+$('listaCidades').innerHTML = [...cidades.values()]
+  .sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt-BR'))
+  .map(c => `<option value="${esc(c.cidade)}">${esc(c.uf)}</option>`).join('');
+
+el.cliente.addEventListener('input', () => {
+  const achado = clientes.find(c => semAcento(c.cliente) === semAcento(el.cliente.value));
+  if (achado) {
+    el.cidade.value = achado.cidade;
+    el.uf.value = achado.uf;
+    mudouCidade();
   }
+});
+el.cidade.addEventListener('input', () => {
+  const conhecida = cidades.get(semAcento(el.cidade.value));
+  if (conhecida) el.uf.value = conhecida.uf;
+  mudouCidade();
+});
+el.uf.addEventListener('change', mudouCidade);
 
-  // Cliente
-  if (document.activeElement !== $('cliente')) $('cliente').value = estado.cliente;
-  if (document.activeElement !== $('cidade')) $('cidade').value = estado.cidade;
-  $('uf').value = estado.uf;
-  if (document.activeElement !== $('vendedor')) $('vendedor').value = estado.vendedor;
+function mudouCidade() {
+  freteManual = null;   // trocar de cidade volta à regra
+  el.frete.value = '';
+  atualizarOrcamento();
+}
+
+// ---------- Frete ----------
+// Devolve { valor, origem } — valor null quando não há regra (fora de MT).
+function fretePelaRegra() {
+  const cidade = el.cidade.value.trim(), uf = el.uf.value;
+  if (!cidade) return { valor: null, origem: 'informe a cidade' };
+  if (uf !== FRETE.uf) return { valor: null, origem: `fora de ${FRETE.uf}` };
+  if (FRETE.gratis.some(c => semAcento(c) === semAcento(cidade))) return { valor: 0, origem: 'grátis nesta cidade' };
+  return { valor: FRETE.valorMT, origem: `padrão ${FRETE.uf}` };
+}
+
+el.frete.addEventListener('input', () => {
+  const txt = el.frete.value.trim();
+  const v = numeroBR(txt);
+  freteManual = txt === '' ? null : (isNaN(v) || v < 0 ? null : centavos(v));
+  atualizarOrcamento(true);
+});
+el.frete.addEventListener('focusout', () => atualizarOrcamento());
+el.fretePadrao.addEventListener('click', () => { freteManual = null; atualizarOrcamento(); });
+
+// ---------- Orçamento ----------
+function descontoPara(subtotal) {
+  const faixa = FAIXAS_DESCONTO.find(f => subtotal > f.acimaDe);
+  return faixa ? faixa.pct : 0;
+}
+
+function calcular() {
+  const itens = produtos
+    .filter(p => quantidades.get(p.codigo) > 0)
+    .map(p => ({ ...p, qtd: quantidades.get(p.codigo), sub: centavos(quantidades.get(p.codigo) * p.preco) }));
+  const subtotal = centavos(itens.reduce((s, i) => s + i.sub, 0));
+  const pct = descontoPara(subtotal);
+  const desconto = centavos(subtotal * pct / 100);
+  const regra = fretePelaRegra();
+  const frete = freteManual !== null ? freteManual : regra.valor;   // null = a definir
+  const total = centavos(subtotal - desconto + (frete || 0));
+  return { itens, subtotal, pct, desconto, regra, frete, freteEditado: freteManual !== null, total };
+}
+
+// digitandoFrete: não reescreve o campo enquanto o vendedor digita nele
+function atualizarOrcamento(digitandoFrete = false) {
+  const o = calcular();
+  if (!o.itens.length) {
+    el.itens.innerHTML = '<div class="vazio">Nenhum produto escolhido ainda.<br>Informe as quantidades na lista ao lado.</div>';
+  } else {
+    el.itens.innerHTML = '<table><tbody>' + o.itens.map(i => `
+      <tr data-cod="${esc(i.codigo)}">
+        <td>${esc(i.produto)}<br><small style="color:var(--muted)">${i.qtd} × ${fmt(i.preco)}</small></td>
+        <td class="num">${fmt(i.sub)}</td>
+        <td style="width:28px"><button class="remover" title="Remover">✕</button></td>
+      </tr>`).join('') + '</tbody></table>';
+  }
+  el.qtdItens.textContent = `${o.itens.length} produto(s) · ${o.itens.reduce((s, i) => s + i.qtd, 0)} unid.`;
+  el.subtotal.textContent = fmt(o.subtotal);
 
   // Desconto
-  $('subtotal').textContent = fmt(o.subtotal);
-  $('linhaDesconto').hidden = o.pct === 0;
-  $('rotuloDesconto').textContent = `Desconto automático (${o.pct}%)`;
-  $('valorDesconto').textContent = '− ' + fmt(o.desconto);
+  el.linhaDesconto.hidden = o.pct === 0;
+  el.rotuloDesconto.textContent = `Desconto automático (${o.pct}%)`;
+  el.valorDesconto.textContent = '− ' + fmt(o.desconto);
   const proxima = [...FAIXAS_DESCONTO].reverse().find(f => o.subtotal <= f.acimaDe);
   if (o.subtotal > 0 && proxima) {
-    $('dicaDesconto').textContent = `Faltam ${fmt(centavos(proxima.acimaDe - o.subtotal + 0.01))} em produtos para ${proxima.pct}% de desconto.`;
-    $('dicaDesconto').hidden = false;
+    const falta = centavos(proxima.acimaDe - o.subtotal + 0.01);
+    el.dicaDesconto.textContent = `Faltam ${fmt(falta)} em produtos para ${proxima.pct}% de desconto.`;
+    el.dicaDesconto.hidden = false;
   } else {
-    $('dicaDesconto').hidden = true;
+    el.dicaDesconto.hidden = true;
   }
 
   // Frete
-  if (document.activeElement !== $('frete')) $('frete').value = o.frete === null ? '' : o.frete.toFixed(2).replace('.', ',');
-  $('origemFrete').textContent = o.freteEditado ? '(alterado)' : `(${o.regra.origem})`;
-  $('fretePadrao').hidden = !o.freteEditado || o.regra.valor === null;
-  $('frete').classList.toggle('pendente', o.frete === null);
-  $('avisoFrete').hidden = o.frete !== null;
-  $('avisoFrete').textContent = estado.cidade.trim()
-    ? `Sem regra de frete para ${estado.cidade.trim()} - ${estado.uf}: informe o valor.`
-    : 'Informe a cidade de entrega para calcular o frete.';
+  if (!digitandoFrete) el.frete.value = o.frete === null ? '' : o.frete.toFixed(2).replace('.', ',');
+  el.origemFrete.textContent = o.freteEditado ? '(alterado)' : `(${o.regra.origem})`;
+  el.fretePadrao.hidden = !o.freteEditado || o.regra.valor === null;
+  el.frete.classList.toggle('pendente', o.frete === null);
+  if (o.frete === null) {
+    el.avisoFrete.textContent = el.cidade.value.trim()
+      ? `Sem regra de frete para ${el.cidade.value.trim()} - ${el.uf.value}: informe o valor.`
+      : 'Informe a cidade de entrega para calcular o frete.';
+    el.avisoFrete.hidden = false;
+  } else {
+    el.avisoFrete.hidden = true;
+  }
 
-  $('total').innerHTML = fmt(o.total) + (o.frete === null ? '<small>frete a definir</small>' : '');
+  el.total.innerHTML = fmt(o.total) + (o.frete === null ? '<small>frete a definir</small>' : '');
 }
 
-ligarQuantidades($('itens'), digitando => desenharOrcamento(digitando));
-$('itens').addEventListener('click', e => {
+el.itens.addEventListener('click', e => {
   if (e.target.closest('.remover')) {
     definirQuantidade(e.target.closest('tr').dataset.cod, 0);
-    desenharOrcamento();
+    if (el.soSel.checked) desenharLista();
   }
 });
 
-$('cliente').addEventListener('input', () => {
-  const achado = clientes.find(c => semAcento(c.cliente) === semAcento($('cliente').value));
-  if (achado) { definirCliente(achado); }
-  else { estado.cliente = $('cliente').value; estado.clienteCodigo = null; atualizarResumos(); }
-  desenharOrcamento();
-});
-$('cidade').addEventListener('input', () => {
-  estado.cidade = $('cidade').value;
-  const uf = ufDaCidade(estado.cidade);
-  if (uf) estado.uf = uf;
-  estado.freteManual = null;
-  atualizarResumos(); desenharOrcamento();
-});
-$('uf').addEventListener('change', () => { estado.uf = $('uf').value; estado.freteManual = null; atualizarResumos(); desenharOrcamento(); });
-$('vendedor').addEventListener('input', () => { estado.vendedor = $('vendedor').value; salvar(); });
-
-$('frete').addEventListener('input', () => {
-  const txt = $('frete').value.trim(), v = numeroBR(txt);
-  estado.freteManual = txt === '' || isNaN(v) || v < 0 ? null : centavos(v);
-  atualizarResumos(); desenharOrcamento(true);
-});
-$('frete').addEventListener('focusout', () => desenharOrcamento());
-$('fretePadrao').addEventListener('click', () => { estado.freteManual = null; atualizarResumos(); desenharOrcamento(); });
-
-$('novoOrcamento').addEventListener('click', () => {
-  if ((estado.quantidades.size || estado.cliente) && !confirm('Começar um novo orçamento? O orçamento atual será apagado.')) return;
-  estado.quantidades.clear();
-  definirCliente(null);
-  $('busca').value = ''; $('soSelecionados').checked = false;
-  location.hash = '#clientes';
-  mostrarTela();
+$('limpar').addEventListener('click', () => {
+  if (quantidades.size && !confirm('Limpar todas as quantidades do orçamento?')) return;
+  quantidades.clear();
+  desenharLista();
+  atualizarOrcamento();
 });
 
 // ---------- Impressão / PDF ----------
@@ -1005,7 +764,7 @@ $('imprimir').addEventListener('click', () => {
   const o = calcular();
   if (!o.itens.length) { alert('Escolha pelo menos um produto.'); return; }
 
-  const cliente = estado.cliente.trim(), cidade = estado.cidade.trim(), vendedor = estado.vendedor.trim();
+  const cliente = el.cliente.value.trim(), cidade = el.cidade.value.trim(), vendedor = el.vendedor.value.trim();
   const faltando = [];
   if (!cliente) faltando.push('nome do cliente');
   if (!cidade) faltando.push('cidade');
@@ -1015,7 +774,7 @@ $('imprimir').addEventListener('click', () => {
   const hoje = new Date().toLocaleDateString('pt-BR');
   $('impressao').innerHTML = `
     <div class="cab-impressao">
-      <img src="${$('logo').src}" alt="">
+      <img src="${document.querySelector('header img').src}" alt="">
       <div>
         <div class="empresa">Distribuidora Pantanal</div>
         <div class="subtitulo">Orçamento de venda</div>
@@ -1023,7 +782,7 @@ $('imprimir').addEventListener('click', () => {
     </div>
     <table class="dados">
       <tr><td><b>Data:</b> ${hoje}</td><td><b>Vendedor:</b> ${esc(vendedor || '—')}</td></tr>
-      <tr><td><b>Cliente:</b> ${esc(cliente || '—')}</td><td><b>Cidade:</b> ${cidade ? esc(cidade) + ' - ' + esc(estado.uf) : '—'}</td></tr>
+      <tr><td><b>Cliente:</b> ${esc(cliente || '—')}</td><td><b>Cidade:</b> ${cidade ? esc(cidade) + ' - ' + esc(el.uf.value) : '—'}</td></tr>
     </table>
     <table>
       <thead><tr><th>Cód.</th><th>Produto</th><th class="num">Qtd.</th><th class="num">Preço unit.</th><th class="num">Subtotal</th></tr></thead>
@@ -1044,12 +803,25 @@ $('imprimir').addEventListener('click', () => {
   document.title = tituloOriginal;
 });
 
+// ---------- Carregar outro CSV ----------
+$('arquivoCsv').addEventListener('change', e => {
+  const arq = e.target.files[0];
+  if (!arq) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const lista = lerCsv(r.result);
+      if (!lista.length) throw new Error('Nenhum produto encontrado no arquivo.');
+      carregarProdutos(lista, arq.name);
+    } catch (err) { alert('Não foi possível ler o arquivo: ' + err.message); }
+  };
+  r.readAsText(arq, 'UTF-8');
+  e.target.value = '';
+});
+
 // ---------- Início ----------
 $('dataHoje').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-produtos = lerProdutos(CSV_PRODUTOS);
-restaurar();
-carregarProdutos(produtos, 'dados/produtos.csv');
-mostrarTela();
+carregarProdutos(lerCsv(CSV_PRODUTOS), 'dados/produtos.csv');
 </script>
 </body>
 </html>
