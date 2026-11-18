@@ -67,7 +67,18 @@
 
   aside.card { position: sticky; top: 16px; }
   .cliente { padding: 12px 16px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
-  .cliente input { width: 100%; }
+  .cliente label { display: grid; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .cliente input, .cliente select { width: 100%; font: inherit; font-size: 15px; font-weight: 400; padding: 8px 10px; border: 1px solid #c9d0dd; border-radius: 6px; background: #fff; color: var(--text); }
+  .cidade-uf { display: grid; grid-template-columns: 1fr 76px; gap: 8px; }
+  .resumo .frete-campo { display: inline-flex; align-items: center; gap: 6px; }
+  .resumo .frete-campo input { width: 90px; }
+  .resumo small { color: var(--muted); font-size: 12px; }
+  .resumo input.pendente { border-color: #d97706; background: #fff7e6; }
+  .link { border: 0; background: none; padding: 0; color: var(--navy-2); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+  .verde { color: #157347; }
+  .dica { font-size: 12px; color: var(--navy-2); background: #eef3ff; border-radius: 6px; padding: 5px 8px; }
+  .aviso { font-size: 12px; color: #8a4b00; background: #fff4dc; border-radius: 6px; padding: 5px 8px; }
+  .total small { display: block; font-size: 12px; color: #c9d3ea; text-transform: none; letter-spacing: 0; }
   .itens { max-height: calc(100vh - 470px); min-height: 80px; overflow: auto; }
   .itens table td { font-size: 14px; padding: 7px 12px; }
   .itens .remover { border: 0; background: none; color: #b33; cursor: pointer; font-size: 16px; padding: 0 4px; }
@@ -90,7 +101,7 @@
   /* Bloco usado só na impressão */
   #impressao { display: none; }
 
-  @media (max-width: 900px) {
+  @media screen and (max-width: 900px) {
     main { grid-template-columns: minmax(0, 1fr); padding: 16px; }
     header { padding: 10px 16px; }
     header .data { margin-left: 0; width: 100%; }
@@ -107,8 +118,15 @@
     body { background: #fff; }
     header, main { display: none !important; }
     #impressao { display: block; padding: 0 8px; font-size: 13px; }
-    #impressao img { height: 60px; }
-    #impressao h2 { margin: 12px 0 4px; color: var(--navy); }
+    .cab-impressao { display: flex; align-items: center; gap: 16px; padding-bottom: 10px; border-bottom: 3px solid var(--yellow); }
+    .cab-impressao img { height: 56px; }
+    .cab-impressao .empresa { font-size: 24px; font-weight: 700; color: var(--navy); }
+    .cab-impressao .subtitulo { font-size: 14px; color: #444; }
+    #impressao table.dados { margin: 12px 0; }
+    #impressao table.dados td { border: 0; padding: 3px 0; }
+    #impressao .res td { border-bottom: 0; padding-top: 4px; padding-bottom: 4px; }
+    #impressao .obs { color: #666; font-size: 11px; margin-top: 16px; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     #impressao table th { position: static; background: #eee; color: #000; }
     #impressao .tot td { font-weight: 700; font-size: 15px; border-top: 2px solid #000; }
     @page { margin: 15mm; }
@@ -149,20 +167,42 @@
   <aside class="card">
     <h2>Orçamento</h2>
     <div class="cliente">
-      <input type="text" id="cliente" placeholder="Nome do cliente (opcional)">
-      <input type="text" id="vendedor" placeholder="Vendedor (opcional)">
+      <label>Cliente
+        <input type="text" id="cliente" list="listaClientes" placeholder="Digite para buscar no cadastro…" autocomplete="off">
+      </label>
+      <datalist id="listaClientes"></datalist>
+      <div class="cidade-uf">
+        <label>Cidade
+          <input type="text" id="cidade" list="listaCidades" placeholder="Cidade de entrega" autocomplete="off">
+        </label>
+        <label>UF
+          <select id="uf"></select>
+        </label>
+      </div>
+      <datalist id="listaCidades"></datalist>
+      <label>Vendedor
+        <input type="text" id="vendedor" placeholder="Opcional">
+      </label>
     </div>
     <div class="itens" id="itens"></div>
     <div class="resumo">
       <div class="linha"><span>Itens</span><span id="qtdItens">0</span></div>
       <div class="linha"><span>Subtotal</span><span id="subtotal">R$ 0,00</span></div>
-      <div class="linha"><span>Desconto (%)</span><input type="number" id="desconto" min="0" max="100" step="0.5" value="0"></div>
-      <div class="linha" id="linhaDesconto" hidden><span>Valor do desconto</span><span id="valorDesconto">− R$ 0,00</span></div>
+      <div class="linha" id="linhaDesconto" hidden><span id="rotuloDesconto">Desconto</span><span id="valorDesconto" class="verde">− R$ 0,00</span></div>
+      <div class="dica" id="dicaDesconto" hidden></div>
+      <div class="linha frete">
+        <span>Frete <small id="origemFrete"></small></span>
+        <span class="frete-campo">
+          <button type="button" class="link" id="fretePadrao" hidden>usar padrão</button>
+          R$ <input type="text" id="frete" inputmode="decimal" placeholder="—" aria-label="Valor do frete">
+        </span>
+      </div>
+      <div class="aviso" id="avisoFrete" hidden></div>
     </div>
     <div class="total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
     <div class="acoes">
       <button class="btn" id="limpar">Limpar</button>
-      <button class="btn primario" id="imprimir">Imprimir / PDF</button>
+      <button class="btn primario" id="imprimir">Imprimir / Salvar PDF</button>
     </div>
   </aside>
 </main>
@@ -234,35 +274,260 @@ const CSV_PRODUTOS = `codigo;produto;categoria;preco
 59;Fósforo (pack 10cx);Utilidades Domésticas;4,49
 60;Cafeteira Elétrica 110V;Utilidades Domésticas;129,90`;
 
+// Clientes copiados de dados/clientes.csv (só nome, cidade e UF).
+const CSV_CLIENTES = `cliente;cidade;uf
+Atacarejo Santo Antônio;Tangará da Serra;MT
+Posto e Conveniência Recanto;Várzea Grande;MT
+Cantina Vale Verde;Rondonópolis;MT
+Supermercado Real;Cuiabá;MT
+Super Vitória;Porto Velho;RO
+Confeitaria Rio Cuiabá;Cáceres;MT
+Super Nova Era;Primavera do Leste;MT
+Mini Mercado Esperança;Rondonópolis;MT
+Empório São José;Várzea Grande;MT
+Armazém Primavera;Lucas do Rio Verde;MT
+Armazém Pantanal;Sinop;MT
+Confeitaria Boa Vista;Cáceres;MT
+Mercearia São José;Sinop;MT
+Churrascaria Primavera;Sinop;MT
+Armazém Santo Antônio;Cáceres;MT
+Super Bom Preço;Cuiabá;MT
+Confeitaria Dois Irmãos;Várzea Grande;MT
+Armazém Dois Irmãos;Lucas do Rio Verde;MT
+Super Progresso;Rondonópolis;MT
+Cantina Popular;Campo Grande;MS
+Cantina Esperança;Cuiabá;MT
+Padaria Bom Preço;Rondonópolis;MT
+Supermercado Sol Nascente;Cuiabá;MT
+Confeitaria Vitória;Cuiabá;MT
+Empório Santa Rita;Sinop;MT
+Confeitaria Santo Antônio;Cuiabá;MT
+Confeitaria Jardim;Rondonópolis;MT
+Mercearia Bandeirantes;Cuiabá;MT
+Supermercado Pantanal;Rondonópolis;MT
+Mercearia Dois Irmãos;Campo Grande;MS
+Atacarejo Coxipó;Cuiabá;MT
+Armazém Rio Cuiabá;Sinop;MT
+Padaria Boa Esperança;Barra do Garças;MT
+Conveniência Três Irmãos;Cáceres;MT
+Armazém Santa Rita;Cuiabá;MT
+Empório Ipê Amarelo;Várzea Grande;MT
+Super Alvorada;Cuiabá;MT
+Mercearia Coxipó;Sorriso;MT
+Conveniência Bom Preço;Campo Grande;MS
+Armazém Popular;Campo Grande;MS
+Armazém Morada;Sorriso;MT
+Churrascaria Morada;Cáceres;MT
+Atacarejo Santa Rita;Cuiabá;MT
+Mercearia Cerrado;Sorriso;MT
+Super Tuiuiú;Sinop;MT
+Empório Primavera;Cuiabá;MT
+Panificadora Alvorada;Campo Grande;MS
+Supermercado Boa Vista;Tangará da Serra;MT
+Mini Mercado Oásis;Sinop;MT
+Atacarejo Central;Sinop;MT
+Posto e Conveniência Esperança;Primavera do Leste;MT
+Supermercado Paraíso;Primavera do Leste;MT
+Supermercado Jardim;Sorriso;MT
+Super Estrela;Sinop;MT
+Supermercado Santa Rita;Rondonópolis;MT
+Restaurante Paraíso;Sinop;MT
+Empório do Bairro;Sorriso;MT
+Churrascaria Recanto;Várzea Grande;MT
+Supermercado Tuiuiú;Sinop;MT
+Armazém Vale Verde;Cuiabá;MT
+Cantina Coxipó;Sorriso;MT
+Posto e Conveniência Sol Nascente;Rondonópolis;MT
+Posto e Conveniência Porto;Cáceres;MT
+Super União;Primavera do Leste;MT
+Churrascaria Três Irmãos;Primavera do Leste;MT
+Atacarejo Alvorada;Cuiabá;MT
+Posto e Conveniência Alvorada;Sorriso;MT
+Atacarejo Primavera;Cuiabá;MT
+Supermercado Vale Verde;Várzea Grande;MT
+Armazém Família;Campo Grande;MS
+Cantina Recanto;Cuiabá;MT
+Restaurante Família;Primavera do Leste;MT
+Empório Estrela;Porto Velho;RO
+Cantina Paraíso;Várzea Grande;MT
+Mercearia Progresso;Rondonópolis;MT
+Atacarejo Bom Preço;Lucas do Rio Verde;MT
+Supermercado Pequi;Sinop;MT
+Mercearia Rio Cuiabá;Várzea Grande;MT
+Super Dois Irmãos;Cuiabá;MT
+Empório Vale Verde;Várzea Grande;MT
+Super Jardim;Cuiabá;MT
+Armazém Recanto;Várzea Grande;MT
+Mercearia Estrela;Lucas do Rio Verde;MT
+Confeitaria Bandeirantes;Cuiabá;MT
+Cantina União;Lucas do Rio Verde;MT
+Mini Mercado Nova Era;Sinop;MT
+Confeitaria São José;Cuiabá;MT
+Mercearia Recanto;Cáceres;MT
+Super Boa Esperança;Rondonópolis;MT
+Empório Popular;Cuiabá;MT
+Atacarejo Guaraná;Várzea Grande;MT
+Mercearia Chapada;Sorriso;MT
+Mini Mercado Progresso;Cuiabá;MT
+Armazém Esperança;Cuiabá;MT
+Supermercado Nova Era;Várzea Grande;MT
+Atacarejo Família;Cáceres;MT
+Churrascaria Vale Verde;Sinop;MT
+Padaria Popular;Sinop;MT
+Panificadora União;Várzea Grande;MT
+Super Primavera;Cuiabá;MT
+Empório Tuiuiú;Rondonópolis;MT
+Empório Rio Cuiabá;Cáceres;MT
+Cantina Três Irmãos;Sinop;MT
+Empório Progresso;Tangará da Serra;MT
+Padaria Primavera;Campo Grande;MS
+Mercearia Pequi;Porto Velho;RO
+Supermercado Santo Antônio;Cuiabá;MT
+Restaurante Recanto;Tangará da Serra;MT
+Churrascaria Guaraná;Cáceres;MT
+Mercearia Nova Era;Cuiabá;MT
+Conveniência Tuiuiú;Sorriso;MT
+Padaria Oásis;Cuiabá;MT
+Cantina Guaraná;Rondonópolis;MT
+Armazém Ipê Amarelo;Rondonópolis;MT
+Mercearia Três Irmãos;Cuiabá;MT
+Posto e Conveniência Primavera;Várzea Grande;MT
+Atacarejo Paraíso;Cuiabá;MT
+Cantina Central;Várzea Grande;MT
+Empório Oásis;Primavera do Leste;MT
+Restaurante Central;Cáceres;MT
+Armazém Guaraná;Tangará da Serra;MT
+Restaurante Tuiuiú;Cuiabá;MT
+Empório Dois Irmãos;Porto Velho;RO
+Empório Pequi;Tangará da Serra;MT
+Cantina Primavera;Campo Grande;MS
+Armazém Coxipó;Campo Grande;MS
+Supermercado Rio Cuiabá;Rondonópolis;MT
+Empório Guaraná;Rondonópolis;MT
+Mercearia Boa Vista;Várzea Grande;MT
+Supermercado União;Cáceres;MT
+Atacarejo Oásis;Cáceres;MT
+Mini Mercado Alvorada;Cuiabá;MT
+Mercearia Vale Verde;Rondonópolis;MT
+Supermercado Bandeirantes;Cáceres;MT
+Supermercado Coxipó;Várzea Grande;MT
+Armazém São José;Sinop;MT
+Empório Porto;Lucas do Rio Verde;MT
+Mercearia Sol Nascente;Cuiabá;MT
+Super Esperança;Cuiabá;MT
+Atacarejo Recanto;Cuiabá;MT
+Atacarejo Chapada;Campo Grande;MS
+Padaria Araras;Cuiabá;MT
+Super Guaraná;Tangará da Serra;MT
+Atacarejo Boa Esperança;Cuiabá;MT
+Empório Cerrado;Sinop;MT
+Mercearia Alvorada;Várzea Grande;MT
+Restaurante Sol Nascente;Cuiabá;MT
+Empório Família;Rondonópolis;MT
+Restaurante Morada;Primavera do Leste;MT
+Armazém Nova Era;Tangará da Serra;MT
+Mercearia Bom Preço;Lucas do Rio Verde;MT
+Empório Morada;Várzea Grande;MT
+Restaurante Primavera;Cuiabá;MT
+Confeitaria Morada;Tangará da Serra;MT
+Restaurante Pantanal;Várzea Grande;MT
+Armazém Três Irmãos;Cuiabá;MT
+Empório Pantanal;Rondonópolis;MT
+Armazém Bom Preço;Rondonópolis;MT
+Mini Mercado Rio Cuiabá;Lucas do Rio Verde;MT
+Empório Três Irmãos;Cuiabá;MT
+Atacarejo Pantanal;Cuiabá;MT
+Mini Mercado do Bairro;Primavera do Leste;MT
+Conveniência Bandeirantes;Cuiabá;MT
+Empório Boa Esperança;Rondonópolis;MT
+Empório Sol Nascente;Cuiabá;MT
+Restaurante Jardim;Cuiabá;MT
+Atacarejo Cerrado;Sinop;MT
+Armazém Jardim;Lucas do Rio Verde;MT
+Churrascaria Santo Antônio;Cuiabá;MT
+Cantina Vitória;Sorriso;MT
+Empório Bandeirantes;Sinop;MT
+Posto e Conveniência Vale Verde;Várzea Grande;MT
+Super Três Irmãos;Goiânia;GO
+Supermercado Boa Esperança;Cuiabá;MT
+Empório Coxipó;Goiânia;GO
+Supermercado Recanto;Primavera do Leste;MT
+Super Sol Nascente;Cuiabá;MT
+Confeitaria Paraíso;Sorriso;MT
+Cantina Rio Cuiabá;Rondonópolis;MT
+Armazém Sol Nascente;Várzea Grande;MT
+Atacarejo Jardim;Cuiabá;MT
+Cantina Ipê Amarelo;Sinop;MT
+Armazém Pequi;Rondonópolis;MT
+Super Família;Várzea Grande;MT
+Supermercado Bom Preço;Barra do Garças;MT
+Churrascaria São José;Tangará da Serra;MT
+Churrascaria Bandeirantes;Tangará da Serra;MT
+Confeitaria Real;Sinop;MT
+Super Bandeirantes;Cáceres;MT
+Super Oásis;Cuiabá;MT
+Supermercado Central;Cuiabá;MT
+Supermercado Guaraná;Rondonópolis;MT
+Supermercado Alvorada;Cuiabá;MT
+Conveniência Vale Verde;Primavera do Leste;MT
+Empório Alvorada;Barra do Garças;MT
+Conveniência Cerrado;Várzea Grande;MT
+Confeitaria Família;Sinop;MT
+Panificadora Três Irmãos;Rondonópolis;MT
+Atacarejo Araras;Cuiabá;MT
+Empório Recanto;Cuiabá;MT`;
+
+// ---------- Regras comerciais (altere aqui) ----------
+// Desconto automático sobre o valor dos produtos (o frete não tem desconto).
+// "acima de": o valor precisa ser MAIOR que o limite.
+const FAIXAS_DESCONTO = [
+  { acimaDe: 15000, pct: 10 },
+  { acimaDe: 5000,  pct: 5 },
+];
+// Frete: grátis nessas cidades de MT; valor fixo nas demais cidades de MT.
+// Fora de MT não há regra: o vendedor informa o valor.
+const FRETE = { uf: 'MT', gratis: ['Cuiabá', 'Várzea Grande'], valorMT: 150 };
+const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const fmt = v => moeda.format(v);
+const centavos = v => Math.round(v * 100) / 100;
 
 // ---------- Leitura do CSV ----------
-function lerCsv(texto) {
+// Lê texto no formato "a;b;c" (com cabeçalho) e devolve objetos só com as colunas pedidas.
+function lerTabela(texto, colunas) {
   const linhas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim() !== '');
   const cab = linhas.shift().split(';').map(c => c.trim().toLowerCase());
-  const idx = nome => cab.indexOf(nome);
-  const iCod = idx('codigo'), iProd = idx('produto'), iCat = idx('categoria'), iPreco = idx('preco');
-  if ([iCod, iProd, iCat, iPreco].includes(-1)) {
-    throw new Error('O arquivo precisa ter as colunas: codigo;produto;categoria;preco');
-  }
+  const pos = colunas.map(c => cab.indexOf(c));
+  if (pos.includes(-1)) throw new Error('O arquivo precisa ter as colunas: ' + colunas.join(';'));
   return linhas.map(l => {
     const c = l.split(';');
-    // "1.234,56" -> 1234.56
-    const preco = parseFloat(c[iPreco].trim().replace(/\./g, '').replace(',', '.'));
-    return { codigo: c[iCod].trim(), produto: c[iProd].trim(), categoria: c[iCat].trim(), preco };
-  }).filter(p => p.produto && !isNaN(p.preco));
+    return Object.fromEntries(colunas.map((nome, i) => [nome, (c[pos[i]] || '').trim()]));
+  });
+}
+// "1.234,56" -> 1234.56
+function numeroBR(s) { return parseFloat(String(s).trim().replace(/\./g, '').replace(',', '.')); }
+
+function lerCsv(texto) {
+  return lerTabela(texto, ['codigo', 'produto', 'categoria', 'preco'])
+    .map(p => ({ ...p, preco: numeroBR(p.preco) }))
+    .filter(p => p.produto && !isNaN(p.preco));
 }
 
 // ---------- Estado ----------
 let produtos = [];
 const quantidades = new Map(); // codigo -> quantidade
+const clientes = lerTabela(CSV_CLIENTES, ['cliente', 'cidade', 'uf']);
+let freteManual = null;        // número digitado pelo vendedor, ou null para usar a regra
 
 const $ = id => document.getElementById(id);
 const el = {
   lista: $('listaProdutos'), busca: $('busca'), categoria: $('categoria'), soSel: $('soSelecionados'),
-  itens: $('itens'), qtdItens: $('qtdItens'), subtotal: $('subtotal'), desconto: $('desconto'),
-  linhaDesconto: $('linhaDesconto'), valorDesconto: $('valorDesconto'), total: $('total'), info: $('infoLista'),
+  itens: $('itens'), qtdItens: $('qtdItens'), subtotal: $('subtotal'),
+  linhaDesconto: $('linhaDesconto'), rotuloDesconto: $('rotuloDesconto'), valorDesconto: $('valorDesconto'),
+  dicaDesconto: $('dicaDesconto'), frete: $('frete'), origemFrete: $('origemFrete'), fretePadrao: $('fretePadrao'),
+  avisoFrete: $('avisoFrete'), total: $('total'), info: $('infoLista'),
+  cliente: $('cliente'), cidade: $('cidade'), uf: $('uf'), vendedor: $('vendedor'),
 };
 
 function carregarProdutos(lista, origem) {
@@ -279,11 +544,11 @@ function carregarProdutos(lista, origem) {
 function esc(s) {
   return String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 }
-function semAcento(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+function semAcento(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); }
 
 // ---------- Lista de produtos ----------
 function desenharLista() {
-  const termo = semAcento(el.busca.value.trim());
+  const termo = semAcento(el.busca.value);
   const cat = el.categoria.value;
   const soSel = el.soSel.checked;
 
@@ -360,18 +625,81 @@ el.lista.addEventListener('keydown', e => {
 
 [el.busca, el.categoria, el.soSel].forEach(c => c.addEventListener('input', desenharLista));
 
+// ---------- Cliente e cidade ----------
+el.uf.innerHTML = UFS.map(u => `<option${u === FRETE.uf ? ' selected' : ''}>${u}</option>`).join('');
+el.listaClientes = $('listaClientes');
+el.listaClientes.innerHTML = clientes
+  .map(c => `<option value="${esc(c.cliente)}">${esc(c.cidade)} - ${esc(c.uf)}</option>`).join('');
+
+// Cidades conhecidas (do cadastro + as da regra de frete), com a UF de cada uma
+const cidades = new Map();
+FRETE.gratis.forEach(c => cidades.set(semAcento(c), { cidade: c, uf: FRETE.uf }));
+clientes.forEach(c => cidades.set(semAcento(c.cidade), { cidade: c.cidade, uf: c.uf }));
+$('listaCidades').innerHTML = [...cidades.values()]
+  .sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt-BR'))
+  .map(c => `<option value="${esc(c.cidade)}">${esc(c.uf)}</option>`).join('');
+
+el.cliente.addEventListener('input', () => {
+  const achado = clientes.find(c => semAcento(c.cliente) === semAcento(el.cliente.value));
+  if (achado) {
+    el.cidade.value = achado.cidade;
+    el.uf.value = achado.uf;
+    mudouCidade();
+  }
+});
+el.cidade.addEventListener('input', () => {
+  const conhecida = cidades.get(semAcento(el.cidade.value));
+  if (conhecida) el.uf.value = conhecida.uf;
+  mudouCidade();
+});
+el.uf.addEventListener('change', mudouCidade);
+
+function mudouCidade() {
+  freteManual = null;   // trocar de cidade volta à regra
+  el.frete.value = '';
+  atualizarOrcamento();
+}
+
+// ---------- Frete ----------
+// Devolve { valor, origem } — valor null quando não há regra (fora de MT).
+function fretePelaRegra() {
+  const cidade = el.cidade.value.trim(), uf = el.uf.value;
+  if (!cidade) return { valor: null, origem: 'informe a cidade' };
+  if (uf !== FRETE.uf) return { valor: null, origem: `fora de ${FRETE.uf}` };
+  if (FRETE.gratis.some(c => semAcento(c) === semAcento(cidade))) return { valor: 0, origem: 'grátis nesta cidade' };
+  return { valor: FRETE.valorMT, origem: `padrão ${FRETE.uf}` };
+}
+
+el.frete.addEventListener('input', () => {
+  const txt = el.frete.value.trim();
+  const v = numeroBR(txt);
+  freteManual = txt === '' ? null : (isNaN(v) || v < 0 ? null : centavos(v));
+  atualizarOrcamento(true);
+});
+el.frete.addEventListener('focusout', () => atualizarOrcamento());
+el.fretePadrao.addEventListener('click', () => { freteManual = null; atualizarOrcamento(); });
+
 // ---------- Orçamento ----------
+function descontoPara(subtotal) {
+  const faixa = FAIXAS_DESCONTO.find(f => subtotal > f.acimaDe);
+  return faixa ? faixa.pct : 0;
+}
+
 function calcular() {
   const itens = produtos
     .filter(p => quantidades.get(p.codigo) > 0)
-    .map(p => ({ ...p, qtd: quantidades.get(p.codigo), sub: quantidades.get(p.codigo) * p.preco }));
-  const subtotal = itens.reduce((s, i) => s + i.sub, 0);
-  const pct = Math.min(100, Math.max(0, parseFloat(el.desconto.value) || 0));
-  const desconto = Math.round(subtotal * pct) / 100;
-  return { itens, subtotal, pct, desconto, total: subtotal - desconto };
+    .map(p => ({ ...p, qtd: quantidades.get(p.codigo), sub: centavos(quantidades.get(p.codigo) * p.preco) }));
+  const subtotal = centavos(itens.reduce((s, i) => s + i.sub, 0));
+  const pct = descontoPara(subtotal);
+  const desconto = centavos(subtotal * pct / 100);
+  const regra = fretePelaRegra();
+  const frete = freteManual !== null ? freteManual : regra.valor;   // null = a definir
+  const total = centavos(subtotal - desconto + (frete || 0));
+  return { itens, subtotal, pct, desconto, regra, frete, freteEditado: freteManual !== null, total };
 }
 
-function atualizarOrcamento() {
+// digitandoFrete: não reescreve o campo enquanto o vendedor digita nele
+function atualizarOrcamento(digitandoFrete = false) {
   const o = calcular();
   if (!o.itens.length) {
     el.itens.innerHTML = '<div class="vazio">Nenhum produto escolhido ainda.<br>Informe as quantidades na lista ao lado.</div>';
@@ -385,9 +713,35 @@ function atualizarOrcamento() {
   }
   el.qtdItens.textContent = `${o.itens.length} produto(s) · ${o.itens.reduce((s, i) => s + i.qtd, 0)} unid.`;
   el.subtotal.textContent = fmt(o.subtotal);
-  el.linhaDesconto.hidden = !(o.pct > 0);
+
+  // Desconto
+  el.linhaDesconto.hidden = o.pct === 0;
+  el.rotuloDesconto.textContent = `Desconto automático (${o.pct}%)`;
   el.valorDesconto.textContent = '− ' + fmt(o.desconto);
-  el.total.textContent = fmt(o.total);
+  const proxima = [...FAIXAS_DESCONTO].reverse().find(f => o.subtotal <= f.acimaDe);
+  if (o.subtotal > 0 && proxima) {
+    const falta = centavos(proxima.acimaDe - o.subtotal + 0.01);
+    el.dicaDesconto.textContent = `Faltam ${fmt(falta)} em produtos para ${proxima.pct}% de desconto.`;
+    el.dicaDesconto.hidden = false;
+  } else {
+    el.dicaDesconto.hidden = true;
+  }
+
+  // Frete
+  if (!digitandoFrete) el.frete.value = o.frete === null ? '' : o.frete.toFixed(2).replace('.', ',');
+  el.origemFrete.textContent = o.freteEditado ? '(alterado)' : `(${o.regra.origem})`;
+  el.fretePadrao.hidden = !o.freteEditado || o.regra.valor === null;
+  el.frete.classList.toggle('pendente', o.frete === null);
+  if (o.frete === null) {
+    el.avisoFrete.textContent = el.cidade.value.trim()
+      ? `Sem regra de frete para ${el.cidade.value.trim()} - ${el.uf.value}: informe o valor.`
+      : 'Informe a cidade de entrega para calcular o frete.';
+    el.avisoFrete.hidden = false;
+  } else {
+    el.avisoFrete.hidden = true;
+  }
+
+  el.total.innerHTML = fmt(o.total) + (o.frete === null ? '<small>frete a definir</small>' : '');
 }
 
 el.itens.addEventListener('click', e => {
@@ -396,38 +750,56 @@ el.itens.addEventListener('click', e => {
     if (el.soSel.checked) desenharLista();
   }
 });
-el.desconto.addEventListener('input', atualizarOrcamento);
 
 $('limpar').addEventListener('click', () => {
   if (quantidades.size && !confirm('Limpar todas as quantidades do orçamento?')) return;
   quantidades.clear();
-  el.desconto.value = 0;
   desenharLista();
   atualizarOrcamento();
 });
 
-// ---------- Impressão ----------
+// ---------- Impressão / PDF ----------
 $('imprimir').addEventListener('click', () => {
   const o = calcular();
   if (!o.itens.length) { alert('Escolha pelo menos um produto.'); return; }
-  const cliente = $('cliente').value.trim(), vendedor = $('vendedor').value.trim();
+
+  const cliente = el.cliente.value.trim(), cidade = el.cidade.value.trim(), vendedor = el.vendedor.value.trim();
+  const faltando = [];
+  if (!cliente) faltando.push('nome do cliente');
+  if (!cidade) faltando.push('cidade');
+  if (o.frete === null) faltando.push('valor do frete');
+  if (faltando.length && !confirm(`Falta informar: ${faltando.join(', ')}.\n\nImprimir mesmo assim?`)) return;
+
+  const hoje = new Date().toLocaleDateString('pt-BR');
   $('impressao').innerHTML = `
-    <img src="${document.querySelector('header img').src}" alt="">
-    <h2>Orçamento</h2>
-    <p>Data: ${new Date().toLocaleDateString('pt-BR')}
-      ${cliente ? `<br>Cliente: ${esc(cliente)}` : ''}
-      ${vendedor ? `<br>Vendedor: ${esc(vendedor)}` : ''}</p>
+    <div class="cab-impressao">
+      <img src="${document.querySelector('header img').src}" alt="">
+      <div>
+        <div class="empresa">Distribuidora Pantanal</div>
+        <div class="subtitulo">Orçamento de venda</div>
+      </div>
+    </div>
+    <table class="dados">
+      <tr><td><b>Data:</b> ${hoje}</td><td><b>Vendedor:</b> ${esc(vendedor || '—')}</td></tr>
+      <tr><td><b>Cliente:</b> ${esc(cliente || '—')}</td><td><b>Cidade:</b> ${cidade ? esc(cidade) + ' - ' + esc(el.uf.value) : '—'}</td></tr>
+    </table>
     <table>
       <thead><tr><th>Cód.</th><th>Produto</th><th class="num">Qtd.</th><th class="num">Preço unit.</th><th class="num">Subtotal</th></tr></thead>
       <tbody>
         ${o.itens.map(i => `<tr><td>${esc(i.codigo)}</td><td>${esc(i.produto)}</td><td class="num">${i.qtd}</td><td class="num">${fmt(i.preco)}</td><td class="num">${fmt(i.sub)}</td></tr>`).join('')}
-        ${o.pct > 0 ? `
-          <tr><td colspan="4" class="num">Subtotal</td><td class="num">${fmt(o.subtotal)}</td></tr>
-          <tr><td colspan="4" class="num">Desconto (${String(o.pct).replace('.', ',')}%)</td><td class="num">− ${fmt(o.desconto)}</td></tr>` : ''}
+        <tr class="res"><td colspan="4" class="num">Subtotal dos produtos</td><td class="num">${fmt(o.subtotal)}</td></tr>
+        ${o.pct > 0 ? `<tr class="res"><td colspan="4" class="num">Desconto (${o.pct}%)</td><td class="num">− ${fmt(o.desconto)}</td></tr>` : ''}
+        <tr class="res"><td colspan="4" class="num">Frete</td><td class="num">${o.frete === null ? 'a definir' : o.frete === 0 ? 'Grátis' : fmt(o.frete)}</td></tr>
         <tr class="tot"><td colspan="4" class="num">TOTAL</td><td class="num">${fmt(o.total)}</td></tr>
       </tbody>
-    </table>`;
+    </table>
+    <p class="obs">Preços sujeitos a alteração sem aviso prévio.</p>`;
+
+  // O título vira o nome sugerido do arquivo ao salvar em PDF
+  const tituloOriginal = document.title;
+  document.title = `Orçamento - ${cliente || 'cliente'} - ${hoje.replace(/\//g, '-')}`;
   window.print();
+  document.title = tituloOriginal;
 });
 
 // ---------- Carregar outro CSV ----------
