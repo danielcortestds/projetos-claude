@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14213D">
+<title>Painel de Vendas — Distribuidora Pantanal</title>
+<style>
+  :root {
+    --navy: #14213D;
+    --navy-2: #2b4580;
+    --yellow: #F5C518;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --text: #1b2333;
+    --muted: #5d6882;
+    --line: #e2e6ee;
+    --red: #b3261e;
+    --red-bg: #fde8e8;
+    --green: #157347;
+    --green-bg: #e3f4ea;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.4;
+  }
+  header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--yellow);
+    padding: 10px 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  header img { height: 48px; display: block; background: #fff; padding: 5px 8px; border-radius: 8px; }
+  header h1 { margin: 0; font-size: 20px; color: #fff; font-weight: 600; }
+  header .info { margin-left: auto; color: #c9d3ea; font-size: 14px; text-align: right; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 20px 24px 48px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 18px; min-width: 0; }
+  .card > h2 { margin: 0; font-size: 16px; color: var(--navy); padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .card > h2 small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .corpo { padding: 16px; }
+
+  .resposta { font-size: 15px; margin: 0 0 18px; padding: 12px 16px; background: #fff8dc; border-left: 4px solid var(--yellow); border-radius: 6px; }
+
+  /* Cartões */
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; border-top: 4px solid var(--navy); }
+  .kpi .rotulo { color: var(--muted); font-size: 13px; font-weight: 600; }
+  .kpi .valor { font-size: 26px; font-weight: 700; color: var(--navy); margin: 4px 0 2px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kpi .nota { color: var(--muted); font-size: 13px; }
+  .kpi.secundario { border-top-color: #c9d0dd; }
+  .kpi.secundario .valor { font-size: 20px; color: var(--text); }
+
+  .duas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+  .duas > .card { margin-bottom: 18px; }
+
+  /* Gráfico de linha */
+  .grafico { position: relative; }
+  .grafico svg { width: 100%; height: auto; display: block; overflow: visible; }
+  .grafico text { font-size: 12px; fill: var(--muted); font-family: inherit; }
+  .dica {
+    position: absolute; pointer-events: none; background: var(--navy); color: #fff;
+    padding: 8px 10px; border-radius: 6px; font-size: 13px; white-space: nowrap;
+    transform: translate(-50%, calc(-100% - 12px)); display: none; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  }
+  .dica b { color: var(--yellow); }
+  .destaques { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .selo { font-size: 13px; padding: 6px 10px; border-radius: 6px; background: var(--bg); }
+  .selo b { color: var(--navy); }
+
+  /* Ranking de vendedores */
+  .ranking { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+  .ranking li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .posicao { width: 26px; height: 26px; border-radius: 50%; background: var(--bg); color: var(--navy); font-weight: 700; font-size: 13px; display: grid; place-items: center; }
+  .ranking li:nth-child(-n+3) .posicao { background: var(--yellow); }
+  .linha-topo { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .linha-topo .nome { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .linha-topo .num { font-weight: 700; color: var(--navy); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .barra { height: 10px; background: var(--bg); border-radius: 5px; margin: 5px 0 3px; overflow: hidden; }
+  .barra span { display: block; height: 100%; background: var(--navy); border-radius: 5px; }
+  .detalhe { font-size: 12px; color: var(--muted); }
+
+  /* Tabelas */
+  .rolagem { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { font-size: 13px; color: var(--muted); font-weight: 600; background: #fafbfd; }
+  th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  th button:hover { color: var(--navy); text-decoration: underline; }
+  th button[data-ativo]::after { content: " ▼"; font-size: 10px; }
+  th button[data-ativo="asc"]::after { content: " ▲"; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: #fafbfd; }
+  tfoot td { font-weight: 700; border-top: 2px solid var(--navy); border-bottom: 0; }
+  .uf { display: inline-block; font-size: 11px; font-weight: 700; color: var(--navy); background: var(--bg); padding: 1px 6px; border-radius: 4px; margin-left: 4px; }
+  .miniparte { display: inline-block; width: 60px; height: 6px; background: var(--bg); border-radius: 3px; vertical-align: middle; margin-left: 6px; overflow: hidden; }
+  .miniparte span { display: block; height: 100%; background: var(--yellow); }
+
+  /* Categorias */
+  .seta { display: inline-block; font-weight: 700; padding: 2px 8px; border-radius: 12px; font-size: 13px; }
+  .seta.sobe { color: var(--green); background: var(--green-bg); }
+  .seta.cai { color: var(--red); background: var(--red-bg); }
+  .seta.igual { color: var(--muted); background: var(--bg); }
+  .spark { display: block; }
+
+  .aviso { font-size: 13px; color: var(--muted); margin: 0 0 18px; }
+  footer.ajuda { font-size: 14px; color: var(--text); }
+  footer.ajuda ul { margin: 0; padding-left: 20px; }
+  footer.ajuda li { margin-bottom: 6px; }
+
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .duas { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  }
+  @media (max-width: 560px) {
+    header { padding: 10px 16px; }
+    header img { height: 38px; }
+    header .info { margin-left: 0; text-align: left; }
+    main { padding: 16px 16px 40px; }
+    .kpi .valor { font-size: 21px; }
+    .kpi.secundario .valor { font-size: 18px; }
+    .kpi { padding: 12px; }
+    .kpis { gap: 10px; }
+    .corpo { padding: 12px; }
+    th, td { padding: 8px 6px; }
+    .some-cel, .miniparte { display: none; }
+    #categorias td:first-child { white-space: normal; }
+    .grafico text { font-size: 11px; }
+  }
+  @media print {
+    body { background: #fff; }
+    .card, .kpi { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="../dados/logo_pantanal.png" alt="Distribuidora Pantanal">
+  <h1 id="titulo">Painel de Vendas</h1>
+  <div class="info" id="info"></div>
+</header>
+
+<main>
+  <p class="resposta" id="resposta"></p>
+
+  <section class="kpis" aria-label="Resumo do ano">
+    <div class="kpi"><div class="rotulo">Faturamento do ano</div><div class="valor" id="k-fat"></div><div class="nota">Total vendido, já com descontos</div></div>
+    <div class="kpi"><div class="rotulo">Número de pedidos</div><div class="valor" id="k-ped"></div><div class="nota" id="k-ped-nota"></div></div>
+    <div class="kpi"><div class="rotulo">Ticket médio</div><div class="valor" id="k-tic"></div><div class="nota">Valor médio de cada pedido</div></div>
+    <div class="kpi secundario"><div class="rotulo">Pedidos cancelados</div><div class="valor" id="k-can"></div><div class="nota" id="k-can-nota"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Faturamento mês a mês<small>Passe o mouse (ou toque) em um mês para ver o valor</small></h2>
+    <div class="corpo">
+      <div class="grafico" id="grafico"><div class="dica" id="dica"></div></div>
+      <div class="destaques" id="destaques"></div>
+    </div>
+  </section>
+
+  <div class="duas">
+    <section class="card">
+      <h2>Ranking de vendedores<small>Quem mais vendeu no ano</small></h2>
+      <div class="corpo"><ol class="ranking" id="ranking"></ol></div>
+    </section>
+
+    <section class="card">
+      <h2>Categorias de produto: crescem ou caem?<small id="cat-sub"></small></h2>
+      <div class="corpo rolagem">
+        <table>
+          <thead><tr><th>Categoria</th><th>Meses</th><th class="n some-cel">Vendido no ano</th><th class="n">Mudança</th></tr></thead>
+          <tbody id="categorias"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Vendas por cidade<small>Clique no título de uma coluna para mudar a ordem</small></h2>
+    <div class="corpo rolagem">
+      <table id="tab-cidades">
+        <thead><tr>
+          <th><button data-col="nome">Cidade</button></th>
+          <th class="n"><button data-col="faturamento" data-ativo="desc">Faturamento</button></th>
+          <th class="n"><button data-col="pedidos">Pedidos</button></th>
+          <th class="n some-cel"><button data-col="ticket">Ticket médio</button></th>
+          <th class="n"><button data-col="participacao">Parte do total</button></th>
+        </tr></thead>
+        <tbody></tbody>
+        <tfoot></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <p class="aviso" id="aviso"></p>
+
+  <section class="card">
+    <h2>Como ler este painel</h2>
+    <div class="corpo">
+      <footer class="ajuda">
+        <ul>
+          <li><b>Faturamento</b> é a soma de tudo o que foi vendido, já com os descontos dados aos clientes.</li>
+          <li><b>Pedidos cancelados não entram</b> em nenhum número do painel — aparecem só no cartão cinza.</li>
+          <li><b>Ticket médio</b> é o faturamento dividido pelo número de pedidos: quanto, em média, cada pedido rendeu.</li>
+          <li><b>Mudança das categorias</b> compara a média de vendas por mês do 1º semestre com a média por mês dos meses seguintes. Verde quer dizer que a categoria está vendendo mais; vermelho, que está vendendo menos.</li>
+          <li id="ajuda-dados"></li>
+        </ul>
+      </footer>
+    </div>
+  </section>
+</main>
+
+<script>
+const D = /*__DADOS__*/null;
+
+// ---------- Formatos ----------
+function reais(v) {
+  const s = Math.abs(v).toFixed(2).split(".");
+  const inteiro = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return (v < 0 ? "-" : "") + "R$ " + inteiro + "," + s[1];
+}
+function reaisCurto(v) {
+  if (v >= 1000) return "R$ " + (v / 1000).toFixed(0) + " mil";
+  return reais(v);
+}
+function inteiro(v) { return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+function pct(v, casas = 1) { return (v * 100).toFixed(casas).replace(".", ",") + "%"; }
+function el(tag, attrs = {}, html = "") {
+  const e = document.createElement(tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  e.innerHTML = html;
+  return e;
+}
+function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+// ---------- Cabeçalho e cartões ----------
+document.getElementById("titulo").textContent = "Painel de Vendas " + D.ano;
+document.title = "Painel de Vendas " + D.ano + " — Distribuidora Pantanal";
+document.getElementById("info").innerHTML =
+  "Vendas de " + D.primeiraData + " a " + D.ultimaData + "<br>Atualizado em " + D.geradoEm;
+
+document.getElementById("k-fat").textContent = reais(D.faturamento);
+document.getElementById("k-ped").textContent = inteiro(D.pedidos);
+document.getElementById("k-ped-nota").textContent = "Média de " + inteiro(D.pedidos / D.mensal.length) + " por mês";
+document.getElementById("k-tic").textContent = reais(D.ticket);
+document.getElementById("k-can").textContent = inteiro(D.cancelados);
+document.getElementById("k-can-nota").textContent = reais(D.valorCancelado) + " que não entraram no faturamento";
+
+const melhorMes = D.mensal.reduce((a, b) => b.faturamento > a.faturamento ? b : a);
+const piorMes = D.mensal.reduce((a, b) => b.faturamento < a.faturamento ? b : a);
+const catSobe = D.categorias[0], catCai = D.categorias[D.categorias.length - 1];
+document.getElementById("resposta").innerHTML =
+  "Em " + D.ano + " vendemos <b>" + reais(D.faturamento) + "</b> em <b>" + inteiro(D.pedidos) + " pedidos</b>. " +
+  "O melhor mês foi <b>" + melhorMes.mesLongo.toLowerCase() + "</b>. " +
+  "Quem mais vendeu foi <b>" + esc(D.vendedores[0].nome) + "</b>, e a cidade que mais comprou foi <b>" + esc(D.cidades[0].nome) + "</b>. " +
+  (catSobe.variacao > 0 ? "A categoria que mais cresceu foi <b>" + esc(catSobe.nome) + "</b>" : "Nenhuma categoria cresceu") +
+  (catCai.variacao < 0 ? " e a que mais caiu foi <b>" + esc(catCai.nome) + "</b>." : ".");
+
+// ---------- Gráfico de linha ----------
+function grafico() {
+  const caixa = document.getElementById("grafico");
+  const dica = document.getElementById("dica");
+  caixa.querySelectorAll("svg").forEach(s => s.remove());
+  dica.style.display = "none";
+  const W = Math.max(caixa.clientWidth, 280), estreito = W < 600;
+  const H = estreito ? 240 : 300, m = { t: 20, r: estreito ? 12 : 20, b: 34, l: estreito ? 62 : 70 };
+  const w = W - m.l - m.r, h = H - m.t - m.b;
+  const n = D.mensal.length;
+  const max = Math.max(...D.mensal.map(p => p.faturamento));
+  const passo = [10000, 20000, 25000, 50000, 100000].find(s => max / s <= 5) || 200000;
+  const topo = Math.ceil(max / passo) * passo;
+  const x = i => m.l + (n === 1 ? w / 2 : i * w / (n - 1));
+  const y = v => m.t + h - v / topo * h;
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico do faturamento por mês">';
+  for (let v = 0; v <= topo; v += passo) {
+    svg += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="' + (v === 0 ? "#c9d0dd" : "#eef1f6") + '"/>';
+    svg += '<text x="' + (m.l - 10) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + reaisCurto(v).replace("R$ 0,00", "R$ 0") + '</text>';
+  }
+  D.mensal.forEach((p, i) => {
+    svg += '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + p.mes + '</text>';
+  });
+  const pts = D.mensal.map((p, i) => x(i) + "," + y(p.faturamento));
+  svg += '<polygon points="' + m.l + ',' + y(0) + ' ' + pts.join(" ") + ' ' + x(n - 1) + ',' + y(0) + '" fill="#14213D" opacity="0.06"/>';
+  svg += '<polyline points="' + pts.join(" ") + '" fill="none" stroke="#14213D" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+  D.mensal.forEach((p, i) => {
+    const destaque = p === melhorMes;
+    svg += '<circle cx="' + x(i) + '" cy="' + y(p.faturamento) + '" r="' + (destaque ? 7 : 4.5) + '" fill="' + (destaque ? "#F5C518" : "#14213D") + '" stroke="#fff" stroke-width="2" data-i="' + i + '" class="ponto"/>';
+  });
+  svg += '<line id="guia" y1="' + m.t + '" y2="' + y(0) + '" stroke="#c9d0dd" stroke-dasharray="4 4" visibility="hidden"/>';
+  D.mensal.forEach((p, i) => {
+    const largura = w / Math.max(n - 1, 1);
+    svg += '<rect x="' + (x(i) - largura / 2) + '" y="' + m.t + '" width="' + largura + '" height="' + h + '" fill="transparent" data-i="' + i + '" class="alvo"/>';
+  });
+  svg += '</svg>';
+  caixa.insertAdjacentHTML("beforeend", svg);
+
+  const guia = caixa.querySelector("#guia");
+  function mostrar(i) {
+    const p = D.mensal[i];
+    const ant = D.mensal[i - 1];
+    let comp = "";
+    if (ant) {
+      const v = p.faturamento / ant.faturamento - 1;
+      comp = "<br>" + (v >= 0 ? "▲ " : "▼ ") + pct(Math.abs(v)) + (v >= 0 ? " a mais" : " a menos") + " que " + ant.mesLongo.toLowerCase();
+    }
+    dica.innerHTML = "<b>" + p.mesLongo + "</b><br>" + reais(p.faturamento) + "<br>" + inteiro(p.pedidos) + " pedidos" + comp;
+    const svgEl = caixa.querySelector("svg");
+    const escala = svgEl.getBoundingClientRect().width / W;
+    let left = x(i) * escala;
+    dica.style.display = "block";
+    const meia = dica.offsetWidth / 2;
+    left = Math.max(meia, Math.min(caixa.clientWidth - meia, left));
+    dica.style.left = left + "px";
+    dica.style.top = (y(p.faturamento) * escala) + "px";
+    guia.setAttribute("x1", x(i)); guia.setAttribute("x2", x(i));
+    guia.setAttribute("visibility", "visible");
+  }
+  function esconder() { dica.style.display = "none"; guia.setAttribute("visibility", "hidden"); }
+  caixa.querySelectorAll(".alvo").forEach(r => {
+    r.addEventListener("mouseenter", () => mostrar(+r.dataset.i));
+    r.addEventListener("click", () => mostrar(+r.dataset.i));
+  });
+  caixa.querySelector("svg").addEventListener("mouseleave", esconder);
+
+  if (document.getElementById("destaques").innerHTML) return;
+  const media = D.faturamento / n;
+  document.getElementById("destaques").innerHTML =
+    '<span class="selo">Melhor mês: <b>' + melhorMes.mesLongo + '</b> — ' + reais(melhorMes.faturamento) + '</span>' +
+    '<span class="selo">Mês mais fraco: <b>' + piorMes.mesLongo + '</b> — ' + reais(piorMes.faturamento) + '</span>' +
+    '<span class="selo">Média por mês: <b>' + reais(media) + '</b></span>';
+}
+grafico();
+let ultimaLargura = document.getElementById("grafico").clientWidth;
+window.addEventListener("resize", () => {
+  const l = document.getElementById("grafico").clientWidth;
+  if (l !== ultimaLargura) { ultimaLargura = l; grafico(); }
+});
+
+// ---------- Ranking de vendedores ----------
+(function ranking() {
+  const lista = document.getElementById("ranking");
+  const max = D.vendedores[0].faturamento;
+  D.vendedores.forEach((v, i) => {
+    lista.appendChild(el("li", {},
+      '<span class="posicao">' + (i + 1) + '</span>' +
+      '<div><div class="linha-topo"><span class="nome">' + esc(v.nome) + '</span><span class="num">' + reais(v.faturamento) + '</span></div>' +
+      '<div class="barra"><span style="width:' + (v.faturamento / max * 100).toFixed(1) + '%"></span></div>' +
+      '<div class="detalhe">' + inteiro(v.pedidos) + ' pedidos · ticket médio ' + reais(v.ticket) + ' · ' + pct(v.participacao) + ' do total</div></div>'));
+  });
+})();
+
+// ---------- Categorias ----------
+(function categorias() {
+  document.getElementById("cat-sub").textContent =
+    "Média por mês de " + D.periodoAntes + " comparada com " + D.periodoDepois;
+  const corpo = document.getElementById("categorias");
+  const maxGeral = Math.max(...D.categorias.flatMap(c => c.serie));
+  D.categorias.forEach(c => {
+    const sw = 90, sh = 26, n = c.serie.length;
+    const max = Math.max(...c.serie), min = Math.min(...c.serie);
+    const px = i => 2 + i * (sw - 4) / Math.max(n - 1, 1);
+    const py = v => sh - 3 - (max === min ? 0.5 : (v - min) / (max - min)) * (sh - 6);
+    const cor = c.variacao > 0.01 ? "#157347" : c.variacao < -0.01 ? "#b3261e" : "#5d6882";
+    const spark = '<svg class="spark" width="' + sw + '" height="' + sh + '" viewBox="0 0 ' + sw + ' ' + sh + '" aria-hidden="true">' +
+      '<polyline points="' + c.serie.map((v, i) => px(i) + "," + py(v)).join(" ") + '" fill="none" stroke="' + cor + '" stroke-width="2" stroke-linejoin="round"/>' +
+      '<circle cx="' + px(n - 1) + '" cy="' + py(c.serie[n - 1]) + '" r="2.5" fill="' + cor + '"/></svg>';
+    const classe = c.variacao > 0.01 ? "sobe" : c.variacao < -0.01 ? "cai" : "igual";
+    const texto = (c.variacao > 0 ? "▲ +" : c.variacao < 0 ? "▼ " : "") + pct(c.variacao).replace(".", ",");
+    const tr = el("tr", { title: "Média por mês: " + reais(c.mediaAntes) + " antes → " + reais(c.mediaDepois) + " depois" },
+      '<td>' + esc(c.nome) + '</td><td>' + spark + '</td><td class="n some-cel">' + reais(c.faturamento) + '</td>' +
+      '<td class="n"><span class="seta ' + classe + '">' + texto + '</span></td>');
+    corpo.appendChild(tr);
+  });
+})();
+
+// ---------- Tabela por cidade ----------
+(function cidades() {
+  const tabela = document.getElementById("tab-cidades");
+  const corpo = tabela.querySelector("tbody");
+  let col = "faturamento", dir = "desc";
+  function desenhar() {
+    const linhas = [...D.cidades].sort((a, b) => {
+      const r = col === "nome" ? a.nome.localeCompare(b.nome, "pt-BR") : a[col] - b[col];
+      return dir === "asc" ? r : -r;
+    });
+    corpo.innerHTML = linhas.map(c =>
+      '<tr><td>' + esc(c.nome) + '<span class="uf">' + esc(c.uf) + '</span></td>' +
+      '<td class="n">' + reais(c.faturamento) + '</td>' +
+      '<td class="n">' + inteiro(c.pedidos) + '</td>' +
+      '<td class="n some-cel">' + reais(c.ticket) + '</td>' +
+      '<td class="n">' + pct(c.participacao) + '<span class="miniparte"><span style="width:' + (c.participacao / D.cidades[0].participacao * 100).toFixed(1) + '%"></span></span></td></tr>'
+    ).join("");
+    tabela.querySelectorAll("th button").forEach(b => {
+      if (b.dataset.col === col) b.dataset.ativo = dir; else delete b.dataset.ativo;
+    });
+  }
+  tabela.querySelector("tfoot").innerHTML =
+    '<tr><td>Total (' + D.cidades.length + ' cidades)</td><td class="n">' + reais(D.faturamento) + '</td><td class="n">' +
+    inteiro(D.pedidos) + '</td><td class="n some-cel">' + reais(D.ticket) + '</td><td class="n">100,0%</td></tr>';
+  tabela.querySelectorAll("th button").forEach(b => b.addEventListener("click", () => {
+    if (col === b.dataset.col) dir = dir === "asc" ? "desc" : "asc";
+    else { col = b.dataset.col; dir = col === "nome" ? "asc" : "desc"; }
+    desenhar();
+  }));
+  desenhar();
+})();
+
+// ---------- Avisos ----------
+document.getElementById("ajuda-dados").innerHTML =
+  "Os números vêm do arquivo <b>vendas_" + D.ano + ".csv</b>, com vendas de " + D.primeiraData + " a " + D.ultimaData + ".";
+if (D.pedidosFuturos > 0) {
+  document.getElementById("aviso").textContent =
+    "Observação: " + inteiro(D.pedidosFuturos) + " pedidos têm data depois de " + D.hoje +
+    " (até " + D.ultimaData + "). Eles fazem parte do planejamento de vendas e já estão incluídos nos números.";
+}
+</script>
+</body>
+</html>
