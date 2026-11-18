@@ -13,7 +13,24 @@ Dê dois cliques em `pedidos/index.html`. A página abre no navegador (Chrome, E
 | **Clientes** | Procurar, cadastrar e corrigir clientes. O botão **Fazer pedido** já abre um pedido para aquele cliente. |
 | **Produtos** | Cadastrar produtos e mudar preços. O preço novo vale só para os próximos pedidos. |
 | **Novo pedido** | Escolher o cliente, adicionar produtos e quantidades. O total aparece na hora. |
-| **Pedidos** | Ver todos os pedidos, filtrar por data, cliente e situação, e mudar a situação (aberto, faturado, cancelado). |
+| **Pedidos** | Ver todos os pedidos, filtrar por data, cliente, situação ou por texto (nº, cliente, produto, observação), mudar a situação (aberto, faturado, cancelado) e exportar para Excel. |
+
+## Busca rápida
+
+No alto da página, em todas as telas, há uma caixa **Busca rápida**. Digite parte do nome de um cliente, de um produto ou o número de um pedido: os resultados aparecem na hora, separados em Pedidos, Clientes e Produtos. Clique num resultado para abrir. Também dá para usar as setas do teclado e apertar **Enter**. Não precisa se preocupar com acentos.
+
+Dica: a tecla **/** leva direto para a busca rápida.
+
+## Exportar para Excel
+
+Na aba **Pedidos**, o botão amarelo **Exportar para Excel** baixa uma planilha (`pedidos_dd-mm-aaaa.xlsx`) com **apenas os pedidos que estão aparecendo na lista**, ou seja, respeitando os filtros escolhidos. Para exportar tudo, clique antes em **Limpar filtros**.
+
+A planilha tem três abas:
+- **Pedidos**: uma linha por pedido, com data, cliente, situação e total;
+- **Itens**: uma linha por produto de cada pedido, com quantidade, preço e valor;
+- **Resumo**: a data da exportação, os filtros usados e os totais por situação.
+
+Não precisa de internet para exportar.
 
 ## Regras
 
