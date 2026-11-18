@@ -63,3 +63,24 @@ python3 automacao/consolidar_vendas.py
 ```bash
 python3 automacao/gerar_relatorio.py
 ```
+
+---
+
+# Atualização automática no GitHub
+
+O arquivo `.github/workflows/atualizar_relatorio_vendas.yml` faz o GitHub rodar tudo sozinho.
+
+**Quando roda:** sempre que uma planilha for enviada ou alterada em `dados/planilhas_mensais/` na branch
+`main`. Também dá para rodar na mão: no GitHub, abra a aba **Actions**, escolha
+**Atualizar relatório de vendas** e clique em **Run workflow**.
+
+**O que faz:**
+1. junta e limpa as planilhas;
+2. gera o relatório;
+3. salva na branch `main` a planilha consolidada e o relatório atualizados.
+
+"Hoje" é contado no horário de Mato Grosso. Para acompanhar, abra a aba **Actions** no GitHub: verde quer
+dizer que deu certo e vermelho quer dizer que deu erro.
+
+**Atenção:** só entram as planilhas com o nome no padrão `vendas_2026_MM.xlsx`, como
+`vendas_2026_12.xlsx`. Uma planilha de 2027 dispara a atualização, mas não entra no relatório de 2026.
