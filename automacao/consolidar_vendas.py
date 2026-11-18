@@ -1,10 +1,10 @@
 """
-Distribuidora Pantanal — junta e limpa as 12 planilhas mensais de vendas de 2026.
+Distribuidora Pantanal — junta e limpa as planilhas mensais de vendas.
 
-Lê:    dados/planilhas_mensais/vendas_2026_MM.xlsx
+Lê:    dados/planilhas_mensais/vendas_AAAA_MM.xlsx  (todas: 2026, 2027, ...)
        dados/clientes.csv  (grafia oficial das cidades e cidade de cada cliente)
-Gera:  automacao/saida/vendas_2026_consolidado.xlsx, com 3 abas:
-       - "Vendas 2026": vendas limpas
+Gera:  automacao/saida/vendas_consolidado.xlsx, com 3 abas:
+       - "Vendas": vendas limpas
        - "pendencias":  linhas que não deu para corrigir com certeza, com o motivo
        - "resumo":      o que foi alterado
 
@@ -17,7 +17,9 @@ O que a automação faz:
 4. remove linhas repetidas (iguais em todas as colunas);
 5. manda para "pendencias", sem inventar nada, as linhas com:
    valor total em branco, data ilegível ou fora do mês da planilha,
-   data posterior ao dia em que a automação roda, ou cidade que não dá para corrigir com certeza.
+   ou cidade que não dá para corrigir com certeza.
+
+Vendas com data futura fazem parte do planejamento de vendas e entram normalmente.
 
 As planilhas originais nunca são alteradas.
 
@@ -29,7 +31,7 @@ import re
 import sys
 import unicodedata
 from collections import Counter
-from datetime import date, datetime
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -40,7 +42,8 @@ from openpyxl.utils import get_column_letter
 RAIZ = Path(__file__).resolve().parent.parent
 PASTA_ENTRADA = RAIZ / "dados" / "planilhas_mensais"
 ARQUIVO_CLIENTES = RAIZ / "dados" / "clientes.csv"
-ARQUIVO_SAIDA = RAIZ / "automacao" / "saida" / "vendas_2026_consolidado.xlsx"
+ARQUIVO_SAIDA = RAIZ / "automacao" / "saida" / "vendas_consolidado.xlsx"
+PADRAO_NOME = re.compile(r"vendas_(\d{4})_(\d{2})\.xlsx$")
 
 # Colunas finais, na ordem em que aparecem na planilha consolidada.
 COLUNAS = ["Data", "Pedido", "Cliente", "Cidade", "Vendedor", "Produto",
@@ -119,7 +122,7 @@ def padronizar_colunas(tabela, nome_arquivo):
 
 
 def ler_planilha(caminho):
-    encontrado = re.search(r"vendas_(\d{4})_(\d{2})\.xlsx$", caminho.name)
+    encontrado = PADRAO_NOME.search(caminho.name)
     ano, mes = encontrado.group(1), encontrado.group(2)
     tabela = pd.read_excel(caminho, dtype=object)
     tabela = padronizar_colunas(tabela, caminho.name)
@@ -174,16 +177,13 @@ def remover_duplicados(tabela):
     return tabela[~repetidas], tabela[repetidas]
 
 
-def marcar_pendencias(tabela, motivos, hoje):
+def marcar_pendencias(tabela, motivos):
     for indice, linha in tabela.iterrows():
         data = linha["Data"]
         if pd.isna(data):
             motivos[indice].append("Data ilegível")
-        else:
-            if data.strftime("%m/%Y") != linha["mes_origem"]:
-                motivos[indice].append("Data fora do mês da planilha")
-            if data.date() > hoje:
-                motivos[indice].append(f"Data posterior a hoje ({hoje:%d/%m/%Y})")
+        elif data.strftime("%m/%Y") != linha["mes_origem"]:
+            motivos[indice].append("Data fora do mês da planilha")
         if pd.isna(linha["Valor total"]):
             motivos[indice].append("Valor total em branco")
         if pd.isna(linha["Qtd"]) or pd.isna(linha["Preço unitário"]):
@@ -222,8 +222,9 @@ def formatar_planilha(caminho):
 # ---------------------------------------------------------------- principal
 
 def main():
-    hoje = date.today()
-    arquivos = sorted(PASTA_ENTRADA.glob("vendas_2026_*.xlsx"))
+    arquivos = sorted(c for c in PASTA_ENTRADA.glob("*.xlsx") if PADRAO_NOME.search(c.name))
+    ignorados = sorted(c.name for c in PASTA_ENTRADA.glob("*.xlsx")
+                       if not PADRAO_NOME.search(c.name) and not c.name.startswith("~$"))
     if not arquivos:
         sys.exit(f"ERRO: nenhuma planilha encontrada em {PASTA_ENTRADA}.")
     print(f"Encontrei {len(arquivos)} planilha(s) em {PASTA_ENTRADA.relative_to(RAIZ)}:")
@@ -232,13 +233,15 @@ def main():
         tabela = ler_planilha(caminho)
         print(f"  {caminho.name}: {len(tabela)} linhas")
         partes.append(tabela)
+    for nome in ignorados:
+        print(f"  ATENÇÃO: {nome} foi ignorada (o nome deve ser vendas_AAAA_MM.xlsx).")
     tudo = pd.concat(partes, ignore_index=True)
     lidas = len(tudo)
 
     motivos = {i: [] for i in tudo.index}
     trocas = corrigir_cidades(tudo, motivos)
     tudo, repetidas = remover_duplicados(tudo)
-    marcar_pendencias(tudo, motivos, hoje)
+    marcar_pendencias(tudo, motivos)
 
     tem_pendencia = tudo.index.map(lambda i: bool(motivos[i]))
     principal = tudo[~tem_pendencia]
@@ -249,17 +252,16 @@ def main():
     cidades_trocadas = sum(trocas.values())
 
     resumo = [
-        ("Linhas lidas das 12 planilhas", lidas),
+        (f"Linhas lidas das {len(arquivos)} planilhas", lidas),
         ("Nomes de cidade corrigidos para a grafia oficial", cidades_trocadas),
         ("Linhas repetidas removidas", len(repetidas)),
         ("Linhas enviadas para a aba 'pendencias'", len(pendencias)),
     ]
     resumo += [(f"   motivo: {m}", n) for m, n in contagem_motivos.most_common()]
     resumo += [
-        ("Linhas na aba 'Vendas 2026'", len(principal)),
-        ("Faturamento da aba 'Vendas 2026'", reais(principal["Valor total"].sum())),
+        ("Linhas na aba 'Vendas'", len(principal)),
+        ("Faturamento da aba 'Vendas'", reais(principal["Valor total"].sum())),
         ("Valor das linhas em pendências (só as que têm valor)", reais(pendencias["Valor total"].sum())),
-        ("Data usada como 'hoje'", hoje.strftime("%d/%m/%Y")),
     ]
     tabela_resumo = pd.DataFrame(resumo, columns=["O que foi feito", "Linhas"])
     tabela_trocas = pd.DataFrame(
@@ -268,7 +270,7 @@ def main():
 
     ARQUIVO_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     with pd.ExcelWriter(ARQUIVO_SAIDA) as arquivo:
-        principal[COLUNAS].to_excel(arquivo, index=False, sheet_name="Vendas 2026")
+        principal[COLUNAS].to_excel(arquivo, index=False, sheet_name="Vendas")
         pendencias[COLUNAS + ["motivo", "linha_original"]].to_excel(
             arquivo, index=False, sheet_name="pendencias")
         tabela_resumo.to_excel(arquivo, index=False, sheet_name="resumo")

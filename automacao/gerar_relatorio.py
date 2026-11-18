@@ -1,14 +1,15 @@
 """
-Distribuidora Pantanal — relatório de vendas de 2026.
+Distribuidora Pantanal — relatório de vendas (todos os meses: 2026, 2027, ...).
 
-Lê:    automacao/saida/vendas_2026_consolidado.xlsx (aba "Vendas 2026", já limpa)
+Lê:    automacao/saida/vendas_consolidado.xlsx (aba "Vendas", já limpa)
        dados/clientes.csv (estado de cada cidade)
-Gera:  automacao/saida/relatorio_vendas_2026.xlsx, com 3 abas:
+Gera:  automacao/saida/relatorio_vendas.xlsx, com 3 abas:
        - "Resumo por mês": faturamento, pedidos e ticket médio, com gráfico de faturamento por mês
        - "Por vendedor"
        - "Por cidade"
 
 Ticket médio = faturamento ÷ número de pedidos.
+Vendas com data depois de hoje fazem parte do planejamento de vendas e entram normalmente.
 
 Como usar: rode antes a automação de limpeza e depois esta, na pasta principal do repositório:
     python3 automacao/consolidar_vendas.py
@@ -16,6 +17,7 @@ Como usar: rode antes a automação de limpeza e depois esta, na pasta principal
 """
 
 import sys
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -27,9 +29,9 @@ from openpyxl.drawing.line import LineProperties
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 RAIZ = Path(__file__).resolve().parent.parent
-ARQUIVO_LIMPO = RAIZ / "automacao" / "saida" / "vendas_2026_consolidado.xlsx"
+ARQUIVO_LIMPO = RAIZ / "automacao" / "saida" / "vendas_consolidado.xlsx"
 ARQUIVO_CLIENTES = RAIZ / "dados" / "clientes.csv"
-ARQUIVO_SAIDA = RAIZ / "automacao" / "saida" / "relatorio_vendas_2026.xlsx"
+ARQUIVO_SAIDA = RAIZ / "automacao" / "saida" / "relatorio_vendas.xlsx"
 
 AZUL = "14213D"
 AMARELO = "F5C518"
@@ -102,19 +104,20 @@ def escrever_tabela(aba, titulo, observacao, cabecalho, linhas, formatos, total,
     return linha_cabecalho, linha_total
 
 
-def aba_resumo_mes(livro, vendas, observacao):
+def aba_resumo_mes(livro, vendas, observacao, periodo):
     aba = livro.active
     aba.title = "Resumo por mês"
-    vendas = vendas.assign(mes=vendas["Data"].dt.month)
+    vendas = vendas.assign(mes=vendas["Data"].dt.year * 100 + vendas["Data"].dt.month)
     tabela = resumir(vendas, "mes").sort_values("mes")
 
     # Se o último mês não está completo, o nome do mês avisa até que dia vai.
     ultima = vendas["Data"].max()
     fim_do_mes = (ultima + pd.offsets.MonthEnd(0)).day
 
-    def nome_mes(m):
-        nome = f"{MESES[m - 1]}/2026"
-        if m == ultima.month and ultima.day < fim_do_mes:
+    def nome_mes(chave):
+        ano, m = divmod(chave, 100)
+        nome = f"{MESES[m - 1]}/{ano}"
+        if (ano, m) == (ultima.year, ultima.month) and ultima.day < fim_do_mes:
             nome += f" (até {ultima:%d/%m})"
         return nome
 
@@ -124,7 +127,7 @@ def aba_resumo_mes(livro, vendas, observacao):
     total = ("Total", fat, ped, fat / ped)
     formatos = (None, FORMATO_REAIS, FORMATO_INTEIRO, FORMATO_REAIS)
     inicio, fim = escrever_tabela(
-        aba, "Resumo de vendas por mês — 2026", observacao,
+        aba, f"Resumo de vendas por mês — {periodo}", observacao,
         ["Mês", "Faturamento", "Pedidos", "Ticket médio"],
         linhas, formatos, total, [27, 18, 12, 16])
 
@@ -155,7 +158,7 @@ def aba_resumo_mes(livro, vendas, observacao):
     aba.add_chart(grafico, f"A{fim + 3}")
 
 
-def aba_vendedor(livro, vendas, observacao):
+def aba_vendedor(livro, vendas, observacao, periodo):
     aba = livro.create_sheet("Por vendedor")
     tabela = resumir(vendas, "Vendedor").sort_values("faturamento", ascending=False)
     linhas = [(r.Vendedor, r.faturamento, r.pedidos, r.ticket, r.clientes, r.participacao)
@@ -163,13 +166,13 @@ def aba_vendedor(livro, vendas, observacao):
     fat, ped = vendas["Valor total"].sum(), vendas["Pedido"].nunique()
     total = ("Total", fat, ped, fat / ped, vendas["Cliente"].nunique(), 1.0)
     formatos = (None, FORMATO_REAIS, FORMATO_INTEIRO, FORMATO_REAIS, FORMATO_INTEIRO, FORMATO_PERCENTUAL)
-    escrever_tabela(aba, "Vendas por vendedor — 2026", observacao,
+    escrever_tabela(aba, f"Vendas por vendedor — {periodo}", observacao,
                     ["Vendedor", "Faturamento", "Pedidos", "Ticket médio", "Clientes atendidos",
                      "Participação no faturamento"],
                     linhas, formatos, total, [26, 18, 12, 16, 14, 16])
 
 
-def aba_cidade(livro, vendas, observacao):
+def aba_cidade(livro, vendas, observacao, periodo):
     aba = livro.create_sheet("Por cidade")
     clientes = pd.read_csv(ARQUIVO_CLIENTES, sep=";", encoding="utf-8-sig", dtype=str)
     uf = dict(zip(clientes["cidade"], clientes["uf"]))
@@ -180,7 +183,7 @@ def aba_cidade(livro, vendas, observacao):
     total = ("Total", None, fat, ped, fat / ped, vendas["Cliente"].nunique(), 1.0)
     formatos = (None, None, FORMATO_REAIS, FORMATO_INTEIRO, FORMATO_REAIS, FORMATO_INTEIRO,
                 FORMATO_PERCENTUAL)
-    escrever_tabela(aba, "Vendas por cidade — 2026", observacao,
+    escrever_tabela(aba, f"Vendas por cidade — {periodo}", observacao,
                     ["Cidade", "Estado", "Faturamento", "Pedidos", "Ticket médio", "Clientes",
                      "Participação no faturamento"],
                     linhas, formatos, total, [22, 8, 18, 12, 16, 11, 16])
@@ -189,19 +192,20 @@ def aba_cidade(livro, vendas, observacao):
 def main():
     if not ARQUIVO_LIMPO.exists():
         sys.exit("ERRO: planilha limpa não encontrada. Rode antes: python3 automacao/consolidar_vendas.py")
-    vendas = pd.read_excel(ARQUIVO_LIMPO, sheet_name="Vendas 2026")
-    resumo = pd.read_excel(ARQUIVO_LIMPO, sheet_name="resumo")
-    hoje = resumo.loc[resumo["O que foi feito"] == "Data usada como 'hoje'", "Linhas"]
-    hoje = hoje.iloc[0] if len(hoje) else vendas["Data"].max().strftime("%d/%m/%Y")
+    vendas = pd.read_excel(ARQUIVO_LIMPO, sheet_name="Vendas")
+    inicio, fim = vendas["Data"].min(), vendas["Data"].max()
+    periodo = f"{inicio:%m/%Y} a {fim:%m/%Y}" if (inicio.year, inicio.month) != (fim.year, fim.month) \
+        else f"{inicio:%m/%Y}"
 
-    observacao = (f"Vendas de {vendas['Data'].min():%d/%m/%Y} a {vendas['Data'].max():%d/%m/%Y}. "
-                  f"Vendas com data depois de {hoje} ou sem valor estão na aba \"pendencias\" "
+    observacao = (f"Vendas de {inicio:%d/%m/%Y} a {fim:%d/%m/%Y}. "
+                  f"As datas depois de {date.today():%d/%m/%Y} são do planejamento de vendas. "
+                  f"Linhas que não puderam ser corrigidas estão na aba \"pendencias\" "
                   f"da planilha consolidada e não entram neste relatório.")
 
     livro = Workbook()
-    aba_resumo_mes(livro, vendas, observacao)
-    aba_vendedor(livro, vendas, observacao)
-    aba_cidade(livro, vendas, observacao)
+    aba_resumo_mes(livro, vendas, observacao, periodo)
+    aba_vendedor(livro, vendas, observacao, periodo)
+    aba_cidade(livro, vendas, observacao, periodo)
     ARQUIVO_SAIDA.parent.mkdir(parents=True, exist_ok=True)
     livro.save(ARQUIVO_SAIDA)
 

@@ -1,0 +1,66 @@
+# Distribuidora Pantanal — atualiza o relatório de vendas automaticamente.
+#
+# Quando roda:
+#   - sempre que uma planilha for enviada ou alterada em dados/planilhas_mensais/ na branch main;
+#   - ou quando alguém clicar em "Run workflow" na aba Actions do GitHub.
+#
+# O que faz:
+#   1. junta e limpa as planilhas  (automacao/consolidar_vendas.py)
+#   2. gera o relatório            (automacao/gerar_relatorio.py)
+#   3. salva na branch main a planilha consolidada e o relatório atualizados.
+#
+# Entram todas as planilhas com nome vendas_AAAA_MM.xlsx (2026, 2027, ...).
+
+name: Atualizar relatório de vendas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dados/planilhas_mensais/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Se duas planilhas chegarem quase juntas, uma atualização espera a outra terminar.
+concurrency:
+  group: atualizar-relatorio-vendas
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    env:
+      # Datas e horários no fuso de Mato Grosso.
+      TZ: America/Cuiaba
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar o necessário
+        run: pip install pandas openpyxl
+
+      - name: Juntar e limpar as planilhas
+        run: python3 automacao/consolidar_vendas.py
+
+      - name: Gerar o relatório
+        run: python3 automacao/gerar_relatorio.py
+
+      - name: Salvar o resultado na branch main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add automacao/saida/vendas_consolidado.xlsx automacao/saida/relatorio_vendas.xlsx
+          if git diff --cached --quiet; then
+            echo "Nada mudou no relatório."
+            exit 0
+          fi
+          git commit -m "Atualiza relatório de vendas ($(date +%d/%m/%Y))"
+          git pull --rebase origin main
+          git push origin HEAD:main
