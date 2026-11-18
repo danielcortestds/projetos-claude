@@ -17,6 +17,25 @@ sendo exibido, e o botão **Limpar filtros** volta a mostrar tudo.
 No celular, os filtros ficam no botão **Filtros**, que mostra quantos filtros estão ligados. Toque nele para abrir,
 escolha o que quiser e toque em **Ver resultado**.
 
+## Carregar outro arquivo de vendas
+
+O botão amarelo **Carregar arquivo**, no alto da página, abre a janela para escolher um arquivo `.csv`
+do seu computador. O painel refaz todas as contas com ele. O arquivo **não é enviado para lugar nenhum**:
+tudo acontece no seu computador. Para voltar, toque em **Voltar aos dados originais** ou recarregue a página.
+
+O painel aceita arquivos separados por `;` ou `,`, salvos pelo Excel em qualquer formato de texto (UTF-8 ou
+"ANSI"), com valores como `1.234,56` ou `1234.56`, e de qualquer ano (até mais de um ano no mesmo arquivo).
+
+**Colunas que o painel precisa:** `pedido`, `data`, `cidade`, `uf`, `vendedor`, `categoria`, `valor` e `status`.
+Maiúsculas, acentos e espaços nos nomes das colunas não fazem diferença.
+
+| O que aconteceu | O que o painel faz |
+|---|---|
+| Falta alguma das colunas acima | Aviso vermelho dizendo quais faltam; o painel continua com os dados de antes |
+| O arquivo é uma planilha do Excel (.xlsx) | Aviso vermelho explicando como salvar como CSV |
+| Colunas a mais, ou faltam `cliente`, `produto`, `quantidade` ou `preco_unitario` | Aviso amarelo; os números são calculados normalmente |
+| Linhas com data ou valor que não dá para ler, ou com coluna vazia | Essas linhas ficam de fora, e o aviso amarelo diz quantas e mostra exemplos |
+
 ## O que tem na página
 
 - **Cartões:** faturamento do ano, número de pedidos, ticket médio e pedidos cancelados.
@@ -39,11 +58,16 @@ escolha o que quiser e toque em **Ver resultado**.
 
 ## Como atualizar
 
-Quando o arquivo `dados/vendas_2026.csv` mudar, rode na pasta principal do repositório:
+**No GitHub, é automático:** sempre que o arquivo `dados/vendas_2026.csv` for enviado ou alterado na branch
+`main`, a automação "Atualizar painel de vendas" (aba **Actions**) refaz a página `painel/index.html` e salva
+na `main` em cerca de um minuto. Ela também roda quando `painel/modelo.html` ou `painel/gerar_painel.py` mudam,
+e pode ser rodada à mão pelo botão **Run workflow**.
+
+Para refazer no seu computador, rode na pasta principal do repositório:
 
 ```bash
 python3 painel/gerar_painel.py
 ```
 
-A página `painel/index.html` é refeita com os números novos. Para mudar a aparência, edite
+A página `painel/index.html` é refeita com o arquivo novo. Para mudar a aparência ou as contas, edite
 `painel/modelo.html` (não edite o `index.html` direto, porque ele é refeito a cada atualização).

@@ -38,6 +38,26 @@
   header img { height: 48px; display: block; background: #fff; padding: 5px 8px; border-radius: 8px; }
   header h1 { margin: 0; font-size: 20px; color: #fff; font-weight: 600; }
   header .info { margin-left: auto; color: #c9d3ea; font-size: 14px; text-align: right; }
+  header .info b { color: #fff; font-weight: 600; }
+  .acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn.btn-arquivo { background: var(--yellow); color: var(--navy); border-color: var(--yellow); }
+  .btn.btn-arquivo:hover { background: #ffd83d; }
+  .btn.btn-voltar { background: transparent; color: #fff; border-color: #8f9cbc; }
+  .btn.btn-voltar:hover { background: rgba(255, 255, 255, .1); }
+
+  /* Mensagens sobre o arquivo carregado */
+  .mensagem { border: 1px solid; border-radius: 8px; padding: 12px 14px 12px 16px; margin-bottom: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+  .mensagem.erro { background: var(--red-bg); border-color: #f1b3ae; }
+  .mensagem.alerta { background: #fff8dc; border-color: #edd479; }
+  .mensagem.ok { background: var(--green-bg); border-color: #a9d8bc; }
+  .mensagem b.titulo { display: block; font-size: 15px; }
+  .mensagem.erro b.titulo { color: var(--red); }
+  .mensagem.ok b.titulo { color: var(--green); }
+  .mensagem ul { margin: 6px 0 0; padding-left: 20px; }
+  .mensagem li { margin-bottom: 3px; overflow-wrap: anywhere; }
+  .mensagem p { margin: 6px 0 0; font-size: 14px; color: var(--muted); }
+  .mensagem code { font-family: inherit; font-weight: 600; background: rgba(20, 33, 61, .07); padding: 0 4px; border-radius: 3px; }
+  .fechar { font: inherit; font-size: 20px; line-height: 1; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px 8px; min-width: 36px; min-height: 36px; }
 
   /* Filtros */
   .filtros {
@@ -49,7 +69,7 @@
   .abrir-filtros { display: none; }
   .campos {
     display: grid; gap: 10px 12px; align-items: end;
-    grid-template-columns: minmax(0, .8fr) minmax(0, .8fr) minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
   }
   .campo { display: grid; gap: 4px; font-size: 13px; color: var(--muted); font-weight: 600; min-width: 0; }
   .campo select {
@@ -152,6 +172,7 @@
   footer.ajuda { font-size: 14px; color: var(--text); }
   footer.ajuda ul { margin: 0; padding-left: 20px; }
   footer.ajuda li { margin-bottom: 6px; }
+  footer.ajuda code { font-family: inherit; font-weight: 600; background: var(--bg); padding: 0 4px; border-radius: 3px; }
 
   @media (max-width: 1000px) {
     .campos { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -186,7 +207,9 @@
   @media (max-width: 560px) {
     header { padding: 10px 16px; }
     header img { height: 38px; }
-    header .info { margin-left: 0; text-align: left; font-size: 13px; }
+    header .info { margin-left: 0; text-align: left; font-size: 13px; width: 100%; }
+    .acoes { width: 100%; }
+    .acoes .btn { flex: 1 1 auto; min-height: 44px; }
     main { padding: 16px 16px 40px; }
     .kpi .valor { font-size: 20px; }
     .kpi.secundario .valor { font-size: 18px; }
@@ -201,7 +224,7 @@
   @media print {
     body { background: #fff; }
     .filtros { position: static; box-shadow: none; }
-    .botoes, .abrir-filtros { display: none !important; }
+    .botoes, .abrir-filtros, .acoes, .fechar { display: none !important; }
     .card, .kpi { break-inside: avoid; }
   }
 </style>
@@ -211,6 +234,11 @@
   <img src="../dados/logo_pantanal.png" alt="Distribuidora Pantanal">
   <h1 id="titulo">Painel de Vendas</h1>
   <div class="info" id="info"></div>
+  <div class="acoes">
+    <button type="button" class="btn btn-arquivo" id="carregar">Carregar arquivo</button>
+    <button type="button" class="btn btn-voltar" id="voltar" hidden>Voltar aos dados originais</button>
+    <input type="file" id="arquivo" accept=".csv,text/csv,.txt" hidden>
+  </div>
 </header>
 
 <section class="filtros" id="filtros" aria-label="Filtros">
@@ -238,6 +266,8 @@
 </section>
 
 <main>
+  <div id="mensagens" aria-live="polite"></div>
+
   <div class="vazio" id="vazio" hidden>
     <p>Nenhuma venda encontrada com esses filtros.</p>
     <button type="button" class="btn btn-limpar" id="limpar-vazio">Limpar filtros</button>
@@ -305,6 +335,8 @@
       <footer class="ajuda">
         <ul>
           <li><b>Filtros:</b> escolha o período, o vendedor, a cidade ou a categoria no alto da página. Todos os números mudam juntos. Para voltar a ver tudo, toque em <b>Limpar filtros</b>.</li>
+          <li><b>Carregar arquivo:</b> escolha no seu computador outro arquivo de vendas (.csv) e o painel refaz todas as contas com ele. O arquivo não é enviado para lugar nenhum: tudo acontece no seu computador. Para voltar, toque em <b>Voltar aos dados originais</b> ou recarregue a página.</li>
+          <li><b>Colunas do arquivo:</b> o painel precisa de <code>pedido</code>, <code>data</code>, <code>cidade</code>, <code>uf</code>, <code>vendedor</code>, <code>categoria</code>, <code>valor</code> e <code>status</code>. Se faltar alguma, aparece um aviso e o painel continua com os dados de antes.</li>
           <li><b>Faturamento</b> é a soma de tudo o que foi vendido, já com os descontos dados aos clientes.</li>
           <li><b>Pedidos cancelados não entram</b> em nenhum número do painel — aparecem só no cartão cinza.</li>
           <li><b>Ticket médio</b> é o faturamento dividido pelo número de pedidos: quanto, em média, cada pedido rendeu.</li>
@@ -318,7 +350,11 @@
 </main>
 
 <script>
-const D = /*__DADOS__*/null;
+// Arquivo de vendas que vem dentro da página (colocado por gerar_painel.py)
+const ORIGINAL = /*__DADOS__*/null;
+
+let D = null;   // vendas em uso, já preparadas
+let R = null;   // números calculados com os filtros
 
 // ---------- Formatos ----------
 function reais(v) {
@@ -327,32 +363,207 @@ function reais(v) {
   return (v < 0 ? "-" : "") + "R$ " + inteiro + "," + s[1];
 }
 function reaisCurto(v) { return v >= 1000 ? "R$ " + inteiro(v / 1000) + " mil" : "R$ " + inteiro(v); }
-function inteiro(v) { return String(Math.round(v)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+function inteiro(v) { return (v < 0 ? "-" : "") + String(Math.round(Math.abs(v))).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
 function pct(v) { return (v * 100).toFixed(1).replace(".", ",") + "%"; }
 function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-const mesCurto = m => D.nomesMeses[m - 1];
-const mesLongo = m => D.nomesMesesLongos[m - 1];
+function dataTexto(n) { return String(n % 100).padStart(2, "0") + "/" + String(Math.floor(n / 100) % 100).padStart(2, "0") + "/" + Math.floor(n / 10000); }
+const $ = id => document.getElementById(id);
+
+const NOMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+const LONGOS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const mesCurto = k => D.rotCurto[k];
+const mesLongo = k => D.rotLongo[k];
 function faixaMeses(lista) {
   if (!lista.length) return "";
   if (lista.length === 1) return mesLongo(lista[0]).toLowerCase();
   return mesCurto(lista[0]).toLowerCase() + " a " + mesCurto(lista[lista.length - 1]).toLowerCase();
 }
-const $ = id => document.getElementById(id);
+
+// ---------- Leitura do arquivo de vendas ----------
+const OBRIGATORIAS = ["pedido", "data", "cidade", "uf", "vendedor", "categoria", "valor", "status"];
+const OPCIONAIS = ["cliente", "produto", "quantidade", "preco_unitario"];
+const lista = itens => itens.map(i => "<code>" + esc(i) + "</code>").join(", ");
+
+// "Preço Unitário " vira "preco_unitario": maiúsculas, acentos e espaços não contam como diferença
+function normalizarColuna(t) {
+  return t.replace(/^﻿/, "").trim().toLowerCase().normalize("NFD")
+    .replace(/[̀-ͯ]/g, "").replace(/[\s-]+/g, "_");
+}
+function detectarSeparador(linha) {
+  const conta = { ";": 0, ",": 0, "\t": 0 };
+  let aspas = false;
+  for (const c of linha) {
+    if (c === '"') aspas = !aspas;
+    else if (!aspas && c in conta) conta[c]++;
+  }
+  return Object.keys(conta).reduce((a, b) => conta[b] > conta[a] ? b : a, ";");
+}
+// Lê o CSV respeitando textos entre aspas (que podem ter o separador dentro)
+function lerCSV(texto, sep) {
+  const linhas = [];
+  let campo = "", linha = [], aspas = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (aspas) {
+      if (c === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else aspas = false; }
+      else campo += c;
+    } else if (c === '"' && campo === "") aspas = true;
+    else if (c === sep) { linha.push(campo); campo = ""; }
+    else if (c === "\n" || c === "\r") {
+      if (c === "\r" && texto[i + 1] === "\n") i++;
+      linha.push(campo); linhas.push(linha); linha = []; campo = "";
+    } else campo += c;
+  }
+  if (campo !== "" || linha.length) { linha.push(campo); linhas.push(linha); }
+  return linhas;
+}
+function lerData(t) {
+  let m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/), a, mes, d;
+  if (m) { d = +m[1]; mes = +m[2]; a = +m[3]; }
+  else if ((m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) { a = +m[1]; mes = +m[2]; d = +m[3]; }
+  else return null;
+  const dt = new Date(a, mes - 1, d);
+  if (dt.getFullYear() !== a || dt.getMonth() !== mes - 1 || dt.getDate() !== d) return null;
+  return { a, m: mes, d };
+}
+// Aceita "1.234,56", "1234,56", "1234.56" e "R$ 1.234,56". Devolve centavos.
+function lerValor(t) {
+  t = t.replace(/R\$/g, "").replace(/\s/g, "");
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  if (!/^-?\d+(\.\d+)?$/.test(t)) return null;
+  return Math.round(parseFloat(t) * 100);
+}
+
+function prepararDados(texto, nomeArquivo) {
+  const res = { erros: [], avisos: [], dados: null };
+  texto = texto.replace(/^﻿/, "");
+  const tabela = lerCSV(texto, detectarSeparador(texto.split(/\r?\n/, 1)[0] || ""));
+  while (tabela.length && tabela[tabela.length - 1].every(c => !c.trim())) tabela.pop();
+  if (!tabela.length) { res.erros.push("O arquivo está vazio."); return res; }
+
+  const originais = tabela[0].map(c => c.replace(/^﻿/, "").trim());
+  const cab = originais.map(normalizarColuna);
+  const pos = {};
+  cab.forEach((c, i) => { if (c && !(c in pos)) pos[c] = i; });
+  const conhecidas = new Set([...OBRIGATORIAS, ...OPCIONAIS]);
+  const faltam = OBRIGATORIAS.filter(c => !(c in pos));
+  const estranhas = originais.filter((c, i) => cab[i] && !conhecidas.has(cab[i]));
+  const faltamOpc = OPCIONAIS.filter(c => !(c in pos));
+
+  if (faltam.length) {
+    res.erros.push("Faltam colunas que o painel precisa: " + lista(faltam) + ".");
+    if (cab.length <= 1) res.erros.push("Só foi encontrada uma coluna. Confira se o arquivo é mesmo um CSV, com as colunas separadas por ponto e vírgula ( ; ) ou vírgula ( , ).");
+    else if (estranhas.length) res.erros.push("O arquivo tem colunas que o painel não conhece: " + lista(estranhas) + ". Veja se alguma delas é uma das que faltam, escrita de outro jeito.");
+    return res;
+  }
+  if (estranhas.length) res.avisos.push("O arquivo tem colunas a mais, que o painel não usa: " + lista(estranhas) + ". Elas foram deixadas de lado.");
+  if (faltamOpc.length) res.avisos.push("Faltam colunas que o painel não usa: " + lista(faltamOpc) + ". Os números não mudam por isso.");
+
+  const agora = new Date();
+  const hoje = agora.getFullYear() * 10000 + (agora.getMonth() + 1) * 100 + agora.getDate();
+  const indice = () => { const mapa = new Map(); return { mapa, de: k => { if (!mapa.has(k)) mapa.set(k, mapa.size); return mapa.get(k); } }; };
+  const iPed = indice(), iVend = indice(), iCid = indice(), iCat = indice();
+  const linhas = [], problemas = [];
+  let primeira = Infinity, ultima = -Infinity, totalLinhas = 0;
+
+  for (let i = 1; i < tabela.length; i++) {
+    const c = tabela[i];
+    if (c.every(x => !x.trim())) continue;
+    totalLinhas++;
+    const g = k => (c[pos[k]] ?? "").trim();
+    const vazio = ["pedido", "data", "vendedor", "cidade", "categoria", "valor", "status"].find(k => !g(k));
+    if (vazio) { problemas.push([i + 1, "a coluna " + vazio + " está vazia"]); continue; }
+    const dt = lerData(g("data"));
+    if (!dt) { problemas.push([i + 1, "a data “" + g("data") + "” não foi reconhecida"]); continue; }
+    const centavos = lerValor(g("valor"));
+    if (centavos === null) { problemas.push([i + 1, "o valor “" + g("valor") + "” não foi reconhecido"]); continue; }
+    const dataN = dt.a * 10000 + dt.m * 100 + dt.d;
+    primeira = Math.min(primeira, dataN); ultima = Math.max(ultima, dataN);
+    const cancelado = normalizarColuna(g("status")).startsWith("cancel");
+    linhas.push([
+      iPed.de(g("pedido")), dt.a * 12 + dt.m - 1,
+      iVend.de(g("vendedor")), iCid.de(g("cidade") + "\u0000" + g("uf").toUpperCase()), iCat.de(g("categoria")),
+      centavos, (cancelado ? 1 : 0) | (dataN > hoje ? 2 : 0),
+    ]);
+  }
+
+  if (problemas.length) {
+    const ex = problemas.slice(0, 3).map(([n, m]) => "linha " + n + ": " + esc(m)).join("; ");
+    res.avisos.push(inteiro(problemas.length) + (problemas.length === 1 ? " linha foi deixada de fora" : " linhas foram deixadas de fora") +
+      " porque não deu para ler (" + ex + (problemas.length > 3 ? "; …" : "") + ").");
+  }
+  if (!linhas.length) {
+    res.erros.push("Nenhuma linha de venda pôde ser lida neste arquivo.");
+    return res;
+  }
+
+  // Nomes em ordem alfabética, e as linhas apontando para a nova ordem
+  const ordenar = (mapa, rotulo) => {
+    const nomes = [...mapa.keys()].sort((a, b) => rotulo(a).localeCompare(rotulo(b), "pt-BR"));
+    const nova = new Map(nomes.map((n, i) => [mapa.get(n), i]));
+    return { nomes, nova };
+  };
+  const v = ordenar(iVend.mapa, n => n), ci = ordenar(iCid.mapa, n => n), ca = ordenar(iCat.mapa, n => n);
+  for (const l of linhas) { l[2] = v.nova.get(l[2]); l[3] = ci.nova.get(l[3]); l[4] = ca.nova.get(l[4]); }
+
+  // Todos os meses entre a primeira e a última venda (mesmo os que não tiveram venda)
+  let kMin = Infinity, kMax = -Infinity;
+  for (const l of linhas) { if (l[1] < kMin) kMin = l[1]; if (l[1] > kMax) kMax = l[1]; }
+  const meses = [];
+  for (let k = kMin; k <= kMax; k++) meses.push(k);
+  const anos = [...new Set(meses.map(k => Math.floor(k / 12)))];
+  const variosAnos = anos.length > 1;
+  const rotCurto = {}, rotLongo = {};
+  meses.forEach(k => {
+    const a = Math.floor(k / 12), m = k % 12;
+    rotCurto[k] = NOMES[m] + (variosAnos ? "/" + String(a).slice(2) : "");
+    rotLongo[k] = LONGOS[m] + (variosAnos ? " de " + a : "");
+  });
+
+  res.dados = {
+    nomeArquivo, linhas, meses, rotCurto, rotLongo, anos, variosAnos,
+    vendedores: v.nomes,
+    cidades: ci.nomes.map(n => n.split("\u0000")),
+    categorias: ca.nomes,
+    primeiraData: dataTexto(primeira), ultimaData: dataTexto(ultima), hoje: dataTexto(hoje),
+    totalLinhas,
+    anoTexto: variosAnos ? anos[0] + "–" + anos[anos.length - 1] : String(anos[0]),
+  };
+  return res;
+}
+
+// ---------- Mensagens ----------
+function mensagem(tipo, titulo, itens = [], rodape = "") {
+  const caixa = document.createElement("div");
+  caixa.className = "mensagem " + tipo;
+  caixa.setAttribute("role", tipo === "erro" ? "alert" : "status");
+  caixa.innerHTML = "<div><b class=\"titulo\">" + titulo + "</b>" +
+    (itens.length ? "<ul>" + itens.map(i => "<li>" + i + "</li>").join("") + "</ul>" : "") +
+    (rodape ? "<p>" + rodape + "</p>" : "") + "</div>" +
+    '<button type="button" class="fechar" aria-label="Fechar aviso">×</button>';
+  caixa.querySelector(".fechar").addEventListener("click", () => caixa.remove());
+  $("mensagens").appendChild(caixa);
+}
+const limparMensagens = () => { $("mensagens").innerHTML = ""; };
 
 // ---------- Filtros ----------
-const PRIMEIRO = D.meses[0], ULTIMO = D.meses[D.meses.length - 1];
-const filtro = { ini: PRIMEIRO, fim: ULTIMO, vend: -1, cid: -1, cat: -1 };
+const filtro = { ini: 0, fim: 0, vend: -1, cid: -1, cat: -1 };
+const primeiroMes = () => D.meses[0];
+const ultimoMes = () => D.meses[D.meses.length - 1];
 
 function opcoes(sel, itens, todos) {
   sel.innerHTML = (todos ? '<option value="-1">' + todos + '</option>' : "") +
     itens.map(([v, t]) => '<option value="' + v + '">' + esc(t) + '</option>').join("");
 }
-opcoes($("f-ini"), D.meses.map(m => [m, mesLongo(m)]));
-opcoes($("f-fim"), D.meses.map(m => [m, mesLongo(m)]));
-opcoes($("f-vend"), D.vendedores.map((n, i) => [i, n]), "Todos os vendedores");
-opcoes($("f-cid"), D.cidades.map((c, i) => [i, c[0] + " – " + c[1]]), "Todas as cidades");
-opcoes($("f-cat"), D.categorias.map((n, i) => [i, n]), "Todas as categorias");
-
+function montarFiltros() {
+  opcoes($("f-ini"), D.meses.map(k => [k, mesLongo(k)]));
+  opcoes($("f-fim"), D.meses.map(k => [k, mesLongo(k)]));
+  opcoes($("f-vend"), D.vendedores.map((n, i) => [i, n]), "Todos os vendedores");
+  opcoes($("f-cid"), D.cidades.map((c, i) => [i, c[1] ? c[0] + " – " + c[1] : c[0]]), "Todas as cidades");
+  opcoes($("f-cat"), D.categorias.map((n, i) => [i, n]), "Todas as categorias");
+  Object.assign(filtro, { ini: primeiroMes(), fim: ultimoMes(), vend: -1, cid: -1, cat: -1 });
+  escreverFiltros();
+}
 function lerFiltros() {
   let ini = +$("f-ini").value, fim = +$("f-fim").value;
   if (ini > fim) { [ini, fim] = [fim, ini]; }
@@ -362,9 +573,9 @@ function escreverFiltros() {
   $("f-ini").value = filtro.ini; $("f-fim").value = filtro.fim;
   $("f-vend").value = filtro.vend; $("f-cid").value = filtro.cid; $("f-cat").value = filtro.cat;
 }
+const periodoLigado = () => filtro.ini !== primeiroMes() || filtro.fim !== ultimoMes();
 function filtrosLigados() {
-  return (filtro.ini !== PRIMEIRO || filtro.fim !== ULTIMO ? 1 : 0) +
-    (filtro.vend >= 0) + (filtro.cid >= 0) + (filtro.cat >= 0);
+  return (periodoLigado() ? 1 : 0) + (filtro.vend >= 0) + (filtro.cid >= 0) + (filtro.cat >= 0);
 }
 
 // ---------- Contas ----------
@@ -393,38 +604,46 @@ function calcular() {
   // valores guardados em centavos
   r.fat /= 100; r.valorCanc /= 100;
   const total = r.fat;
-  const lista = (obj, nome) => Object.keys(obj).map(k => {
+  const agrupar = (obj, nome) => Object.keys(obj).map(k => {
     const g = obj[k], fat = g.fat / 100;
     return Object.assign({ fat, ped: g.ped.size, ticket: fat / g.ped.size, parte: total ? fat / total : 0, mes: g.mes }, nome(+k));
   }).sort((a, b) => b.fat - a.fat);
   r.mensal = meses.map(m => ({ m, fat: r.mes[m].fat / 100, ped: r.mes[m].ped.size }));
-  r.vendedores = lista(r.vend, i => ({ nome: D.vendedores[i] }));
-  r.cidades = lista(r.cid, i => ({ nome: D.cidades[i][0], uf: D.cidades[i][1] }));
+  r.vendedores = agrupar(r.vend, i => ({ nome: D.vendedores[i] }));
+  r.cidades = agrupar(r.cid, i => ({ nome: D.cidades[i][0], uf: D.cidades[i][1] }));
 
   // Categorias: 1ª metade dos meses (com o do meio, se for ímpar) contra a 2ª metade
   const metade = Math.ceil(meses.length / 2);
   r.antes = meses.slice(0, metade);
   r.depois = meses.length > 1 ? meses.slice(metade) : [];
-  r.categorias = lista(r.cat, i => ({ nome: D.categorias[i] })).map(c => {
+  r.categorias = agrupar(r.cat, i => ({ nome: D.categorias[i] })).map(c => {
     c.serie = meses.map(m => (c.mes[m] || 0) / 100);
     if (!r.depois.length) { c.variacao = null; return c; }
     const media = ms => ms.reduce((s, m) => s + (c.mes[m] || 0), 0) / 100 / ms.length;
     c.mediaAntes = media(r.antes); c.mediaDepois = media(r.depois);
-    c.variacao = c.mediaAntes ? c.mediaDepois / c.mediaAntes - 1 : null;
+    c.variacao = c.mediaAntes > 0 ? c.mediaDepois / c.mediaAntes - 1 : null;
     return c;
   }).sort((a, b) => (b.variacao ?? -Infinity) - (a.variacao ?? -Infinity) || b.fat - a.fat);
   return r;
 }
 
 // ---------- Desenho ----------
-let R = null;
+function cabecalho() {
+  $("titulo").textContent = "Painel de Vendas " + D.anoTexto;
+  document.title = "Painel de Vendas " + D.anoTexto + " — Distribuidora Pantanal";
+  const carregado = D !== DADOS_ORIGINAIS;
+  $("info").innerHTML = "Vendas de " + D.primeiraData + " a " + D.ultimaData + "<br>" +
+    (carregado ? "Arquivo carregado: <b>" + esc(D.nomeArquivo) + "</b>" : "Atualizado em " + esc(ORIGINAL.geradoEm));
+  $("voltar").hidden = !carregado || !DADOS_ORIGINAIS;
+  $("ajuda-dados").innerHTML = "Os números vêm do arquivo <b>" + esc(D.nomeArquivo) + "</b>, com vendas de " + D.primeiraData + " a " + D.ultimaData + ".";
+}
 
 function desenharTudo() {
   lerFiltros();
   escreverFiltros();
   R = calcular();
   const ligados = filtrosLigados();
-  ["f-ini", "f-fim"].forEach(id => $(id).classList.toggle("ligado", filtro.ini !== PRIMEIRO || filtro.fim !== ULTIMO));
+  ["f-ini", "f-fim"].forEach(id => $(id).classList.toggle("ligado", periodoLigado()));
   $("f-vend").classList.toggle("ligado", filtro.vend >= 0);
   $("f-cid").classList.toggle("ligado", filtro.cid >= 0);
   $("f-cat").classList.toggle("ligado", filtro.cat >= 0);
@@ -432,7 +651,8 @@ function desenharTudo() {
   $("qtd-filtros").hidden = ligados === 0;
   $("qtd-filtros").textContent = ligados + (ligados === 1 ? " ligado" : " ligados");
 
-  const partes = ["<b>" + (R.meses.length === D.meses.length ? "Ano todo (" + faixaMeses(R.meses) + ")" : faixaMeses(R.meses)) + "</b>"];
+  const tudo = R.meses.length === D.meses.length;
+  const partes = ["<b>" + (tudo ? (D.variosAnos ? "Período todo (" : "Ano todo (") + faixaMeses(R.meses) + ")" : faixaMeses(R.meses)) + "</b>"];
   if (filtro.vend >= 0) partes.push("<b>" + esc(D.vendedores[filtro.vend]) + "</b>");
   if (filtro.cid >= 0) partes.push("<b>" + esc(D.cidades[filtro.cid][0]) + "</b>");
   if (filtro.cat >= 0) partes.push("<b>" + esc(D.categorias[filtro.cat]) + "</b>");
@@ -457,8 +677,11 @@ function cartoes() {
 
   const com = R.mensal.filter(p => p.ped > 0);
   const melhor = com.reduce((a, b) => b.fat > a.fat ? b : a);
-  const quando = R.meses.length === D.meses.length ? "Em " + D.ano
-    : (R.meses.length === 1 ? "Em " : "De ") + faixaMeses(R.meses) + " de " + D.ano;
+  const ano = D.variosAnos ? "" : " de " + D.anoTexto;
+  let quando;
+  if (R.meses.length === D.meses.length && !D.variosAnos) quando = "Em " + D.anoTexto;
+  else if (R.meses.length === 1) quando = "Em " + mesLongo(R.meses[0]).toLowerCase() + ano;
+  else quando = "De " + faixaMeses(R.meses) + ano;
   let t = quando + " vendemos <b>" + reais(R.fat) + "</b> em <b>" + inteiro(R.pedidos.size) + (R.pedidos.size === 1 ? " pedido" : " pedidos") + "</b>";
   if (filtro.vend >= 0 || filtro.cid >= 0 || filtro.cat >= 0) {
     const de = [];
@@ -489,18 +712,22 @@ function grafico() {
   const H = estreito ? 240 : 300, m = { t: 24, r: estreito ? 14 : 24, b: 34, l: estreito ? 62 : 72 };
   const w = W - m.l - m.r, h = H - m.t - m.b;
   const max = Math.max(...dados.map(p => p.fat), 1);
-  const passos = [100, 200, 250, 500, 1000, 2000, 5000, 10000, 20000, 25000, 50000, 100000, 200000, 500000];
-  const passo = passos.find(s => max / s <= 5) || 1000000;
+  const passos = [100, 200, 250, 500, 1000, 2000, 5000, 10000, 20000, 25000, 50000, 100000, 200000, 500000, 1000000, 2000000, 5000000];
+  const passo = passos.find(s => max / s <= 5) || Math.pow(10, Math.ceil(Math.log10(max / 5)));
   const topo = Math.ceil(max / passo) * passo;
   const x = i => m.l + (n === 1 ? w / 2 : i * w / (n - 1));
-  const y = v => m.t + h - v / topo * h;
+  const y = v => m.t + h - Math.max(v, 0) / topo * h;
   const melhor = n > 1 ? dados.reduce((a, b) => b.fat > a.fat ? b : a) : null;
+  // com muitos meses, mostra só alguns nomes no eixo para não embolar
+  const cada = Math.max(1, Math.ceil(n / Math.floor(w / (D.variosAnos ? 46 : 34))));
   let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico do faturamento por mês">';
   for (let v = 0; v <= topo + 0.5; v += passo) {
     svg += '<line x1="' + m.l + '" x2="' + (W - m.r) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="' + (v === 0 ? "#c9d0dd" : "#eef1f6") + '"/>';
     svg += '<text x="' + (m.l - 10) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + reaisCurto(v) + '</text>';
   }
-  dados.forEach((p, i) => svg += '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + mesCurto(p.m) + '</text>');
+  dados.forEach((p, i) => {
+    if (i % cada === 0 || i === n - 1 && cada === 1) svg += '<text x="' + x(i) + '" y="' + (H - 10) + '" text-anchor="middle">' + mesCurto(p.m) + '</text>';
+  });
   const pts = dados.map((p, i) => x(i) + "," + y(p.fat));
   if (n > 1) {
     svg += '<polygon points="' + x(0) + ',' + y(0) + ' ' + pts.join(" ") + ' ' + x(n - 1) + ',' + y(0) + '" fill="#14213D" opacity="0.06"/>';
@@ -508,9 +735,10 @@ function grafico() {
   } else {
     svg += '<line x1="' + x(0) + '" x2="' + x(0) + '" y1="' + y(0) + '" y2="' + y(dados[0].fat) + '" stroke="#14213D" stroke-width="3"/>';
   }
+  const raio = n > 24 ? 3 : 4.5;
   dados.forEach((p, i) => {
     const d = p === melhor;
-    svg += '<circle cx="' + x(i) + '" cy="' + y(p.fat) + '" r="' + (d ? 7 : 4.5) + '" fill="' + (d ? "#F5C518" : "#14213D") + '" stroke="#fff" stroke-width="2"/>';
+    svg += '<circle cx="' + x(i) + '" cy="' + y(p.fat) + '" r="' + (d ? 7 : raio) + '" fill="' + (d ? "#F5C518" : "#14213D") + '" stroke="#fff" stroke-width="2"/>';
   });
   svg += '<line class="guia" y1="' + m.t + '" y2="' + y(0) + '" stroke="#c9d0dd" stroke-dasharray="4 4" visibility="hidden"/>';
   const larg = n === 1 ? w : w / (n - 1);
@@ -555,12 +783,12 @@ function grafico() {
 }
 
 function ranking() {
-  const lista = $("ranking"), max = R.vendedores[0].fat;
+  const lista = $("ranking"), max = Math.max(R.vendedores[0].fat, 0.01);
   lista.classList.toggle("top", R.vendedores.length > 3);
   lista.innerHTML = R.vendedores.map((v, i) =>
     '<li><span class="posicao">' + (i + 1) + '</span>' +
     '<div><div class="linha-topo"><span class="nome">' + esc(v.nome) + '</span><span class="num">' + reais(v.fat) + '</span></div>' +
-    '<div class="barra"><span style="width:' + (v.fat / max * 100).toFixed(1) + '%"></span></div>' +
+    '<div class="barra"><span style="width:' + Math.max(0, v.fat / max * 100).toFixed(1) + '%"></span></div>' +
     '<div class="detalhe">' + inteiro(v.ped) + (v.ped === 1 ? ' pedido' : ' pedidos') + ' · ticket médio ' + reais(v.ticket) + ' · ' + pct(v.parte) + ' do total</div></div></li>'
   ).join("");
 }
@@ -603,13 +831,13 @@ function cidades() {
     const r = col === "nome" ? a.nome.localeCompare(b.nome, "pt-BR") : a[col] - b[col];
     return dir === "asc" ? r : -r;
   });
-  const maiorParte = Math.max(...R.cidades.map(c => c.parte));
+  const maiorParte = Math.max(...R.cidades.map(c => c.parte), 0.0001);
   tabela.querySelector("tbody").innerHTML = linhas.map(c =>
-    '<tr><td>' + esc(c.nome) + '<span class="uf">' + esc(c.uf) + '</span></td>' +
+    '<tr><td>' + esc(c.nome) + (c.uf ? '<span class="uf">' + esc(c.uf) + '</span>' : '') + '</td>' +
     '<td class="n">' + reais(c.fat) + '</td>' +
     '<td class="n">' + inteiro(c.ped) + '</td>' +
     '<td class="n some-cel">' + reais(c.ticket) + '</td>' +
-    '<td class="n">' + pct(c.parte) + '<span class="miniparte"><span style="width:' + (c.parte / maiorParte * 100).toFixed(1) + '%"></span></span></td></tr>'
+    '<td class="n">' + pct(c.parte) + '<span class="miniparte"><span style="width:' + Math.max(0, c.parte / maiorParte * 100).toFixed(1) + '%"></span></span></td></tr>'
   ).join("");
   tabela.querySelector("tfoot").innerHTML =
     '<tr><td>Total (' + R.cidades.length + (R.cidades.length === 1 ? ' cidade' : ' cidades') + ')</td><td class="n">' + reais(R.fat) + '</td><td class="n">' +
@@ -630,20 +858,73 @@ document.querySelectorAll("#tab-cidades th button").forEach(b => {
 
 function aviso() {
   $("aviso").textContent = R.futuros.size
-    ? "Observação: " + inteiro(R.futuros.size) + (R.futuros.size === 1 ? " pedido tem" : " pedidos têm") + " data depois de " + D.hoje +
-      " (até " + D.ultimaData + "). Eles fazem parte do planejamento de vendas e já estão incluídos nos números."
+    ? "Observação: " + inteiro(R.futuros.size) + (R.futuros.size === 1 ? " pedido tem" : " pedidos têm") + " data depois de hoje (" + D.hoje +
+      "). Eles fazem parte do planejamento de vendas e já estão incluídos nos números."
     : "";
 }
 
-// ---------- Cabeçalho, eventos e início ----------
-$("titulo").textContent = "Painel de Vendas " + D.ano;
-document.title = "Painel de Vendas " + D.ano + " — Distribuidora Pantanal";
-$("info").innerHTML = "Vendas de " + D.primeiraData + " a " + D.ultimaData + "<br>Atualizado em " + D.geradoEm;
-$("ajuda-dados").innerHTML = "Os números vêm do arquivo <b>vendas_" + D.ano + ".csv</b>, com vendas de " + D.primeiraData + " a " + D.ultimaData + ".";
+// ---------- Trocar o arquivo de vendas ----------
+function usarDados(dados) {
+  D = dados;
+  montarFiltros();
+  cabecalho();
+  desenharTudo();
+}
 
+async function carregarArquivo(arquivo) {
+  limparMensagens();
+  const nome = arquivo.name;
+  const naoUsado = "Não foi possível usar o arquivo “" + esc(nome) + "”";
+  const continua = D ? "O painel continua mostrando os dados de antes (" + esc(D.nomeArquivo) + ")." : "";
+  if (arquivo.size > 50 * 1024 * 1024) {
+    mensagem("erro", naoUsado, ["O arquivo é grande demais (mais de 50 MB)."], continua);
+    return;
+  }
+  let bruto;
+  try { bruto = await arquivo.arrayBuffer(); }
+  catch (e) { mensagem("erro", naoUsado, ["Não deu para abrir o arquivo."], continua); return; }
+  const b = new Uint8Array(bruto);
+  if (b[0] === 0x50 && b[1] === 0x4B) {
+    mensagem("erro", naoUsado, ["Este arquivo é uma planilha do Excel, não um CSV."],
+      "No Excel, use <b>Arquivo › Salvar como</b> e escolha o tipo <b>CSV (separado por vírgulas)</b>. Depois carregue o arquivo novo. " + continua);
+    return;
+  }
+  // Excel pode salvar o CSV com acentuação antiga ("ANSI"); tenta os dois jeitos
+  let texto;
+  try { texto = new TextDecoder("utf-8", { fatal: true }).decode(b); }
+  catch (e) { texto = new TextDecoder("windows-1252").decode(b); }
+
+  const res = prepararDados(texto, nome);
+  if (res.erros.length) {
+    mensagem("erro", naoUsado, res.erros,
+      "O painel espera estas colunas: " + lista(OBRIGATORIAS) + ". " + continua);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  usarDados(res.dados);
+  mensagem("ok", "Arquivo “" + esc(nome) + "” carregado",
+    [inteiro(res.dados.linhas.length) + (res.dados.linhas.length === 1 ? " linha usada" : " linhas usadas") + ", com vendas de " + res.dados.primeiraData + " a " + res.dados.ultimaData + ". Todos os números abaixo são deste arquivo."],
+    "O arquivo não foi enviado para lugar nenhum: as contas são feitas no seu computador. Ao recarregar a página, ela volta aos dados originais.");
+  if (res.avisos.length) mensagem("alerta", "Confira estes pontos do arquivo", res.avisos);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$("carregar").addEventListener("click", () => $("arquivo").click());
+$("arquivo").addEventListener("change", e => {
+  const arquivo = e.target.files[0];
+  e.target.value = "";   // permite escolher o mesmo arquivo de novo
+  if (arquivo) carregarArquivo(arquivo);
+});
+$("voltar").addEventListener("click", () => {
+  limparMensagens();
+  usarDados(DADOS_ORIGINAIS);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+// ---------- Eventos dos filtros ----------
 ["f-ini", "f-fim", "f-vend", "f-cid", "f-cat"].forEach(id => $(id).addEventListener("change", desenharTudo));
 function limpar() {
-  Object.assign(filtro, { ini: PRIMEIRO, fim: ULTIMO, vend: -1, cid: -1, cat: -1 });
+  Object.assign(filtro, { ini: primeiroMes(), fim: ultimoMes(), vend: -1, cid: -1, cat: -1 });
   escreverFiltros();
   desenharTudo();
 }
@@ -663,8 +944,17 @@ window.addEventListener("resize", () => {
   if (R && l && l !== ultimaLargura) { ultimaLargura = l; grafico(); }
 });
 
-escreverFiltros();
-desenharTudo();
+// ---------- Início ----------
+const inicio = prepararDados(ORIGINAL.texto, ORIGINAL.nomeArquivo);
+const DADOS_ORIGINAIS = inicio.dados;
+if (inicio.erros.length) {
+  $("conteudo").hidden = true;
+  mensagem("erro", "Não foi possível ler o arquivo de vendas “" + esc(ORIGINAL.nomeArquivo) + "”", inicio.erros,
+    "Use o botão <b>Carregar arquivo</b> para escolher outro arquivo.");
+} else {
+  usarDados(DADOS_ORIGINAIS);
+  if (inicio.avisos.length) mensagem("alerta", "Confira estes pontos do arquivo de vendas", inicio.avisos);
+}
 </script>
 </body>
 </html>
