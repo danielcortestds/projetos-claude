@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14213D">
+<title>Início — Distribuidora Pantanal</title>
+<style>
+  :root {
+    --navy: #14213D;
+    --navy-2: #1f3360;
+    --yellow: #F5C518;
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --text: #1b2333;
+    --muted: #64708a;
+    --line: #e2e6ee;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--yellow);
+    padding: 28px 16px 32px;
+    text-align: center;
+  }
+  header img {
+    height: 72px; display: inline-block;
+    background: #fff; padding: 8px 12px; border-radius: 10px;
+  }
+  header h1 { margin: 16px 0 6px; font-size: 26px; color: #fff; font-weight: 700; }
+  header p { margin: 0; color: #c9d3ea; font-size: 16px; }
+  main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 32px 16px 48px; }
+  .instrucao { margin: 0 0 20px; color: var(--muted); text-align: center; }
+  .ferramentas {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+  a.botao {
+    display: flex; flex-direction: column; gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 6px solid var(--yellow);
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-decoration: none; color: var(--text);
+    box-shadow: 0 1px 3px rgba(20, 33, 61, .06);
+    transition: transform .12s, box-shadow .12s, border-color .12s;
+  }
+  a.botao:hover, a.botao:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(20, 33, 61, .14);
+    border-color: var(--navy);
+    border-top-color: var(--yellow);
+    outline: none;
+  }
+  a.botao:focus-visible { box-shadow: 0 0 0 3px var(--yellow), 0 8px 20px rgba(20, 33, 61, .14); }
+  .icone {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: var(--navy); color: var(--yellow);
+    display: grid; place-items: center;
+  }
+  .icone svg { width: 28px; height: 28px; }
+  .nome { font-size: 20px; font-weight: 700; color: var(--navy); margin-top: 4px; }
+  .desc { color: var(--muted); font-size: 15px; line-height: 1.4; flex: 1; }
+  .abrir {
+    margin-top: 6px; align-self: flex-start;
+    background: var(--yellow); color: var(--navy);
+    font-weight: 700; font-size: 15px;
+    padding: 8px 16px; border-radius: 8px;
+  }
+  footer { text-align: center; color: var(--muted); font-size: 14px; padding: 16px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <img src="dados/logo_pantanal.png" alt="Logo da Distribuidora Pantanal">
+  <h1>Distribuidora Pantanal</h1>
+  <p>Ferramentas do dia a dia da equipe</p>
+</header>
+
+<main>
+  <p class="instrucao">Clique na ferramenta que você quer usar.</p>
+
+  <nav class="ferramentas" aria-label="Ferramentas">
+    <a class="botao" href="orcamento/index.html">
+      <span class="icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11.01"/><line x1="12" y1="11" x2="12" y2="11.01"/><line x1="16" y1="11" x2="16" y2="11.01"/><line x1="8" y1="15" x2="8" y2="15.01"/><line x1="12" y1="15" x2="12" y2="15.01"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+      </span>
+      <span class="nome">Orçamento</span>
+      <span class="desc">Monte o orçamento para um cliente e veja o valor total na hora.</span>
+      <span class="abrir">Abrir orçamento</span>
+    </a>
+
+    <a class="botao" href="despesas/index.html">
+      <span class="icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="13" y2="15"/></svg>
+      </span>
+      <span class="nome">Despesas</span>
+      <span class="desc">Registre as despesas de viagem para pedir o reembolso.</span>
+      <span class="abrir">Abrir despesas</span>
+    </a>
+
+    <a class="botao" href="painel/index.html">
+      <span class="icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><rect x="5" y="11" width="3" height="7"/><rect x="10.5" y="6" width="3" height="12"/><rect x="16" y="13" width="3" height="5"/></svg>
+      </span>
+      <span class="nome">Painel</span>
+      <span class="desc">Veja o faturamento mês a mês, o ranking de vendedores e as vendas por cidade.</span>
+      <span class="abrir">Abrir painel</span>
+    </a>
+
+    <a class="botao" href="pedidos/index.html">
+      <span class="icone" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><line x1="12" y1="11" x2="12" y2="21"/></svg>
+      </span>
+      <span class="nome">Pedidos</span>
+      <span class="desc">Cadastre e acompanhe os pedidos dos clientes.</span>
+      <span class="abrir">Abrir pedidos</span>
+    </a>
+  </nav>
+</main>
+
+<footer>Distribuidora Pantanal</footer>
+</body>
+</html>
