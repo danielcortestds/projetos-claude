@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vendas 2026 — Distribuidora Pantanal</title>
+<style>
+  :root {
+    --azul: #14213D;
+    --amarelo: #F5C518;
+    --fundo: #F4F5F8;
+    --texto: #1E2433;
+    --suave: #5B6275;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+  }
+  header {
+    background: var(--azul);
+    color: #fff;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 5px solid var(--amarelo);
+  }
+  header img { height: 48px; width: auto; background: #fff; border-radius: 8px; padding: 4px; }
+  header h1 { margin: 0; font-size: 1.3rem; }
+  main { max-width: 640px; margin: 32px auto; padding: 0 16px; display: grid; gap: 16px; }
+  .cartao {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(20, 33, 61, .08);
+    border-left: 6px solid var(--amarelo);
+  }
+  .rotulo { margin: 0 0 6px; color: var(--suave); font-size: 1rem; }
+  .valor { margin: 0; font-size: 2rem; font-weight: 700; color: var(--azul); }
+  .nota { margin: 10px 0 0; color: var(--suave); font-size: .95rem; }
+  .aviso { display: none; }
+  .aviso.visivel { display: block; }
+  label.botao {
+    display: inline-block;
+    margin-top: 12px;
+    background: var(--azul);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  label.botao:hover { background: #22325a; }
+</style>
+</head>
+<body>
+<header>
+  <img src="../dados/logo_pantanal.png" alt="Logo Distribuidora Pantanal">
+  <h1>Distribuidora Pantanal</h1>
+</header>
+
+<main>
+  <section class="cartao">
+    <p class="rotulo">Data de hoje</p>
+    <p class="valor" id="dataHoje">—</p>
+  </section>
+
+  <section class="cartao">
+    <p class="rotulo">Total de vendas em 2026</p>
+    <p class="valor" id="totalVendas">Carregando…</p>
+    <p class="nota" id="detalhe"></p>
+  </section>
+
+  <section class="cartao aviso" id="aviso">
+    <p class="rotulo">Não foi possível abrir a planilha de vendas sozinho.</p>
+    <p class="nota">Clique no botão abaixo e escolha o arquivo <strong>vendas_2026.csv</strong>, que fica na pasta <strong>dados</strong>.</p>
+    <label class="botao" for="arquivo">Escolher planilha de vendas</label>
+    <input type="file" id="arquivo" accept=".csv,text/csv" hidden>
+  </section>
+</main>
+
+<script>
+  // Data de hoje no formato dd/mm/aaaa
+  document.getElementById('dataHoje').textContent =
+    new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  // Formata em reais: R$ 1.234,56
+  const reais = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Converte "1.234,56" em número
+  const numero = t => Number(String(t).trim().replace(/\./g, '').replace(',', '.')) || 0;
+
+  // Soma a coluna "valor" das vendas de 2026, separando as canceladas
+  function calcular(texto) {
+    const linhas = texto.replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
+    const cab = linhas.shift().split(';').map(c => c.trim().toLowerCase());
+    const iValor = cab.indexOf('valor'), iData = cab.indexOf('data'), iStatus = cab.indexOf('status');
+    if (iValor < 0 || iData < 0) throw new Error('Planilha em formato inesperado');
+
+    let entregue = 0, cancelado = 0, qtdCancelado = 0;
+    for (const linha of linhas) {
+      const c = linha.split(';');
+      if (!(c[iData] || '').trim().endsWith('/2026')) continue;
+      const v = numero(c[iValor]);
+      if (iStatus >= 0 && (c[iStatus] || '').trim().toLowerCase() === 'cancelado') {
+        cancelado += v; qtdCancelado++;
+      } else {
+        entregue += v;
+      }
+    }
+
+    document.getElementById('totalVendas').textContent = reais(entregue);
+    document.getElementById('detalhe').textContent =
+      'Não inclui vendas canceladas (' + reais(cancelado) + ' em ' + qtdCancelado + ' itens).';
+    document.getElementById('aviso').classList.remove('visivel');
+  }
+
+  function mostrarAviso() {
+    document.getElementById('totalVendas').textContent = '—';
+    document.getElementById('aviso').classList.add('visivel');
+  }
+
+  // Tenta abrir a planilha automaticamente; se não der, pede para escolher o arquivo
+  fetch('../dados/vendas_2026.csv')
+    .then(r => { if (!r.ok) throw new Error(); return r.text(); })
+    .then(calcular)
+    .catch(mostrarAviso);
+
+  document.getElementById('arquivo').addEventListener('change', e => {
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+    arquivo.text().then(calcular).catch(() => {
+      document.getElementById('totalVendas').textContent = 'Arquivo inválido';
+    });
+  });
+</script>
+</body>
+</html>
