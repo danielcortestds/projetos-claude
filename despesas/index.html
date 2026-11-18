@@ -71,7 +71,7 @@
   textarea { min-height: 64px; resize: vertical; }
   input:focus, select:focus, textarea:focus { outline: 2px solid var(--yellow); outline-offset: 0; border-color: var(--navy-2); }
   .erro-campo { border-color: var(--red) !important; background: #fff6f6; }
-  .tipos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .tipos { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
   .tipos button {
     font: inherit; font-weight: 600; min-height: 48px; border-radius: 8px; cursor: pointer;
     border: 1px solid #c9d0dd; background: #fff; color: var(--navy);
@@ -157,6 +157,7 @@
     .form { grid-template-columns: minmax(0, 1fr); }
     .form .obs-campo, .form .largo { grid-column: 1 / -1; }
     .tipos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tipos button:last-child:nth-child(odd) { grid-column: 1 / -1; }
     .acoes .btn { flex: 1; }
     .kpis { grid-template-columns: minmax(0, 1fr); gap: 10px; }
     .kpi strong { font-size: 20px; }
@@ -337,7 +338,7 @@ const VENDEDORES = [
   'Eduarda Moraes Silva', 'Fábio Nunes Ferreira', 'Gabriela Costa Pinto', 'Henrique Dias Rocha',
   'Isabela Martins Cruz', 'João Victor Almeida'
 ];
-const TIPOS = ['Combustível', 'Alimentação', 'Hospedagem', 'Outros'];
+const TIPOS = ['Combustível', 'Pedágio', 'Alimentação', 'Hospedagem', 'Outros'];
 const CHAVE = 'pantanal_despesas_v1';
 const CHAVE_VEND = 'pantanal_despesas_vendedor';
 const XLSX_URL = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
@@ -748,7 +749,7 @@ $('btn-excel').addEventListener('click', async () => {
   linhas.forEach(l => aoaR.push([l.vendedor, ...TIPOS.map(t => l[t]), l.total]));
   aoaR.push(['Total por tipo', ...TIPOS.map(t => totais[t]), totais.total]);
   const wsR = X.utils.aoa_to_sheet(aoaR);
-  formatar(wsR, [1, 2, 3, 4, 5], [], [24, 14, 14, 14, 14, 14]);
+  formatar(wsR, TIPOS.map((_, i) => i + 1).concat(TIPOS.length + 1), [], [24, ...TIPOS.map(() => 14), 14]);
 
   const aoaE = [['Data', 'Vendedor', 'Alimentação no dia', 'Limite', 'Excesso']];
   estouros.forEach(e => aoaE.push([isoParaData(e.data), e.vendedor, e.total, LIMITE_ALIMENTACAO, e.excesso]));
