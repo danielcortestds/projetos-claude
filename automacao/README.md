@@ -37,3 +37,29 @@ Como a data de "hoje" é a do dia em que a automação roda, rodar de novo mais 
 principal as vendas que já aconteceram.
 
 As planilhas originais nunca são alteradas.
+
+---
+
+# Relatório de vendas de 2026
+
+A partir da planilha limpa, gera `automacao/saida/relatorio_vendas_2026.xlsx`, com 3 abas:
+
+1. **Resumo por mês**: faturamento, pedidos e ticket médio de cada mês, mais um gráfico de faturamento por mês.
+2. **Por vendedor**: faturamento, pedidos, ticket médio, clientes atendidos e participação no faturamento.
+3. **Por cidade**: as mesmas informações por cidade, com o estado.
+
+Ticket médio = faturamento ÷ número de pedidos. Os valores aparecem em reais e o cabeçalho em azul escuro
+com texto branco. As vendas que estão em "pendencias" não entram no relatório. Se o último mês ainda não
+terminou, o nome dele avisa até que dia vai, como em "Novembro/2026 (até 18/11)".
+
+## Como usar
+
+Rode primeiro a limpeza e depois o relatório:
+
+```bash
+python3 automacao/consolidar_vendas.py
+```
+
+```bash
+python3 automacao/gerar_relatorio.py
+```
