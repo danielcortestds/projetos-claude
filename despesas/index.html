@@ -99,6 +99,10 @@
   .msg.info { background: #eef3ff; color: var(--navy-2); }
   .dica-limite { font-size: 13px; color: var(--muted); margin-top: 2px; }
   .dica-limite.estouro { color: var(--red); font-weight: 600; }
+  .erro-texto { font-size: 13px; color: var(--red); font-weight: 600; }
+  .erro-texto:empty { display: none; }
+  #msg-form { margin: 0 0 14px; scroll-margin-top: 72px; }
+  .form input, .form select, .form textarea, .tipos { scroll-margin-top: 72px; }
 
   /* Filtros e tabela */
   .filtros { display: flex; gap: 10px; padding: 12px 16px; flex-wrap: wrap; border-bottom: 1px solid var(--line); align-items: center; }
@@ -228,23 +232,29 @@
     <div class="card">
       <h2 id="titulo-form">Novo lançamento</h2>
       <div class="corpo">
+        <div id="msg-form" class="msg" role="status" aria-live="polite" hidden></div>
         <form id="form" class="form" novalidate autocomplete="off">
           <label class="campo">Data
             <input type="date" id="f-data" required>
+            <div class="erro-texto" id="e-f-data"></div>
           </label>
           <label class="campo">Vendedor
             <select id="f-vendedor" required></select>
+            <div class="erro-texto" id="e-f-vendedor"></div>
           </label>
           <label class="campo">Cidade
             <input type="text" id="f-cidade" list="cidades" placeholder="Ex.: Rondonópolis" required>
             <datalist id="cidades"></datalist>
+            <div class="erro-texto" id="e-f-cidade"></div>
           </label>
           <div class="campo largo">
             <label class="campo" id="lbl-tipo">Tipo de despesa</label>
             <div class="tipos" id="f-tipo" role="group" aria-labelledby="lbl-tipo"></div>
+            <div class="erro-texto" id="e-f-tipo"></div>
           </div>
           <label class="campo">Valor
             <div class="valor-wrap"><span>R$</span><input type="text" id="f-valor" inputmode="decimal" placeholder="0,00" required></div>
+            <div class="erro-texto" id="e-f-valor"></div>
             <div class="dica-limite" id="dica-limite"></div>
           </label>
           <label class="campo obs-campo"><span id="lbl-obs">Observação</span>
@@ -256,7 +266,6 @@
             <button type="button" class="btn sec" id="btn-cancelar" hidden>Cancelar edição</button>
           </div>
         </form>
-        <div id="msg-form" class="msg" hidden></div>
       </div>
     </div>
   </section>
@@ -439,7 +448,7 @@ function montarFormulario() {
   $('fl-vendedor').innerHTML = '<option value="">Todos os vendedores</option>' + VENDEDORES.map(v => `<option>${esc(v)}</option>`).join('');
   $('fl-tipo').innerHTML = '<option value="">Todos os tipos</option>' + TIPOS.map(t => `<option>${t}</option>`).join('');
   $('f-tipo').innerHTML = TIPOS.map(t => `<button type="button" data-tipo="${t}" aria-pressed="false">${t}</button>`).join('');
-  $('f-tipo').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { selecionarTipo(b.dataset.tipo); $('f-tipo').classList.remove('erro-campo'); }));
+  $('f-tipo').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { selecionarTipo(b.dataset.tipo); limparErro('f-tipo'); }));
   limparFormulario();
 }
 function selecionarTipo(t) {
@@ -461,22 +470,46 @@ function atualizarObs() {
     dica.textContent = `Hospedagem acima de ${brl(LIMITE_HOSPEDAGEM)}: justificativa obrigatória (mínimo ${MIN_JUSTIFICATIVA} caracteres).`;
   } else {
     dica.textContent = '';
-    $('f-obs').classList.remove('erro-campo');
+    if ($('f-obs').classList.contains('erro-campo')) limparErro('f-obs');
   }
 }
-function limparFormulario() {
+// manter = true: depois de um lançamento novo, guarda data, vendedor e cidade para o próximo da mesma viagem.
+function limparFormulario({ manter = false } = {}) {
   editandoId = null;
-  const ult = lerPref(CHAVE_VEND);
-  $('f-data').value = hojeISO();
-  $('f-vendedor').value = VENDEDORES.includes(ult) ? ult : '';
-  $('f-cidade').value = '';
+  if (!manter) {
+    const ult = lerPref(CHAVE_VEND);
+    $('f-data').value = hojeISO();
+    $('f-vendedor').value = VENDEDORES.includes(ult) ? ult : '';
+    $('f-cidade').value = '';
+  }
   $('f-valor').value = '';
   $('f-obs').value = '';
   selecionarTipo(null);
   $('titulo-form').textContent = 'Novo lançamento';
   $('btn-salvar').textContent = 'Salvar lançamento';
   $('btn-cancelar').hidden = true;
-  document.querySelectorAll('.erro-campo').forEach(e => e.classList.remove('erro-campo'));
+  ['f-data', 'f-vendedor', 'f-cidade', 'f-tipo', 'f-valor', 'f-obs'].forEach(limparErro);
+}
+
+/* Erros de validação: destaque no campo, texto logo abaixo dele e aviso no topo do formulário. */
+let msgDeValidacao = false;
+function marcarErro(id, texto) {
+  $(id).classList.add('erro-campo');
+  const e = $('e-' + id);
+  if (e) e.textContent = texto;
+}
+function limparErro(id) {
+  $(id).classList.remove('erro-campo');
+  const e = $('e-' + id);
+  if (e) e.textContent = '';
+  if (msgDeValidacao && !document.querySelector('#form .erro-campo')) { $('msg-form').hidden = true; msgDeValidacao = false; }
+}
+function mostrarErroValidacao(texto, primeiroId) {
+  mostrarMsg($('msg-form'), 'alerta', texto);
+  msgDeValidacao = true;
+  const alvo = $(primeiroId);
+  alvo.scrollIntoView({ block: 'center' });
+  (primeiroId === 'f-tipo' ? alvo.querySelector('button') : alvo).focus({ preventScroll: true });
 }
 function atualizarCidades() {
   const set = [...new Set(dados.map(r => r.cidade).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
@@ -499,9 +532,9 @@ function atualizarDicaLimite() {
     el.textContent = `Alimentação do dia: ${brl(total)} de ${brl(LIMITE_ALIMENTACAO)} (resta ${brl(LIMITE_ALIMENTACAO - total)}).`;
   }
 }
-['f-vendedor', 'f-data', 'f-valor'].forEach(id => $(id).addEventListener('input', () => { $(id).classList.remove('erro-campo'); atualizarDicaLimite(); atualizarObs(); }));
-$('f-obs').addEventListener('input', () => { if ($('f-obs').value.trim().length >= MIN_JUSTIFICATIVA) $('f-obs').classList.remove('erro-campo'); atualizarObs(); });
-$('f-cidade').addEventListener('input', () => $('f-cidade').classList.remove('erro-campo'));
+['f-vendedor', 'f-data', 'f-valor'].forEach(id => $(id).addEventListener('input', () => { limparErro(id); atualizarDicaLimite(); atualizarObs(); }));
+$('f-obs').addEventListener('input', () => { if ($('f-obs').value.trim().length >= MIN_JUSTIFICATIVA) limparErro('f-obs'); atualizarObs(); });
+$('f-cidade').addEventListener('input', () => { if ($('f-cidade').value.trim()) limparErro('f-cidade'); });
 
 $('form').addEventListener('submit', ev => {
   ev.preventDefault();
@@ -514,16 +547,19 @@ $('form').addEventListener('submit', ev => {
     obs: $('f-obs').value.trim()
   };
   const faltando = [];
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(reg.data)) { $('f-data').classList.add('erro-campo'); faltando.push('data'); }
-  if (!reg.vendedor) { $('f-vendedor').classList.add('erro-campo'); faltando.push('vendedor'); }
-  if (!reg.cidade) { $('f-cidade').classList.add('erro-campo'); faltando.push('cidade'); }
-  if (!reg.tipo) { $('f-tipo').classList.add('erro-campo'); faltando.push('tipo'); }
-  if (!(reg.valor > 0)) { $('f-valor').classList.add('erro-campo'); faltando.push('valor'); }
-  if (faltando.length) { mostrarMsg($('msg-form'), 'alerta', 'Preencha: ' + faltando.join(', ') + '.'); return; }
+  const falta = (id, nome, texto) => { marcarErro(id, texto); faltando.push([id, nome]); };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(reg.data)) falta('f-data', 'data', 'Informe a data.');
+  if (!reg.vendedor) falta('f-vendedor', 'vendedor', 'Escolha o vendedor.');
+  if (!reg.cidade) falta('f-cidade', 'cidade', 'Informe a cidade.');
+  if (!reg.tipo) falta('f-tipo', 'tipo', 'Escolha o tipo de despesa.');
+  if (!(reg.valor > 0)) falta('f-valor', 'valor', 'Informe um valor maior que zero.');
+  if (faltando.length) {
+    mostrarErroValidacao('Não foi salvo. Preencha: ' + faltando.map(f => f[1]).join(', ') + '.', faltando[0][0]);
+    return;
+  }
   if (exigeJustificativa(reg.tipo, reg.valor) && reg.obs.length < MIN_JUSTIFICATIVA) {
-    $('f-obs').classList.add('erro-campo');
-    $('f-obs').focus();
-    mostrarMsg($('msg-form'), 'alerta', `Hospedagem de ${brl(reg.valor)} está acima de ${brl(LIMITE_HOSPEDAGEM)}: escreva uma justificativa com pelo menos ${MIN_JUSTIFICATIVA} caracteres antes de salvar.`);
+    marcarErro('f-obs', '');
+    mostrarErroValidacao(`Não foi salvo. Hospedagem de ${brl(reg.valor)} está acima de ${brl(LIMITE_HOSPEDAGEM)}: escreva uma justificativa com pelo menos ${MIN_JUSTIFICATIVA} caracteres.`, 'f-obs');
     return;
   }
 
@@ -544,11 +580,13 @@ $('form').addEventListener('submit', ev => {
     const tot = totaisAlimentacao(dados).get(reg.vendedor + '|' + reg.data);
     if (acimaDoLimite(tot)) { tipoMsg = 'alerta'; texto += ` Atenção: alimentação do dia soma ${brl(tot)}, acima do limite em ${brl(tot - LIMITE_ALIMENTACAO)}.`; }
   }
-  mostrarMsg($('msg-form'), tipoMsg, texto);
   if (reg.data.slice(0, 7) !== mesAtual) { mesAtual = reg.data.slice(0, 7); $('mes').value = mesAtual; }
-  limparFormulario();
+  limparFormulario({ manter: !foiEdicao });
+  mostrarMsg($('msg-form'), tipoMsg, texto);
+  msgDeValidacao = false;
   atualizarCidades();
   if (foiEdicao) trocarAba('lista');
+  else { document.activeElement?.blur(); $('msg-form').scrollIntoView({ block: 'start' }); }
 });
 $('btn-cancelar').addEventListener('click', () => { limparFormulario(); $('msg-form').hidden = true; trocarAba('lista'); });
 
