@@ -1,0 +1,201 @@
+﻿codigo;cliente;cidade;uf;segmento;email
+1;Atacarejo Santo Antônio;Tangará da Serra;MT;Supermercado;contato@atacarejosantoantonio.com.br
+2;Posto e Conveniência Recanto;Várzea Grande;MT;Conveniência;contato@postoeconvenienciarecanto.com.br
+3;Cantina Vale Verde;Rondonópolis;MT;Restaurante;contato@cantinavaleverde.com.br
+4;Supermercado Real;Cuiabá;MT;Supermercado;contato@supermercadoreal.com.br
+5;Super Vitória;Porto Velho;RO;Supermercado;contato@supervitoria.com.br
+6;Confeitaria Rio Cuiabá;Cáceres;MT;Padaria;contato@confeitariariocuiaba.com.br
+7;Super Nova Era;Primavera do Leste;MT;Supermercado;contato@supernovaera.com.br
+8;Mini Mercado Esperança;Rondonópolis;MT;Conveniência;contato@minimercadoesperanca.com.br
+9;Empório São José;Várzea Grande;MT;Mercearia;contato@emporiosaojose.com.br
+10;Armazém Primavera;Lucas do Rio Verde;MT;Mercearia;contato@armazemprimavera.com.br
+11;Armazém Pantanal;Sinop;MT;Mercearia;contato@armazempantanal.com.br
+12;Confeitaria Boa Vista;Cáceres;MT;Padaria;contato@confeitariaboavista.com.br
+13;Mercearia São José;Sinop;MT;Mercearia;contato@merceariasaojose.com.br
+14;Churrascaria Primavera;Sinop;MT;Restaurante;contato@churrascariaprimavera.com.br
+15;Armazém Santo Antônio;Cáceres;MT;Mercearia;contato@armazemsantoantonio.com.br
+16;Super Bom Preço;Cuiabá;MT;Supermercado;contato@superbompreco.com.br
+17;Confeitaria Dois Irmãos;Várzea Grande;MT;Padaria;contato@confeitariadoisirmaos.com.br
+18;Armazém Dois Irmãos;Lucas do Rio Verde;MT;Mercearia;contato@armazemdoisirmaos.com.br
+19;Super Progresso;Rondonópolis;MT;Supermercado;contato@superprogresso.com.br
+20;Cantina Popular;Campo Grande;MS;Restaurante;contato@cantinapopular.com.br
+21;Cantina Esperança;Cuiabá;MT;Restaurante;
+22;Padaria Bom Preço;Rondonópolis;MT;Padaria;contato@padariabompreco.com.br
+23;Supermercado Sol Nascente;Cuiabá;MT;Supermercado;contato@supermercadosolnascente.com.br
+24;Confeitaria Vitória;Cuiabá;MT;Padaria;contato@confeitariavitoria.com.br
+25;Empório Santa Rita;Sinop;MT;Mercearia;contato@emporiosantarita.com.br
+26;Confeitaria Santo Antônio;Cuiabá;MT;Padaria;contato@confeitariasantoantonio.com.br
+27;Confeitaria Jardim;Rondonópolis;MT;Padaria;contato@confeitariajardim.com.br
+28;Mercearia Bandeirantes;Cuiabá;MT;Mercearia;contato@merceariabandeirantes.com.br
+29;Supermercado Pantanal;Rondonópolis;MT;Supermercado;contato@supermercadopantanal.com.br
+30;Mercearia Dois Irmãos;Campo Grande;MS;Mercearia;contato@merceariadoisirmaos.com.br
+31;Atacarejo Coxipó;Cuiabá;MT;Supermercado;contato@atacarejocoxipo.com.br
+32;Armazém Rio Cuiabá;Sinop;MT;Mercearia;contato@armazemriocuiaba.com.br
+33;Padaria Boa Esperança;Barra do Garças;MT;Padaria;contato@padariaboaesperanca.com.br
+34;Conveniência Três Irmãos;Cáceres;MT;Conveniência;
+35;Armazém Santa Rita;Cuiabá;MT;Mercearia;contato@armazemsantarita.com.br
+36;Empório Ipê Amarelo;Várzea Grande;MT;Mercearia;contato@emporioipeamarelo.com.br
+37;Super Alvorada;Cuiabá;MT;Supermercado;contato@superalvorada.com.br
+38;Mercearia Coxipó;Sorriso;MT;Mercearia;contato@merceariacoxipo.com.br
+39;Conveniência Bom Preço;Campo Grande;MS;Conveniência;contato@convenienciabompreco.com.br
+40;Armazém Popular;Campo Grande;MS;Mercearia;contato@armazempopular.com.br
+41;Armazém Morada;Sorriso;MT;Mercearia;
+42;Churrascaria Morada;Cáceres;MT;Restaurante;contato@churrascariamorada.com.br
+43;Atacarejo Santa Rita;Cuiabá;MT;Supermercado;
+44;Mercearia Cerrado;Sorriso;MT;Mercearia;contato@merceariacerrado.com.br
+45;Super Tuiuiú;Sinop;MT;Supermercado;contato@supertuiuiu.com.br
+46;Empório Primavera;Cuiabá;MT;Mercearia;contato@emporioprimavera.com.br
+47;Panificadora Alvorada;Campo Grande;MS;Padaria;
+48;Supermercado Boa Vista;Tangará da Serra;MT;Supermercado;contato@supermercadoboavista.com.br
+49;Mini Mercado Oásis;Sinop;MT;Conveniência;contato@minimercadooasis.com.br
+50;Atacarejo Central;Sinop;MT;Supermercado;contato@atacarejocentral.com.br
+51;Posto e Conveniência Esperança;Primavera do Leste;MT;Conveniência;contato@postoeconvenienciaesperanca.com.br
+52;Supermercado Paraíso;Primavera do Leste;MT;Supermercado;contato@supermercadoparaiso.com.br
+53;Supermercado Jardim;Sorriso;MT;Supermercado;contato@supermercadojardim.com.br
+54;Super Estrela;Sinop;MT;Supermercado;contato@superestrela.com.br
+55;Supermercado Santa Rita;Rondonópolis;MT;Supermercado;contato@supermercadosantarita.com.br
+56;Restaurante Paraíso;Sinop;MT;Restaurante;contato@restauranteparaiso.com.br
+57;Empório do Bairro;Sorriso;MT;Mercearia;contato@emporiodobairro.com.br
+58;Churrascaria Recanto;Várzea Grande;MT;Restaurante;contato@churrascariarecanto.com.br
+59;Supermercado Tuiuiú;Sinop;MT;Supermercado;contato@supermercadotuiuiu.com.br
+60;Armazém Vale Verde;Cuiabá;MT;Mercearia;contato@armazemvaleverde.com.br
+61;Cantina Coxipó;Sorriso;MT;Restaurante;
+62;Posto e Conveniência Sol Nascente;Rondonópolis;MT;Conveniência;contato@postoeconvenienciasolnascente.com.br
+63;Posto e Conveniência Porto;Cáceres;MT;Conveniência;contato@postoeconvenienciaporto.com.br
+64;Super União;Primavera do Leste;MT;Supermercado;contato@superuniao.com.br
+65;Churrascaria Três Irmãos;Primavera do Leste;MT;Restaurante;contato@churrascariatresirmaos.com.br
+66;Atacarejo Alvorada;Cuiabá;MT;Supermercado;contato@atacarejoalvorada.com.br
+67;Posto e Conveniência Alvorada;Sorriso;MT;Conveniência;contato@postoeconvenienciaalvorada.com.br
+68;Atacarejo Primavera;Cuiabá;MT;Supermercado;contato@atacarejoprimavera.com.br
+69;Supermercado Vale Verde;Várzea Grande;MT;Supermercado;contato@supermercadovaleverde.com.br
+70;Armazém Família;Campo Grande;MS;Mercearia;
+71;Cantina Recanto;Cuiabá;MT;Restaurante;contato@cantinarecanto.com.br
+72;Restaurante Família;Primavera do Leste;MT;Restaurante;contato@restaurantefamilia.com.br
+73;Empório Estrela;Porto Velho;RO;Mercearia;
+74;Cantina Paraíso;Várzea Grande;MT;Restaurante;contato@cantinaparaiso.com.br
+75;Mercearia Progresso;Rondonópolis;MT;Mercearia;
+76;Atacarejo Bom Preço;Lucas do Rio Verde;MT;Supermercado;contato@atacarejobompreco.com.br
+77;Supermercado Pequi;Sinop;MT;Supermercado;
+78;Mercearia Rio Cuiabá;Várzea Grande;MT;Mercearia;contato@merceariariocuiaba.com.br
+79;Super Dois Irmãos;Cuiabá;MT;Supermercado;contato@superdoisirmaos.com.br
+80;Empório Vale Verde;Várzea Grande;MT;Mercearia;contato@emporiovaleverde.com.br
+81;Super Jardim;Cuiabá;MT;Supermercado;contato@superjardim.com.br
+82;Armazém Recanto;Várzea Grande;MT;Mercearia;contato@armazemrecanto.com.br
+83;Mercearia Estrela;Lucas do Rio Verde;MT;Mercearia;contato@merceariaestrela.com.br
+84;Confeitaria Bandeirantes;Cuiabá;MT;Padaria;contato@confeitariabandeirantes.com.br
+85;Cantina União;Lucas do Rio Verde;MT;Restaurante;contato@cantinauniao.com.br
+86;Mini Mercado Nova Era;Sinop;MT;Conveniência;contato@minimercadonovaera.com.br
+87;Confeitaria São José;Cuiabá;MT;Padaria;contato@confeitariasaojose.com.br
+88;Mercearia Recanto;Cáceres;MT;Mercearia;contato@merceariarecanto.com.br
+89;Super Boa Esperança;Rondonópolis;MT;Supermercado;contato@superboaesperanca.com.br
+90;Empório Popular;Cuiabá;MT;Mercearia;contato@emporiopopular.com.br
+91;Atacarejo Guaraná;Várzea Grande;MT;Supermercado;contato@atacarejoguarana.com.br
+92;Mercearia Chapada;Sorriso;MT;Mercearia;
+93;Mini Mercado Progresso;Cuiabá;MT;Conveniência;contato@minimercadoprogresso.com.br
+94;Armazém Esperança;Cuiabá;MT;Mercearia;contato@armazemesperanca.com.br
+95;Supermercado Nova Era;Várzea Grande;MT;Supermercado;contato@supermercadonovaera.com.br
+96;Atacarejo Família;Cáceres;MT;Supermercado;contato@atacarejofamilia.com.br
+97;Churrascaria Vale Verde;Sinop;MT;Restaurante;
+98;Padaria Popular;Sinop;MT;Padaria;contato@padariapopular.com.br
+99;Panificadora União;Várzea Grande;MT;Padaria;contato@panificadorauniao.com.br
+100;Super Primavera;Cuiabá;MT;Supermercado;
+101;Empório Tuiuiú;Rondonópolis;MT;Mercearia;contato@emporiotuiuiu.com.br
+102;Empório Rio Cuiabá;Cáceres;MT;Mercearia;contato@emporioriocuiaba.com.br
+103;Cantina Três Irmãos;Sinop;MT;Restaurante;contato@cantinatresirmaos.com.br
+104;Empório Progresso;Tangará da Serra;MT;Mercearia;contato@emporioprogresso.com.br
+105;Padaria Primavera;Campo Grande;MS;Padaria;contato@padariaprimavera.com.br
+106;Mercearia Pequi;Porto Velho;RO;Mercearia;contato@merceariapequi.com.br
+107;Supermercado Santo Antônio;Cuiabá;MT;Supermercado;contato@supermercadosantoantonio.com.br
+108;Restaurante Recanto;Tangará da Serra;MT;Restaurante;contato@restauranterecanto.com.br
+109;Churrascaria Guaraná;Cáceres;MT;Restaurante;contato@churrascariaguarana.com.br
+110;Mercearia Nova Era;Cuiabá;MT;Mercearia;contato@mercearianovaera.com.br
+111;Conveniência Tuiuiú;Sorriso;MT;Conveniência;
+112;Padaria Oásis;Cuiabá;MT;Padaria;contato@padariaoasis.com.br
+113;Cantina Guaraná;Rondonópolis;MT;Restaurante;contato@cantinaguarana.com.br
+114;Armazém Ipê Amarelo;Rondonópolis;MT;Mercearia;contato@armazemipeamarelo.com.br
+115;Mercearia Três Irmãos;Cuiabá;MT;Mercearia;contato@merceariatresirmaos.com.br
+116;Posto e Conveniência Primavera;Várzea Grande;MT;Conveniência;contato@postoeconvenienciaprimavera.com.br
+117;Atacarejo Paraíso;Cuiabá;MT;Supermercado;contato@atacarejoparaiso.com.br
+118;Cantina Central;Várzea Grande;MT;Restaurante;contato@cantinacentral.com.br
+119;Empório Oásis;Primavera do Leste;MT;Mercearia;contato@emporiooasis.com.br
+120;Restaurante Central;Cáceres;MT;Restaurante;contato@restaurantecentral.com.br
+121;Armazém Guaraná;Tangará da Serra;MT;Mercearia;contato@armazemguarana.com.br
+122;Restaurante Tuiuiú;Cuiabá;MT;Restaurante;contato@restaurantetuiuiu.com.br
+123;Empório Dois Irmãos;Porto Velho;RO;Mercearia;contato@emporiodoisirmaos.com.br
+124;Empório Pequi;Tangará da Serra;MT;Mercearia;contato@emporiopequi.com.br
+125;Cantina Primavera;Campo Grande;MS;Restaurante;contato@cantinaprimavera.com.br
+126;Armazém Coxipó;Campo Grande;MS;Mercearia;contato@armazemcoxipo.com.br
+127;Supermercado Rio Cuiabá;Rondonópolis;MT;Supermercado;contato@supermercadoriocuiaba.com.br
+128;Empório Guaraná;Rondonópolis;MT;Mercearia;contato@emporioguarana.com.br
+129;Mercearia Boa Vista;Várzea Grande;MT;Mercearia;contato@merceariaboavista.com.br
+130;Supermercado União;Cáceres;MT;Supermercado;contato@supermercadouniao.com.br
+131;Atacarejo Oásis;Cáceres;MT;Supermercado;contato@atacarejooasis.com.br
+132;Mini Mercado Alvorada;Cuiabá;MT;Conveniência;contato@minimercadoalvorada.com.br
+133;Mercearia Vale Verde;Rondonópolis;MT;Mercearia;contato@merceariavaleverde.com.br
+134;Supermercado Bandeirantes;Cáceres;MT;Supermercado;contato@supermercadobandeirantes.com.br
+135;Supermercado Coxipó;Várzea Grande;MT;Supermercado;contato@supermercadocoxipo.com.br
+136;Armazém São José;Sinop;MT;Mercearia;contato@armazemsaojose.com.br
+137;Empório Porto;Lucas do Rio Verde;MT;Mercearia;contato@emporioporto.com.br
+138;Mercearia Sol Nascente;Cuiabá;MT;Mercearia;contato@merceariasolnascente.com.br
+139;Super Esperança;Cuiabá;MT;Supermercado;contato@superesperanca.com.br
+140;Atacarejo Recanto;Cuiabá;MT;Supermercado;contato@atacarejorecanto.com.br
+141;Atacarejo Chapada;Campo Grande;MS;Supermercado;contato@atacarejochapada.com.br
+142;Padaria Araras;Cuiabá;MT;Padaria;
+143;Super Guaraná;Tangará da Serra;MT;Supermercado;contato@superguarana.com.br
+144;Atacarejo Boa Esperança;Cuiabá;MT;Supermercado;contato@atacarejoboaesperanca.com.br
+145;Empório Cerrado;Sinop;MT;Mercearia;contato@emporiocerrado.com.br
+146;Mercearia Alvorada;Várzea Grande;MT;Mercearia;contato@merceariaalvorada.com.br
+147;Restaurante Sol Nascente;Cuiabá;MT;Restaurante;contato@restaurantesolnascente.com.br
+148;Empório Família;Rondonópolis;MT;Mercearia;contato@emporiofamilia.com.br
+149;Restaurante Morada;Primavera do Leste;MT;Restaurante;contato@restaurantemorada.com.br
+150;Armazém Nova Era;Tangará da Serra;MT;Mercearia;contato@armazemnovaera.com.br
+151;Mercearia Bom Preço;Lucas do Rio Verde;MT;Mercearia;contato@merceariabompreco.com.br
+152;Empório Morada;Várzea Grande;MT;Mercearia;
+153;Restaurante Primavera;Cuiabá;MT;Restaurante;contato@restauranteprimavera.com.br
+154;Confeitaria Morada;Tangará da Serra;MT;Padaria;contato@confeitariamorada.com.br
+155;Restaurante Pantanal;Várzea Grande;MT;Restaurante;contato@restaurantepantanal.com.br
+156;Armazém Três Irmãos;Cuiabá;MT;Mercearia;
+157;Empório Pantanal;Rondonópolis;MT;Mercearia;contato@emporiopantanal.com.br
+158;Armazém Bom Preço;Rondonópolis;MT;Mercearia;
+159;Mini Mercado Rio Cuiabá;Lucas do Rio Verde;MT;Conveniência;contato@minimercadoriocuiaba.com.br
+160;Empório Três Irmãos;Cuiabá;MT;Mercearia;contato@emporiotresirmaos.com.br
+161;Atacarejo Pantanal;Cuiabá;MT;Supermercado;contato@atacarejopantanal.com.br
+162;Mini Mercado do Bairro;Primavera do Leste;MT;Conveniência;contato@minimercadodobairro.com.br
+163;Conveniência Bandeirantes;Cuiabá;MT;Conveniência;contato@convenienciabandeirantes.com.br
+164;Empório Boa Esperança;Rondonópolis;MT;Mercearia;contato@emporioboaesperanca.com.br
+165;Empório Sol Nascente;Cuiabá;MT;Mercearia;
+166;Restaurante Jardim;Cuiabá;MT;Restaurante;contato@restaurantejardim.com.br
+167;Atacarejo Cerrado;Sinop;MT;Supermercado;contato@atacarejocerrado.com.br
+168;Armazém Jardim;Lucas do Rio Verde;MT;Mercearia;contato@armazemjardim.com.br
+169;Churrascaria Santo Antônio;Cuiabá;MT;Restaurante;contato@churrascariasantoantonio.com.br
+170;Cantina Vitória;Sorriso;MT;Restaurante;contato@cantinavitoria.com.br
+171;Empório Bandeirantes;Sinop;MT;Mercearia;contato@emporiobandeirantes.com.br
+172;Posto e Conveniência Vale Verde;Várzea Grande;MT;Conveniência;
+173;Super Três Irmãos;Goiânia;GO;Supermercado;contato@supertresirmaos.com.br
+174;Supermercado Boa Esperança;Cuiabá;MT;Supermercado;
+175;Empório Coxipó;Goiânia;GO;Mercearia;
+176;Supermercado Recanto;Primavera do Leste;MT;Supermercado;contato@supermercadorecanto.com.br
+177;Super Sol Nascente;Cuiabá;MT;Supermercado;contato@supersolnascente.com.br
+178;Confeitaria Paraíso;Sorriso;MT;Padaria;
+179;Cantina Rio Cuiabá;Rondonópolis;MT;Restaurante;contato@cantinariocuiaba.com.br
+180;Armazém Sol Nascente;Várzea Grande;MT;Mercearia;contato@armazemsolnascente.com.br
+181;Atacarejo Jardim;Cuiabá;MT;Supermercado;contato@atacarejojardim.com.br
+182;Cantina Ipê Amarelo;Sinop;MT;Restaurante;contato@cantinaipeamarelo.com.br
+183;Armazém Pequi;Rondonópolis;MT;Mercearia;contato@armazempequi.com.br
+184;Super Família;Várzea Grande;MT;Supermercado;contato@superfamilia.com.br
+185;Supermercado Bom Preço;Barra do Garças;MT;Supermercado;contato@supermercadobompreco.com.br
+186;Churrascaria São José;Tangará da Serra;MT;Restaurante;contato@churrascariasaojose.com.br
+187;Churrascaria Bandeirantes;Tangará da Serra;MT;Restaurante;contato@churrascariabandeirantes.com.br
+188;Confeitaria Real;Sinop;MT;Padaria;contato@confeitariareal.com.br
+189;Super Bandeirantes;Cáceres;MT;Supermercado;contato@superbandeirantes.com.br
+190;Super Oásis;Cuiabá;MT;Supermercado;contato@superoasis.com.br
+191;Supermercado Central;Cuiabá;MT;Supermercado;contato@supermercadocentral.com.br
+192;Supermercado Guaraná;Rondonópolis;MT;Supermercado;contato@supermercadoguarana.com.br
+193;Supermercado Alvorada;Cuiabá;MT;Supermercado;contato@supermercadoalvorada.com.br
+194;Conveniência Vale Verde;Primavera do Leste;MT;Conveniência;
+195;Empório Alvorada;Barra do Garças;MT;Mercearia;contato@emporioalvorada.com.br
+196;Conveniência Cerrado;Várzea Grande;MT;Conveniência;contato@convenienciacerrado.com.br
+197;Confeitaria Família;Sinop;MT;Padaria;
+198;Panificadora Três Irmãos;Rondonópolis;MT;Padaria;
+199;Atacarejo Araras;Cuiabá;MT;Supermercado;contato@atacarejoararas.com.br
+200;Empório Recanto;Cuiabá;MT;Mercearia;contato@emporiorecanto.com.br

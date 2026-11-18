@@ -1,0 +1,61 @@
+﻿codigo;produto;categoria;preco
+1;Água Mineral 500ml (fardo 12un);Bebidas;18,90
+2;Refrigerante Cola 2L;Bebidas;9,49
+3;Refrigerante Guaraná 2L;Bebidas;8,79
+4;Suco de Laranja 1L;Bebidas;7,99
+5;Chá Gelado Limão 1,5L;Bebidas;6,49
+6;Energético 473ml;Bebidas;9,90
+7;Cerveja Lata 350ml (pack 12un);Bebidas;42,90
+8;Arroz Tipo 1 5kg;Mercearia;27,90
+9;Feijão Carioca 1kg;Mercearia;8,49
+10;Açúcar Cristal 5kg;Mercearia;22,90
+11;Café Torrado e Moído 500g;Mercearia;19,90
+12;Óleo de Soja 900ml;Mercearia;7,29
+13;Macarrão Espaguete 500g;Mercearia;4,59
+14;Farinha de Mandioca 1kg;Mercearia;9,90
+15;Sal Refinado 1kg;Mercearia;3,29
+16;Molho de Tomate 340g;Mercearia;3,49
+17;Farinha de Trigo 1kg;Mercearia;5,79
+18;Fubá 1kg;Mercearia;4,29
+19;Detergente Líquido 500ml;Limpeza;2,79
+20;Sabão em Pó 1kg;Limpeza;14,90
+21;Água Sanitária 2L;Limpeza;6,49
+22;Desinfetante 2L;Limpeza;9,90
+23;Amaciante 2L;Limpeza;15,90
+24;Esponja Multiuso (pack 3un);Limpeza;4,99
+25;Limpador Multiuso 500ml;Limpeza;5,49
+26;Sabonete 85g (pack 6un);Higiene Pessoal;12,90
+27;Creme Dental 90g;Higiene Pessoal;4,99
+28;Shampoo 350ml;Higiene Pessoal;16,90
+29;Condicionador 350ml;Higiene Pessoal;17,90
+30;Papel Higiênico (pack 12 rolos);Higiene Pessoal;21,90
+31;Desodorante Aerosol 150ml;Higiene Pessoal;15,49
+32;Escova Dental;Higiene Pessoal;6,90
+33;Leite Integral 1L (caixa 12un);Laticínios;59,90
+34;Queijo Muçarela kg;Laticínios;44,90
+35;Manteiga 200g;Laticínios;12,90
+36;Iogurte Morango 1L;Laticínios;8,99
+37;Requeijão Cremoso 200g;Laticínios;8,49
+38;Leite Condensado 395g;Laticínios;6,99
+39;Creme de Leite 200g;Laticínios;3,99
+40;Biscoito Recheado 130g;Snacks e Doces;3,29
+41;Batata Chips 100g;Snacks e Doces;8,90
+42;Chocolate ao Leite 90g;Snacks e Doces;6,49
+43;Bala de Goma 100g;Snacks e Doces;4,29
+44;Amendoim Torrado 500g;Snacks e Doces;11,90
+45;Biscoito Cream Cracker 400g;Snacks e Doces;6,79
+46;Paçoca (pote 50un);Snacks e Doces;19,90
+47;Pão de Queijo Congelado 1kg;Congelados;22,90
+48;Lasanha Congelada 600g;Congelados;17,90
+49;Hambúrguer Bovino (caixa 12un);Congelados;24,90
+50;Batata Pré-frita 2kg;Congelados;29,90
+51;Pizza Congelada Muçarela;Congelados;19,90
+52;Sorvete Creme 2L;Congelados;24,90
+53;Polpa de Fruta 1kg;Congelados;14,90
+54;Copo Descartável 200ml (100un);Utilidades Domésticas;6,99
+55;Guardanapo de Papel (pack 50un);Utilidades Domésticas;3,49
+56;Saco de Lixo 100L (rolo 15un);Utilidades Domésticas;12,90
+57;Papel Alumínio 7,5m;Utilidades Domésticas;7,49
+58;Filme PVC 28m;Utilidades Domésticas;6,99
+59;Fósforo (pack 10cx);Utilidades Domésticas;4,49
+60;Cafeteira Elétrica 110V;Utilidades Domésticas;129,90
