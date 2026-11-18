@@ -1,0 +1,60 @@
+# Distribuidora Pantanal — refaz o painel de vendas automaticamente.
+#
+# Quando roda:
+#   - sempre que o arquivo dados/vendas_2026.csv for enviado ou alterado na branch main;
+#   - quando a aparência ou as regras do painel mudarem (painel/modelo.html ou painel/gerar_painel.py);
+#   - ou quando alguém clicar em "Run workflow" na aba Actions do GitHub.
+#
+# O que faz:
+#   1. refaz a página do painel com as vendas novas  (painel/gerar_painel.py)
+#   2. salva na branch main o arquivo painel/index.html atualizado.
+
+name: Atualizar painel de vendas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dados/vendas_2026.csv"
+      - "painel/modelo.html"
+      - "painel/gerar_painel.py"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Se duas atualizações chegarem quase juntas, uma espera a outra terminar.
+concurrency:
+  group: atualizar-painel-vendas
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    env:
+      # Datas no fuso de Mato Grosso ("Atualizado em" e vendas depois de hoje).
+      TZ: America/Cuiaba
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refazer o painel
+        run: python3 painel/gerar_painel.py
+
+      - name: Salvar o resultado na branch main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add painel/index.html
+          if git diff --cached --quiet; then
+            echo "Nada mudou no painel."
+            exit 0
+          fi
+          git commit -m "Atualiza painel de vendas ($(date +%d/%m/%Y))"
+          git pull --rebase origin main
+          git push origin HEAD:main

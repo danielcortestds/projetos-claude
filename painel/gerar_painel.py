@@ -1,27 +1,33 @@
 """
-Distribuidora Pantanal — painel de vendas 2026.
+Distribuidora Pantanal — painel de vendas.
 
 Lê:    dados/vendas_2026.csv
-Gera:  painel/index.html (uma página só, com as vendas já dentro; abre com dois cliques, sem internet)
-Modelo: painel/modelo.html (aparência da página)
+Gera:  painel/index.html (uma página só, com o arquivo de vendas já dentro; abre com dois cliques, sem internet)
+Modelo: painel/modelo.html (aparência da página e todas as contas)
 
-Regras:
+As contas são feitas pela própria página, do mesmo jeito para o arquivo que vem dentro dela e para
+um arquivo escolhido no botão "Carregar arquivo". Este script só coloca o arquivo dentro da página
+e mostra na tela um resumo para conferência.
+
+Regras (as mesmas da página):
 - Pedidos com status "Cancelado" ficam fora dos números (aparecem só no cartão de cancelados).
 - Faturamento = soma da coluna "valor" (já com desconto).
 - Pedidos = número de pedidos diferentes.
 - Ticket médio = faturamento ÷ pedidos.
 - Vendas com data depois de hoje fazem parte do planejamento de vendas e entram normalmente.
-- Os filtros (período, vendedor, cidade e categoria) são aplicados na própria página.
-- Categorias: os meses escolhidos são divididos em duas metades; a média por mês da 1ª metade
-  é comparada com a da 2ª (sem filtro de período: jan–jun contra jul–nov).
 
 Como usar, na pasta principal do repositório:
     python3 painel/gerar_painel.py
+
+No GitHub, a automação .github/workflows/atualizar_painel.yml roda este script sozinha
+sempre que dados/vendas_2026.csv mudar.
 """
 
 import csv
+import io
 import json
-from datetime import date, datetime
+import sys
+from datetime import datetime
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -29,13 +35,15 @@ ARQUIVO_VENDAS = RAIZ / "dados" / "vendas_2026.csv"
 ARQUIVO_SAIDA = RAIZ / "painel" / "index.html"
 MODELO = Path(__file__).resolve().parent / "modelo.html"
 
-MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-MESES_LONGOS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho",
-                "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+# Mesma lista usada pela página para avisar quando faltar alguma coluna.
+COLUNAS_OBRIGATORIAS = ["pedido", "data", "cidade", "uf", "vendedor", "categoria", "valor", "status"]
 
 
 def numero(texto):
-    return float(texto.strip().replace(".", "").replace(",", "."))
+    texto = texto.strip().replace("R$", "").strip()
+    if "," in texto:
+        texto = texto.replace(".", "").replace(",", ".")
+    return float(texto)
 
 
 def reais(valor):
@@ -43,73 +51,55 @@ def reais(valor):
     return f"R$ {texto}"
 
 
-def ler_vendas():
-    with open(ARQUIVO_VENDAS, encoding="utf-8-sig", newline="") as arquivo:
-        linhas = list(csv.DictReader(arquivo, delimiter=";"))
-    for linha in linhas:
-        linha["data"] = datetime.strptime(linha["data"].strip(), "%d/%m/%Y").date()
-        linha["valor"] = numero(linha["valor"])
-    return linhas
+def ler_texto():
+    bruto = ARQUIVO_VENDAS.read_bytes()
+    try:
+        return bruto.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        return bruto.decode("cp1252")
 
 
-def calcular(linhas):
-    """Prepara as vendas, linha por linha, para a página fazer as contas com os filtros."""
-    hoje = date.today()
-    vendedores = sorted({l["vendedor"].strip() for l in linhas})
-    cidades = sorted({(l["cidade"].strip(), l["uf"].strip()) for l in linhas})
-    categorias = sorted({l["categoria"].strip() for l in linhas})
-    meses = sorted({l["data"].month for l in linhas})
-    i_vend = {n: i for i, n in enumerate(vendedores)}
-    i_cid = {c[0]: i for i, c in enumerate(cidades)}
-    i_cat = {n: i for i, n in enumerate(categorias)}
-
-    # Cada linha: [pedido, mês, vendedor, cidade, categoria, valor em centavos, marcas]
-    # marcas: 1 = cancelado, 2 = data depois de hoje (planejamento)
-    compactas = []
-    for l in linhas:
-        marcas = (1 if l["status"].strip() == "Cancelado" else 0) | (2 if l["data"] > hoje else 0)
-        compactas.append([int(l["pedido"]), l["data"].month, i_vend[l["vendedor"].strip()],
-                          i_cid[l["cidade"].strip()], i_cat[l["categoria"].strip()],
-                          round(l["valor"] * 100), marcas])
-
-    ultima = max(l["data"] for l in linhas)
-    return {
-        "ano": ultima.year,
-        "meses": meses,
-        "nomesMeses": MESES,
-        "nomesMesesLongos": MESES_LONGOS,
-        "vendedores": vendedores,
-        "cidades": [list(c) for c in cidades],
-        "categorias": categorias,
-        "linhas": compactas,
-        "primeiraData": min(l["data"] for l in linhas).strftime("%d/%m/%Y"),
-        "ultimaData": ultima.strftime("%d/%m/%Y"),
-        "hoje": hoje.strftime("%d/%m/%Y"),
-        "geradoEm": datetime.now().strftime("%d/%m/%Y"),
-    }
-
-
-def resumo(linhas):
-    entregues = [l for l in linhas if l["status"].strip() != "Cancelado"]
-    fat = sum(l["valor"] for l in entregues)
-    ped = len({l["pedido"] for l in entregues})
-    canc = [l for l in linhas if l["status"].strip() == "Cancelado"]
-    return fat, ped, len({l["pedido"] for l in canc}), sum(l["valor"] for l in canc)
+def resumo(texto):
+    """Conta os totais para conferência na tela (a página faz as mesmas contas)."""
+    primeira = texto.splitlines()[0]
+    separador = ";" if primeira.count(";") >= primeira.count(",") else ","
+    leitor = csv.DictReader(io.StringIO(texto), delimiter=separador)
+    leitor.fieldnames = [c.strip().lower() for c in leitor.fieldnames]
+    faltando = [c for c in COLUNAS_OBRIGATORIAS if c not in leitor.fieldnames]
+    if faltando:
+        sys.exit("ERRO: o arquivo de vendas não tem as colunas: " + ", ".join(faltando))
+    fat, pedidos, canc, valor_canc = 0.0, set(), set(), 0.0
+    for linha in leitor:
+        valor = numero(linha["valor"])
+        if linha["status"].strip().lower().startswith("cancel"):
+            canc.add(linha["pedido"].strip())
+            valor_canc += valor
+        else:
+            pedidos.add(linha["pedido"].strip())
+            fat += valor
+    return fat, len(pedidos), len(canc), valor_canc
 
 
 def main():
-    linhas = ler_vendas()
-    dados = calcular(linhas)
+    texto = ler_texto()
+    fat, ped, canc, valor_canc = resumo(texto)
+
+    original = {
+        "texto": texto,
+        "nomeArquivo": ARQUIVO_VENDAS.name,
+        "geradoEm": datetime.now().strftime("%d/%m/%Y"),
+    }
     modelo = MODELO.read_text(encoding="utf-8")
-    json_dados = json.dumps(dados, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    json_dados = json.dumps(original, ensure_ascii=False, separators=(",", ":"))
+    # Evita que algum texto do arquivo feche a parte de programação da página.
+    json_dados = json_dados.replace("</", "<\\/").replace("<!--", "<\\!--")
     pagina = modelo.replace("/*__DADOS__*/null", json_dados)
     ARQUIVO_SAIDA.write_text(pagina, encoding="utf-8")
 
     print("Painel gerado:", ARQUIVO_SAIDA.relative_to(RAIZ))
-    fat, ped, canc, valor_canc = resumo(linhas)
     print("  Faturamento: ", reais(fat))
     print("  Pedidos:     ", f"{ped:,}".replace(",", "."))
-    print("  Ticket médio:", reais(fat / ped))
+    print("  Ticket médio:", reais(fat / ped) if ped else "-")
     print("  Cancelados:  ", canc, "pedidos,", reais(valor_canc))
 
 
