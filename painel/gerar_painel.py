@@ -2,7 +2,8 @@
 Distribuidora Pantanal — painel de vendas 2026.
 
 Lê:    dados/vendas_2026.csv
-Gera:  painel/index.html (uma página só, com os números já dentro; abre com dois cliques, sem internet)
+Gera:  painel/index.html (uma página só, com as vendas já dentro; abre com dois cliques, sem internet)
+Modelo: painel/modelo.html (aparência da página)
 
 Regras:
 - Pedidos com status "Cancelado" ficam fora dos números (aparecem só no cartão de cancelados).
@@ -10,7 +11,9 @@ Regras:
 - Pedidos = número de pedidos diferentes.
 - Ticket médio = faturamento ÷ pedidos.
 - Vendas com data depois de hoje fazem parte do planejamento de vendas e entram normalmente.
-- Categorias: média por mês do 1º semestre (jan–jun) comparada com a média por mês dos meses seguintes.
+- Os filtros (período, vendedor, cidade e categoria) são aplicados na própria página.
+- Categorias: os meses escolhidos são divididos em duas metades; a média por mês da 1ª metade
+  é comparada com a da 2ª (sem filtro de período: jan–jun contra jul–nov).
 
 Como usar, na pasta principal do repositório:
     python3 painel/gerar_painel.py
@@ -18,7 +21,6 @@ Como usar, na pasta principal do repositório:
 
 import csv
 import json
-from collections import defaultdict
 from datetime import date, datetime
 from pathlib import Path
 
@@ -50,105 +52,65 @@ def ler_vendas():
     return linhas
 
 
-def agrupar(linhas, chave):
-    """Faturamento e pedidos diferentes por grupo."""
-    fat = defaultdict(float)
-    pedidos = defaultdict(set)
-    for linha in linhas:
-        k = chave(linha)
-        fat[k] += linha["valor"]
-        pedidos[k].add(linha["pedido"])
-    return {k: (fat[k], len(pedidos[k])) for k in fat}
-
-
 def calcular(linhas):
-    entregues = [l for l in linhas if l["status"].strip() != "Cancelado"]
-    canceladas = [l for l in linhas if l["status"].strip() == "Cancelado"]
+    """Prepara as vendas, linha por linha, para a página fazer as contas com os filtros."""
+    hoje = date.today()
+    vendedores = sorted({l["vendedor"].strip() for l in linhas})
+    cidades = sorted({(l["cidade"].strip(), l["uf"].strip()) for l in linhas})
+    categorias = sorted({l["categoria"].strip() for l in linhas})
+    meses = sorted({l["data"].month for l in linhas})
+    i_vend = {n: i for i, n in enumerate(vendedores)}
+    i_cid = {c[0]: i for i, c in enumerate(cidades)}
+    i_cat = {n: i for i, n in enumerate(categorias)}
 
-    faturamento = sum(l["valor"] for l in entregues)
-    pedidos = len({l["pedido"] for l in entregues})
-    meses = sorted({l["data"].month for l in entregues})
-
-    por_mes = agrupar(entregues, lambda l: l["data"].month)
-    mensal = [{"mes": MESES[m - 1], "mesLongo": MESES_LONGOS[m - 1],
-               "faturamento": round(por_mes[m][0], 2), "pedidos": por_mes[m][1]} for m in meses]
-
-    def ranking(grupos, extra=None):
-        itens = []
-        for nome, (fat, ped) in grupos.items():
-            item = {"nome": nome, "faturamento": round(fat, 2), "pedidos": ped,
-                    "ticket": round(fat / ped, 2), "participacao": fat / faturamento}
-            if extra:
-                item.update(extra(nome))
-            itens.append(item)
-        return sorted(itens, key=lambda i: -i["faturamento"])
-
-    vendedores = ranking(agrupar(entregues, lambda l: l["vendedor"].strip()))
-    uf_da_cidade = {l["cidade"].strip(): l["uf"].strip() for l in entregues}
-    cidades = ranking(agrupar(entregues, lambda l: l["cidade"].strip()),
-                      lambda nome: {"uf": uf_da_cidade[nome]})
-
-    # Categorias: série mês a mês e comparação 1º semestre x meses seguintes
-    cat_mes = agrupar(entregues, lambda l: (l["categoria"].strip(), l["data"].month))
-    primeiros = [m for m in meses if m <= 6]
-    seguintes = [m for m in meses if m > 6]
-    categorias = []
-    for nome in sorted({l["categoria"].strip() for l in entregues}):
-        serie = [round(cat_mes.get((nome, m), (0, 0))[0], 2) for m in meses]
-        media_a = sum(cat_mes.get((nome, m), (0, 0))[0] for m in primeiros) / max(len(primeiros), 1)
-        media_b = sum(cat_mes.get((nome, m), (0, 0))[0] for m in seguintes) / max(len(seguintes), 1)
-        categorias.append({
-            "nome": nome,
-            "faturamento": round(sum(serie), 2),
-            "serie": serie,
-            "mediaAntes": round(media_a, 2),
-            "mediaDepois": round(media_b, 2),
-            "variacao": (media_b / media_a - 1) if media_a else 0,
-        })
-    categorias.sort(key=lambda c: -c["variacao"])
+    # Cada linha: [pedido, mês, vendedor, cidade, categoria, valor em centavos, marcas]
+    # marcas: 1 = cancelado, 2 = data depois de hoje (planejamento)
+    compactas = []
+    for l in linhas:
+        marcas = (1 if l["status"].strip() == "Cancelado" else 0) | (2 if l["data"] > hoje else 0)
+        compactas.append([int(l["pedido"]), l["data"].month, i_vend[l["vendedor"].strip()],
+                          i_cid[l["cidade"].strip()], i_cat[l["categoria"].strip()],
+                          round(l["valor"] * 100), marcas])
 
     ultima = max(l["data"] for l in linhas)
-    hoje = date.today()
-    futuras = [l for l in entregues if l["data"] > hoje]
-
-    def periodo(lista):
-        if not lista:
-            return ""
-        return f"{MESES_LONGOS[lista[0] - 1].lower()} a {MESES_LONGOS[lista[-1] - 1].lower()}"
-
     return {
         "ano": ultima.year,
-        "faturamento": round(faturamento, 2),
-        "pedidos": pedidos,
-        "ticket": round(faturamento / pedidos, 2),
-        "cancelados": len({l["pedido"] for l in canceladas}),
-        "valorCancelado": round(sum(l["valor"] for l in canceladas), 2),
-        "mensal": mensal,
+        "meses": meses,
+        "nomesMeses": MESES,
+        "nomesMesesLongos": MESES_LONGOS,
         "vendedores": vendedores,
-        "cidades": cidades,
+        "cidades": [list(c) for c in cidades],
         "categorias": categorias,
-        "periodoAntes": periodo(primeiros),
-        "periodoDepois": periodo(seguintes),
+        "linhas": compactas,
         "primeiraData": min(l["data"] for l in linhas).strftime("%d/%m/%Y"),
         "ultimaData": ultima.strftime("%d/%m/%Y"),
         "hoje": hoje.strftime("%d/%m/%Y"),
-        "pedidosFuturos": len({l["pedido"] for l in futuras}),
         "geradoEm": datetime.now().strftime("%d/%m/%Y"),
     }
 
 
+def resumo(linhas):
+    entregues = [l for l in linhas if l["status"].strip() != "Cancelado"]
+    fat = sum(l["valor"] for l in entregues)
+    ped = len({l["pedido"] for l in entregues})
+    canc = [l for l in linhas if l["status"].strip() == "Cancelado"]
+    return fat, ped, len({l["pedido"] for l in canc}), sum(l["valor"] for l in canc)
+
+
 def main():
-    dados = calcular(ler_vendas())
+    linhas = ler_vendas()
+    dados = calcular(linhas)
     modelo = MODELO.read_text(encoding="utf-8")
-    json_dados = json.dumps(dados, ensure_ascii=False).replace("</", "<\\/")
+    json_dados = json.dumps(dados, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     pagina = modelo.replace("/*__DADOS__*/null", json_dados)
     ARQUIVO_SAIDA.write_text(pagina, encoding="utf-8")
 
     print("Painel gerado:", ARQUIVO_SAIDA.relative_to(RAIZ))
-    print("  Faturamento: ", reais(dados["faturamento"]))
-    print("  Pedidos:     ", f"{dados['pedidos']:,}".replace(",", "."))
-    print("  Ticket médio:", reais(dados["ticket"]))
-    print("  Cancelados:  ", dados["cancelados"], "pedidos,", reais(dados["valorCancelado"]))
+    fat, ped, canc, valor_canc = resumo(linhas)
+    print("  Faturamento: ", reais(fat))
+    print("  Pedidos:     ", f"{ped:,}".replace(",", "."))
+    print("  Ticket médio:", reais(fat / ped))
+    print("  Cancelados:  ", canc, "pedidos,", reais(valor_canc))
 
 
 if __name__ == "__main__":
