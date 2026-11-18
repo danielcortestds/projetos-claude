@@ -230,8 +230,9 @@
             <div class="valor-wrap"><span>R$</span><input type="text" id="f-valor" inputmode="decimal" placeholder="0,00" required></div>
             <div class="dica-limite" id="dica-limite"></div>
           </label>
-          <label class="campo obs-campo">Observação
+          <label class="campo obs-campo"><span id="lbl-obs">Observação</span>
             <textarea id="f-obs" placeholder="Opcional — ex.: almoço com cliente, nº da nota"></textarea>
+            <div class="dica-limite" id="dica-obs"></div>
           </label>
           <div class="acoes largo">
             <button type="submit" class="btn" id="btn-salvar">Salvar lançamento</button>
@@ -333,6 +334,8 @@
 <script>
 /* ===== Configuração ===== */
 const LIMITE_ALIMENTACAO = 150;
+const LIMITE_HOSPEDAGEM = 300;      // acima disso, justificativa obrigatória
+const MIN_JUSTIFICATIVA = 10;       // caracteres mínimos da justificativa
 const VENDEDORES = [
   'Ana Paula Ribeiro', 'Bruno Henrique Lima', 'Carla Mendes Souza', 'Diego Arruda Campos',
   'Eduarda Moraes Silva', 'Fábio Nunes Ferreira', 'Gabriela Costa Pinto', 'Henrique Dias Rocha',
@@ -426,6 +429,23 @@ function selecionarTipo(t) {
   tipoSel = t;
   $('f-tipo').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tipo === t));
   atualizarDicaLimite();
+  atualizarObs();
+}
+const exigeJustificativa = (tipo, valor) => tipo === 'Hospedagem' && valor > LIMITE_HOSPEDAGEM;
+// Troca o campo Observação para "Justificativa (obrigatória)" quando a hospedagem passa do limite.
+function atualizarObs() {
+  const exige = exigeJustificativa(tipoSel, parseValor($('f-valor').value));
+  const dica = $('dica-obs');
+  $('lbl-obs').textContent = exige ? 'Justificativa (obrigatória)' : 'Observação';
+  $('f-obs').placeholder = exige ? 'Ex.: única opção na cidade, evento na região' : 'Opcional — ex.: almoço com cliente, nº da nota';
+  if (exige) {
+    const n = $('f-obs').value.trim().length;
+    dica.className = 'dica-limite' + (n < MIN_JUSTIFICATIVA ? ' estouro' : '');
+    dica.textContent = `Hospedagem acima de ${brl(LIMITE_HOSPEDAGEM)}: justificativa obrigatória (mínimo ${MIN_JUSTIFICATIVA} caracteres).`;
+  } else {
+    dica.textContent = '';
+    $('f-obs').classList.remove('erro-campo');
+  }
 }
 function limparFormulario() {
   editandoId = null;
@@ -462,7 +482,8 @@ function atualizarDicaLimite() {
     el.textContent = `Alimentação do dia: ${brl(total)} de ${brl(LIMITE_ALIMENTACAO)} (resta ${brl(LIMITE_ALIMENTACAO - total)}).`;
   }
 }
-['f-vendedor', 'f-data', 'f-valor'].forEach(id => $(id).addEventListener('input', () => { $(id).classList.remove('erro-campo'); atualizarDicaLimite(); }));
+['f-vendedor', 'f-data', 'f-valor'].forEach(id => $(id).addEventListener('input', () => { $(id).classList.remove('erro-campo'); atualizarDicaLimite(); atualizarObs(); }));
+$('f-obs').addEventListener('input', () => { if ($('f-obs').value.trim().length >= MIN_JUSTIFICATIVA) $('f-obs').classList.remove('erro-campo'); atualizarObs(); });
 $('f-cidade').addEventListener('input', () => $('f-cidade').classList.remove('erro-campo'));
 
 $('form').addEventListener('submit', ev => {
@@ -482,6 +503,12 @@ $('form').addEventListener('submit', ev => {
   if (!reg.tipo) { $('f-tipo').classList.add('erro-campo'); faltando.push('tipo'); }
   if (!(reg.valor > 0)) { $('f-valor').classList.add('erro-campo'); faltando.push('valor'); }
   if (faltando.length) { mostrarMsg($('msg-form'), 'alerta', 'Preencha: ' + faltando.join(', ') + '.'); return; }
+  if (exigeJustificativa(reg.tipo, reg.valor) && reg.obs.length < MIN_JUSTIFICATIVA) {
+    $('f-obs').classList.add('erro-campo');
+    $('f-obs').focus();
+    mostrarMsg($('msg-form'), 'alerta', `Hospedagem de ${brl(reg.valor)} está acima de ${brl(LIMITE_HOSPEDAGEM)}: escreva uma justificativa com pelo menos ${MIN_JUSTIFICATIVA} caracteres antes de salvar.`);
+    return;
+  }
 
   const agora = new Date().toISOString();
   if (editandoId) {
@@ -519,6 +546,7 @@ function editar(id) {
   $('f-valor').value = r.valor.toFixed(2).replace('.', ',');
   $('f-obs').value = r.obs || '';
   selecionarTipo(r.tipo);
+  $('f-obs').classList.remove('erro-campo');
   $('titulo-form').textContent = 'Editar lançamento';
   $('btn-salvar').textContent = 'Atualizar lançamento';
   $('btn-cancelar').hidden = false;
