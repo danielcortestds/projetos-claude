@@ -1,21 +1,25 @@
 """
-Distribuidora Pantanal — junta as 12 planilhas mensais de vendas de 2026
-em uma única planilha.
+Distribuidora Pantanal — junta e limpa as 12 planilhas mensais de vendas de 2026.
 
 Lê:    dados/planilhas_mensais/vendas_2026_MM.xlsx
-Gera:  automacao/saida/vendas_2026_consolidado.xlsx
+       dados/clientes.csv  (grafia oficial das cidades e cidade de cada cliente)
+Gera:  automacao/saida/vendas_2026_consolidado.xlsx, com 3 abas:
+       - "Vendas 2026": vendas limpas
+       - "pendencias":  linhas que não deu para corrigir com certeza, com o motivo
+       - "resumo":      o que foi alterado
 
 O que a automação faz:
-- coloca as colunas sempre com o mesmo nome e na mesma ordem
-  (março vem com a ordem trocada e setembro chama "Valor total" de "Total (R$)");
-- transforma as datas em data de verdade (julho e outubro vêm como texto);
-- acrescenta a coluna "mes_origem" (ex.: 03/2026) dizendo de qual planilha veio a linha.
+1. junta os meses com as colunas sempre com o mesmo nome e na mesma ordem
+   e acrescenta a coluna "mes_origem" (ex.: 03/2026);
+2. transforma as datas em data de verdade, mostrada como dd/mm/aaaa;
+3. corrige os nomes de cidade para a grafia oficial (ex.: "Cuiaba" e "CUIABÁ" viram "Cuiabá"),
+   somente quando o nome bate com a cidade cadastrada do cliente;
+4. remove linhas repetidas (iguais em todas as colunas);
+5. manda para "pendencias", sem inventar nada, as linhas com:
+   valor total em branco, data ilegível ou fora do mês da planilha,
+   data posterior ao dia em que a automação roda, ou cidade que não dá para corrigir com certeza.
 
-O que ela NÃO faz (de propósito, aguardando decisão):
-- não apaga linhas duplicadas;
-- não corrige nomes de cidade;
-- não preenche valores vazios;
-- não mexe nas planilhas originais.
+As planilhas originais nunca são alteradas.
 
 Como usar: na pasta principal do repositório, rode
     python3 automacao/consolidar_vendas.py
@@ -24,15 +28,18 @@ Como usar: na pasta principal do repositório, rode
 import re
 import sys
 import unicodedata
-from datetime import datetime
+from collections import Counter
+from datetime import date, datetime
 from pathlib import Path
 
 import pandas as pd
+from openpyxl import load_workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 RAIZ = Path(__file__).resolve().parent.parent
 PASTA_ENTRADA = RAIZ / "dados" / "planilhas_mensais"
+ARQUIVO_CLIENTES = RAIZ / "dados" / "clientes.csv"
 ARQUIVO_SAIDA = RAIZ / "automacao" / "saida" / "vendas_2026_consolidado.xlsx"
 
 # Colunas finais, na ordem em que aparecem na planilha consolidada.
@@ -40,7 +47,7 @@ COLUNAS = ["Data", "Pedido", "Cliente", "Cidade", "Vendedor", "Produto",
            "Qtd", "Preço unitário", "Valor total", "mes_origem"]
 
 # Outros nomes que a mesma coluna já recebeu nas planilhas mensais.
-APELIDOS = {
+APELIDOS_COLUNA = {
     "total (r$)": "Valor total",
     "valor": "Valor total",
     "total": "Valor total",
@@ -49,32 +56,31 @@ APELIDOS = {
     "preco unitario": "Preço unitário",
 }
 
+# Abreviações e formas incompletas de cidade (já sem acento e em minúsculas).
+APELIDOS_CIDADE = {
+    "vg": "Várzea Grande",
+    "primavera leste": "Primavera do Leste",
+}
+
 AZUL = "14213D"
 AMARELO = "F5C518"
 
 
+# ---------------------------------------------------------------- utilidades
+
 def simplificar(texto):
-    """Tira acentos, espaços extras e maiúsculas, para comparar nomes de coluna."""
+    """Tira acentos, espaços extras e maiúsculas, para comparar nomes."""
     texto = unicodedata.normalize("NFKD", str(texto)).encode("ascii", "ignore").decode()
     return re.sub(r"\s+", " ", texto).strip().lower()
 
 
-def padronizar_colunas(tabela, nome_arquivo):
-    esperadas = {simplificar(c): c for c in COLUNAS if c != "mes_origem"}
-    novos_nomes = {}
-    for coluna in tabela.columns:
-        chave = simplificar(coluna)
-        if chave in esperadas:
-            novos_nomes[coluna] = esperadas[chave]
-        elif chave in APELIDOS:
-            novos_nomes[coluna] = APELIDOS[chave]
-        else:
-            sys.exit(f"ERRO: a planilha {nome_arquivo} tem uma coluna desconhecida: '{coluna}'.")
-    tabela = tabela.rename(columns=novos_nomes)
-    faltando = [c for c in esperadas.values() if c not in tabela.columns]
-    if faltando:
-        sys.exit(f"ERRO: na planilha {nome_arquivo} faltam as colunas: {', '.join(faltando)}.")
-    return tabela
+def reais(valor):
+    texto = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {texto}"
+
+
+def numero(valor):
+    return f"{valor:,}".replace(",", ".")
 
 
 def ler_data(valor):
@@ -92,18 +98,33 @@ def ler_data(valor):
     return pd.NaT
 
 
+# ---------------------------------------------------------------- 1. juntar
+
+def padronizar_colunas(tabela, nome_arquivo):
+    esperadas = {simplificar(c): c for c in COLUNAS if c != "mes_origem"}
+    novos_nomes = {}
+    for coluna in tabela.columns:
+        chave = simplificar(coluna)
+        if chave in esperadas:
+            novos_nomes[coluna] = esperadas[chave]
+        elif chave in APELIDOS_COLUNA:
+            novos_nomes[coluna] = APELIDOS_COLUNA[chave]
+        else:
+            sys.exit(f"ERRO: a planilha {nome_arquivo} tem uma coluna desconhecida: '{coluna}'.")
+    tabela = tabela.rename(columns=novos_nomes)
+    faltando = [c for c in esperadas.values() if c not in tabela.columns]
+    if faltando:
+        sys.exit(f"ERRO: na planilha {nome_arquivo} faltam as colunas: {', '.join(faltando)}.")
+    return tabela
+
+
 def ler_planilha(caminho):
-    mes = re.search(r"vendas_(\d{4})_(\d{2})\.xlsx$", caminho.name)
-    ano, mes = mes.group(1), mes.group(2)
+    encontrado = re.search(r"vendas_(\d{4})_(\d{2})\.xlsx$", caminho.name)
+    ano, mes = encontrado.group(1), encontrado.group(2)
     tabela = pd.read_excel(caminho, dtype=object)
     tabela = padronizar_colunas(tabela, caminho.name)
 
-    datas = tabela["Data"].map(ler_data)
-    ilegiveis = tabela.loc[datas.isna(), "Data"]
-    if len(ilegiveis):
-        print(f"  ATENÇÃO: {caminho.name} tem {len(ilegiveis)} data(s) que não consegui ler.")
-    tabela["Data"] = datas
-
+    tabela["Data"] = tabela["Data"].map(ler_data)
     for coluna in ("Pedido", "Qtd"):
         tabela[coluna] = pd.to_numeric(tabela[coluna], errors="coerce").astype("Int64")
     for coluna in ("Preço unitário", "Valor total"):
@@ -112,62 +133,158 @@ def ler_planilha(caminho):
         tabela[coluna] = tabela[coluna].astype("string")
 
     tabela["mes_origem"] = f"{mes}/{ano}"
-    return tabela[COLUNAS]
+    # Onde a linha está no arquivo original (linha 1 é o cabeçalho).
+    tabela["linha_original"] = [f"{caminho.name}, linha {i + 2}" for i in range(len(tabela))]
+    return tabela[COLUNAS + ["linha_original"]]
+
+
+# ---------------------------------------------------------------- 2. limpar
+
+def corrigir_cidades(tabela, motivos):
+    """Troca a cidade pela grafia oficial só quando há certeza:
+    o nome tem que bater com uma cidade oficial E com a cidade cadastrada do cliente."""
+    clientes = pd.read_csv(ARQUIVO_CLIENTES, sep=";", encoding="utf-8-sig", dtype=str)
+    oficiais = {simplificar(c): c for c in clientes["cidade"].dropna().unique()}
+    oficiais.update(APELIDOS_CIDADE)
+    cidade_do_cliente = dict(zip(clientes["cliente"], clientes["cidade"]))
+
+    trocas = Counter()
+    novas = []
+    for indice, cliente, cidade in zip(tabela.index, tabela["Cliente"], tabela["Cidade"]):
+        oficial = oficiais.get(simplificar(cidade)) if pd.notna(cidade) else None
+        cadastrada = cidade_do_cliente.get(cliente)
+        if oficial is None:
+            motivos[indice].append(f"Cidade desconhecida: '{cidade}'")
+            novas.append(cidade)
+        elif cadastrada is not None and oficial != cadastrada:
+            motivos[indice].append(f"Cidade '{cidade}' diferente da cadastrada para o cliente ({cadastrada})")
+            novas.append(cidade)
+        else:
+            if oficial != cidade:
+                trocas[(cidade, oficial)] += 1
+            novas.append(oficial)
+    tabela["Cidade"] = pd.array(novas, dtype="string")
+    return trocas
+
+
+def remover_duplicados(tabela):
+    """Remove linhas iguais em todas as colunas (mantém a primeira)."""
+    comparar = [c for c in tabela.columns if c != "linha_original"]
+    repetidas = tabela.duplicated(subset=comparar, keep="first")
+    return tabela[~repetidas], tabela[repetidas]
+
+
+def marcar_pendencias(tabela, motivos, hoje):
+    for indice, linha in tabela.iterrows():
+        data = linha["Data"]
+        if pd.isna(data):
+            motivos[indice].append("Data ilegível")
+        else:
+            if data.strftime("%m/%Y") != linha["mes_origem"]:
+                motivos[indice].append("Data fora do mês da planilha")
+            if data.date() > hoje:
+                motivos[indice].append(f"Data posterior a hoje ({hoje:%d/%m/%Y})")
+        if pd.isna(linha["Valor total"]):
+            motivos[indice].append("Valor total em branco")
+        if pd.isna(linha["Qtd"]) or pd.isna(linha["Preço unitário"]):
+            motivos[indice].append("Quantidade ou preço em branco")
+
+
+# ---------------------------------------------------------------- 3. gravar
+
+FORMATOS = {"Data": "dd/mm/yyyy", "Preço unitário": '"R$" #,##0.00', "Valor total": '"R$" #,##0.00'}
+LARGURAS = {"Data": 12, "Pedido": 9, "Cliente": 32, "Cidade": 20, "Vendedor": 22, "Produto": 34,
+            "Qtd": 6, "Preço unitário": 15, "Valor total": 15, "mes_origem": 12,
+            "motivo": 45, "linha_original": 32, "O que foi feito": 60, "Linhas": 12,
+            "Como estava": 22, "Como ficou": 22, "Vezes": 10}
 
 
 def formatar_planilha(caminho):
     """Cabeçalho nas cores da empresa, datas dd/mm/aaaa e valores em R$."""
-    from openpyxl import load_workbook
     livro = load_workbook(caminho)
-    aba = livro.active
-    for celula in aba[1]:
-        celula.font = Font(bold=True, color=AMARELO)
-        celula.fill = PatternFill("solid", fgColor=AZUL)
-    larguras = {"Data": 12, "Pedido": 9, "Cliente": 32, "Cidade": 20, "Vendedor": 22,
-                "Produto": 34, "Qtd": 6, "Preço unitário": 15, "Valor total": 15, "mes_origem": 12}
-    for indice, nome in enumerate(COLUNAS, start=1):
-        letra = get_column_letter(indice)
-        aba.column_dimensions[letra].width = larguras[nome]
-        formato = {"Data": "dd/mm/yyyy",
-                   "Preço unitário": '"R$" #,##0.00',
-                   "Valor total": '"R$" #,##0.00'}.get(nome)
-        if formato:
-            for celula in aba[letra][1:]:
-                celula.number_format = formato
-    aba.freeze_panes = "A2"
-    aba.auto_filter.ref = aba.dimensions
+    for aba in livro.worksheets:
+        for celula in aba[1]:
+            celula.font = Font(bold=True, color=AMARELO)
+            celula.fill = PatternFill("solid", fgColor=AZUL)
+        for indice, celula in enumerate(aba[1], start=1):
+            letra = get_column_letter(indice)
+            aba.column_dimensions[letra].width = LARGURAS.get(celula.value, 18)
+            formato = FORMATOS.get(celula.value)
+            if formato:
+                for c in aba[letra][1:]:
+                    c.number_format = formato
+        aba.freeze_panes = "A2"
+        if aba.title != "resumo":
+            aba.auto_filter.ref = aba.dimensions
     livro.save(caminho)
 
 
-def reais(valor):
-    texto = f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return f"R$ {texto}"
-
+# ---------------------------------------------------------------- principal
 
 def main():
+    hoje = date.today()
     arquivos = sorted(PASTA_ENTRADA.glob("vendas_2026_*.xlsx"))
     if not arquivos:
         sys.exit(f"ERRO: nenhuma planilha encontrada em {PASTA_ENTRADA}.")
     print(f"Encontrei {len(arquivos)} planilha(s) em {PASTA_ENTRADA.relative_to(RAIZ)}:")
-
     partes = []
     for caminho in arquivos:
         tabela = ler_planilha(caminho)
         print(f"  {caminho.name}: {len(tabela)} linhas")
         partes.append(tabela)
-
     tudo = pd.concat(partes, ignore_index=True)
+    lidas = len(tudo)
+
+    motivos = {i: [] for i in tudo.index}
+    trocas = corrigir_cidades(tudo, motivos)
+    tudo, repetidas = remover_duplicados(tudo)
+    marcar_pendencias(tudo, motivos, hoje)
+
+    tem_pendencia = tudo.index.map(lambda i: bool(motivos[i]))
+    principal = tudo[~tem_pendencia]
+    pendencias = tudo[tem_pendencia].copy()
+    pendencias["motivo"] = [" | ".join(motivos[i]) for i in pendencias.index]
+
+    contagem_motivos = Counter(m for i in pendencias.index for m in motivos[i])
+    cidades_trocadas = sum(trocas.values())
+
+    resumo = [
+        ("Linhas lidas das 12 planilhas", lidas),
+        ("Nomes de cidade corrigidos para a grafia oficial", cidades_trocadas),
+        ("Linhas repetidas removidas", len(repetidas)),
+        ("Linhas enviadas para a aba 'pendencias'", len(pendencias)),
+    ]
+    resumo += [(f"   motivo: {m}", n) for m, n in contagem_motivos.most_common()]
+    resumo += [
+        ("Linhas na aba 'Vendas 2026'", len(principal)),
+        ("Faturamento da aba 'Vendas 2026'", reais(principal["Valor total"].sum())),
+        ("Valor das linhas em pendências (só as que têm valor)", reais(pendencias["Valor total"].sum())),
+        ("Data usada como 'hoje'", hoje.strftime("%d/%m/%Y")),
+    ]
+    tabela_resumo = pd.DataFrame(resumo, columns=["O que foi feito", "Linhas"])
+    tabela_trocas = pd.DataFrame(
+        [(antes, depois, n) for (antes, depois), n in sorted(trocas.items(), key=lambda x: (x[0][1], -x[1]))],
+        columns=["Como estava", "Como ficou", "Vezes"])
+
     ARQUIVO_SAIDA.parent.mkdir(parents=True, exist_ok=True)
-    tudo.to_excel(ARQUIVO_SAIDA, index=False, sheet_name="Vendas 2026")
+    with pd.ExcelWriter(ARQUIVO_SAIDA) as arquivo:
+        principal[COLUNAS].to_excel(arquivo, index=False, sheet_name="Vendas 2026")
+        pendencias[COLUNAS + ["motivo", "linha_original"]].to_excel(
+            arquivo, index=False, sheet_name="pendencias")
+        tabela_resumo.to_excel(arquivo, index=False, sheet_name="resumo")
+        tabela_trocas.to_excel(arquivo, index=False, sheet_name="resumo", startcol=3)
     formatar_planilha(ARQUIVO_SAIDA)
 
-    soma_linhas = sum(len(p) for p in partes)
     print()
     print(f"Planilha gerada: {ARQUIVO_SAIDA.relative_to(RAIZ)}")
-    print(f"Total de linhas: {len(tudo)} (soma das planilhas: {soma_linhas})")
-    print(f"Soma do valor total: {reais(tudo['Valor total'].sum())}")
-    print(f"Linhas repetidas (iguais a outra): {tudo.duplicated().sum()} — mantidas")
-    print(f"Linhas sem valor total: {tudo['Valor total'].isna().sum()} — mantidas")
+    print()
+    print("RESUMO")
+    for texto, valor in resumo:
+        print(f"  {texto}: {numero(valor) if isinstance(valor, int) else valor}")
+    print()
+    print("Cidades corrigidas (como estava → como ficou):")
+    for (antes, depois), n in sorted(trocas.items(), key=lambda x: (x[0][1], -x[1])):
+        print(f"  '{antes}' → '{depois}': {n}")
 
 
 if __name__ == "__main__":
