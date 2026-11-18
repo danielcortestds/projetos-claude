@@ -183,6 +183,23 @@
     table.lista tfoot tr { display: flex; justify-content: space-between; background: #f8f9fc; }
     table.lista tfoot td { width: auto; }
     table.lista tfoot td:empty { display: none; }
+
+    /* Alvos de toque grandes no celular */
+    nav.abas button { min-height: 54px; font-size: 15px; }
+    header .mes input { min-height: 48px; font-size: 16px; }
+    input, select, textarea { min-height: 52px; font-size: 17px; }
+    textarea { min-height: 96px; }
+    .btn { min-height: 56px; font-size: 17px; padding: 14px 18px; border-radius: 10px; }
+    .tipos { gap: 10px; }
+    .tipos button { min-height: 60px; font-size: 17px; border-radius: 10px; }
+    .acoes { flex-direction: column; align-items: stretch; }
+    .acoes .btn { width: 100%; }
+    .filtros select { flex: 1 1 100%; }
+    .filtros label.chk { min-height: 52px; width: 100%; font-size: 16px; gap: 12px; padding: 0 4px; }
+    .filtros label.chk input { width: 26px; height: 26px; min-height: 26px; flex: none; }
+    table.lista td.btns { display: flex; gap: 10px; margin: 8px 0 2px; }
+    .ico { flex: 1; min-height: 48px; font-size: 16px; font-weight: 600; text-decoration: none; border: 1px solid #c9d0dd; background: #fff; border-radius: 10px; }
+    .ico.del { border-color: #e3a3a6; }
   }
 </style>
 </head>
